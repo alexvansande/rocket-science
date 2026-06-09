@@ -1,0 +1,105 @@
+# 06 — Status and Open Threads
+
+## Current version
+
+v0.3-playtest (June 2026)
+
+## Completed
+
+- **Displacement model** (rocket equation, no additive model) — documented in `docs/01-physics-model.md`
+- **Engine deck** restructured: 20 cards, heritage + two-precursor model. Tech labels (K1-K3, H1-H3, M1-M3, Hp1-Hp3, S1-S3, N1, I1, L1, Sh1) visible on cards.
+- **Equipment deck**: 16 cards, tech labels (C1-C3, P1-P2, Sc1-Sc3, Mb1-Mb3, L2, R1-R2, Cn, Bn).
+- **Mars Ascent Vehicle** added (Hp3, sub-grid stage refuelable from Mars-surface Methalox Refinery)
+- **Apollo 11 mission** verified end-to-end. See `docs/01-physics-model.md` for cascade.
+- **Shuttle mission** verified (with 2 SRBs + Drop Tank + Orbiter; Orbiter has OMS reserve for circularization)
+- **Atmospheric Return** equipment card (heat shield + parachute merged)
+- **RTG** renamed from Nuclear Reactor
+- **Hypergolic Upper** converted to fixed-function sub-grid card (10t, 8.5t fuel)
+- **Ion Engine** generalized to "Requires power" (Solar Array OR RTG)
+- **Repo layout** organized into src/, data/, docs/, build/
+- **Lunar Mass Driver** added (equipment, L3): electromagnetic catapult deployed on an airless surface — a reusable, propellant-free Light Ascent Engine (launches 1 equipment/turn to orbit), requires power. As feasible as a Mars greenhouse/ISRU. Has its own silhouette (rail accelerator + launching pod). Equipment deck now paginates (the kit auto-splits any deck past 16 cards per page).
+- **Playtest report renders the real cards.** Each mission in `build/playtest-report.html` now shows the actual game cards it uses, drawn by the kit's own renderer (`build_kit.py` is import-safe: `load_cards()` + the card functions are reusable). Missions that fall short are flagged "✗ rocket falls short." Added a **Nova lunar direct-ascent** mission (lands the 40t CSM itself, no LM, 4 stages) — which also surfaced that the board's flat land/ascent dv lets Saturn direct-ascent too (a possible model flag re: why Apollo really needed Lunar-Orbit-Rendezvous).
+- **Tower brute-force** (`src/tower_search.py`) maps the dv envelope and which cards are strong/dominated. Key findings (10t payload, all cards unlocked): dv ceiling **~32** (8-stage tower), hard **diminishing returns** past ~4 stages (the rocket equation working). **Nova is strictly dominated — 0× appearances in any optimal tower** (more evidence it's redundant for raw lift, though it may keep a progression role). **Heavy Hydrolox Core** is a workhorse (10 dv/card, appears everywhere). **Nuclear Engine** is strong (9 dv/card) but hard-gated. The **Drop Tank** would be god-tier (14 dv) as a standalone — its rules-lock to the Orbiter is *load-bearing for balance*. Caveat: the tool assumes everything unlocked, so it's the late-game ceiling, not early-game.
+- **Dry masses rounded for clean refuel tokens** (dry is a tuning dial; only Isp is sacred): Heavy Kerolox Booster (refuel 3K3R1O), Nova (5K2R), Starship (2K3R2O), Sea Dragon (23K3R) — no more fiddly trailing yellows. Convention in `docs/01`. Strips regenerated, all missions still green.
+- **Tower report → "theoretical vs historical" graph.** The Tower-analysis tab overlays TWO cost-of-dv frontiers on one log-mass scatter: **theoretical** (every card, blue) and **historical** (only hardware that flew, green). Driven by a new `flown` boolean per engine in `cards.json` — `false` for the paper/test-only set: **Nuclear Engine (NERVA, ground-test only), Sea Dragon, Super Hydrolox Upper, Super Heavy Kerolox Booster (Nova), Mars Ascent Vehicle.** The gap between the lines IS the value of those paper rockets: Mars-return ~9,600t flown vs ~3,850t theoretical; ceiling 26 vs 33 dv. Hover either line's dots to browse towers; comparison tables show per-card usage and per-mission cost in both columns. `tower_search.py` computes both variants via `set_active_cards()` (rebuilds the transition set + clears memos). Also fixed a real `minmass` bug (couldn't place a ground booster under a vacuum upper that already met the dv → non-monotonic frontier). **Finding: the Hydrolox Drop Tank (Shuttle ET) is a top-3 workhorse in BOTH columns** — the engine-less-tank trick is genuinely mass-efficient (vindication for the tank, not the orbiter strapped to it).
+- **Kerolox Upper (Ku) added** — the single Merlin Vacuum / Soyuz Blok-I kerolox 2nd stage (120t, Isp 348, space). The kerolox family was all boosters; now the small launchers stage honestly: **Falcon 9 / Soyuz = K2 + Ku → ~20-22t to LEO**. K2-alone-orbits-a-capsule stays valid (it's the Sputnik/Glenn stage-and-a-half case). R-7 deliberately NOT split into boosters/core (parallel stage-and-a-half = one card). Has a silhouette + a playtest mission. See `docs/02`.
+- **Starship ignition fixed `both` → `space`.** It was the only upper stage mis-tagged as ground-capable, which let the card pretend to be an Earth SSTO (Starship + 80t ≈ 9 dv). Real Starship can't lift off fully fuelled (T/W < 1) — the model is ideal-Δv only, so we use the `space` tag to forbid it as an Earth first stage (it still rides Super Heavy, and may ascend from Mars). Tower search also now requires a ground-capable first stage in the *max-dv* frontier, not just the cheapest stacks. See `docs/01` (ideal-Δv abstraction) and `docs/02` (ignition tags).
+- **All engine silhouettes complete.** Drew the 4 that were missing: **Sea Dragon in two parts** (K4 first stage / H4 upper — same fat pressure-fed hull with the giant single engine bell sitting in the waterline, either part highlighted), Kerolox Sustainer (K1, slim Atlas/Mercury), and Super Heavy Kerolox Booster (Nova, K4, finned booster with 8 F-1 bells). `silhouette_for_engine()` now covers every card.
+- **Nova added** (K4): kerolox super-Saturn, 3,840t (6×⬛), 8× F-1, ~Saturn-plus to LEO. A *second* K4 peer to Sea Dragon (clustered land-launch vs sea-launched giant). Unlocks normally from K3.
+- **Sea Dragon added** (K4 + H4): a 16,000t (25×⬛) kerolox first stage + a 2,560t hydrolox super-upper → 9 dv / ~550t to LEO, the real Truax design. `Requires Sea launch`. Cards print huge masses compactly as `N × ⬛` (Super Heavy too). See `docs/02`.
+- **Clustering / bundling rules** settled (`docs/04`): "repeat launch ×N" is a single in-orbit action (bundling); clustering the *same card* is capped at **4×**, beyond which you build a bigger rocket. Asymmetry comes from the **park rule** — liftoff is atomic (can't accumulate across turns), so first stages are the only place parallel boosters matter; the board's circle/square/triangle node typing enforces it.
+- **Equipment strip rows** added to every non-sub-grid card (3/2/1 equipment = 7.5/5/2.5t, deduped, min 1 equipment). Surfaces the sub-token regime where marginal missions live: K2+capsule=9 (orbit), CSM return, LM 2-dv landing. Light Descent went from an empty strip to a real one. See `docs/01`.
+- **`regen_strips.py` landmine fixed.** It was silently computing the *additive* model (and referenced dropped cards) — running it would have corrupted all strips. Rewritten to displacement, verified to reproduce existing token rows exactly. (PDFs were stale relative to this — now regenerated.)
+- **Token-display bugs fixed:** MAV `OO`→`YY` (20t), Hydrolox Upper `OYY`→`YYY` (30t). Audit now clean.
+- **Playtest harness + HTML report** (`src/playtest.py`, `src/build_playtest_report.py`): audits numbers, flies reference missions (Apollo, First Orbit, Hubble, Starship-Mars, commercial, one-way-Mars, Saturn invariant). Emits `build/playtest-results.json` → dashboard.
+- **PDFs live in `build/` only** (generated, git-ignored). The duplicate in `files/` was removed. Renderable with WeasyPrint or headless Chrome (`--headless=new --print-to-pdf`).
+- **Mission-deck direction** documented: constant (FIRST/MOST) vs transient (refreshing contract market) cards; military + commercial growth paths. See `docs/05`.
+- **Board: "Earth to Mars" dual loop** (`files/board art/earth to mars.pdf`, Jun 2026). Earth spiral + Mars spiral joined by an effectively-infinite central Deep Space Trajectory ladder. Three crossing types (burn / aerobrake-free / skip-a-turn). Three trajectories to Mars (fast 5dv/3turn/3mo, medium 4/4/4, slow 3/5/8mo). Documented in `docs/04`.
+
+## Verified playtest scenarios
+
+- **Apollo 11**: 7 cards. Works exactly. 9-dv ascent (4+5), 4-dv lunar insertion, 2-dv landing, 2-dv ascent (printed), 1-dv TEI, free aerobrake home.
+- **Shuttle**: 2 SRBs (1 dv) + Drop Tank carrying Orbiter+25t payload (7 dv) + Orbiter OMS (1 dv) = 9 dv to LEO.
+- **Saturn V → Mars**: correctly FAILS. Upper carrying CSM-only gives 4 dv, short of the 6 needed for Mars Orbit. Forces players to develop higher-Isp propellants or multi-mission architecture.
+- **Mars Direct architecture**: viable via NERVA + pre-positioned MAV + Methalox Refinery. Multi-mission, asymmetric, historically grounded.
+- **Three crewed-Mars-return architectures** validated in `src/playtest.py` (each as phase missions):
+  - **A · nuclear/expendable** (1969 NASA plan): Saturn launches + NERVA deep-space stages + MAV ascent. Closes per-leg; real cost is the launch count to assemble in LEO. Pure *chemical* doesn't close — that's why NERVA existed.
+  - **B · Starship + ISRU**: refuel in LEO (~15 tankers), land, make return propellant on Mars (Methalox Refinery + power), fly home on one ship refuelled twice.
+  - **C · split / pre-positioned, no ISRU** (Mars Direct): send a fuelled MAV + return stage ahead uncrewed; crew flies out light and rides the cached vehicle home.
+- **Level-1 orbit**: K1+H1 puts a *sub-token equipment* payload in orbit (11 dv) but not a 10t token — and lobs 10t to a DV7 military contract (8 dv). The equipment strip rows made this legible.
+- **1970s uncrewed Mars probe** (Viking-class) closes on chemical tech (the deck lacks a Titan-class booster, so it's modeled oversized on a Saturn stack — the probe path is easy; crewed Mars is the hard part).
+
+## Pending — high priority
+
+1. **Event / failure deck**. Two failure types per the discussion:
+   - **Small failures**: humans recover (cost: Consumables/turn loss); robots get stuck
+   - **Big failures**: catastrophic; crewed mission losses freeze player for a turn, lose cards. Uncrewed losses are just a single ledger entry.
+2. **Mission flow / market draft** for objectives. Sketched in `docs/05-missions-and-tech-tree.md` — hybrid open + personal recommended.
+3. **Tech-unlock thresholds** (the "N tons to orbit" for M1). Refine in playtest.
+4. **Endgame trigger**.
+
+## Pending — medium priority
+
+5. **Faction asymmetry** (NASA / Soviet / SpaceX / ESA / CNSA). Sketched but not designed.
+6. **Mars window dial** physical component for 26-month transfer windows.
+7. **Launch site mechanics** (equatorial vs polar advantages, multiple sites per player).
+8. **Burner Engine equipment** still missing tech label badge in the render (data has `Bn`, just visual glitch).
+
+## Pending — design speculation
+
+9. **Heavy Mars Ascent Vehicle** (Starship-class) for Mars colonization at scale.
+10. **Fuel depot refueling rule** — current refineries produce tokens; the docking-to-refuel mechanism is implicit. Could be explicit: "engine card with empty fuel tank parked at a depot recovers 1 token per turn until full."
+11. **Salvage rule** for stranded engines: deliver a propellant tank to revive a stranded stage.
+12. **Crewed-mission heroism mechanic**: small failures fixable by crews, big failures penalized heavily.
+13. **Nuclear escalation tree + "public outcry / fallout" mechanic.** A whole nuclear lineage ranked by capability *and* provocation: **RTG** (power, benign) → **NERVA** (nuclear-thermal, N1, real/test-fired) → **gas-core "nuclear lightbulb"** (Isp ~3,000-7,000s — an N2 that dwarfs NERVA) → **Project Pluto / Orion** (nuclear-pulse; thousands of tons to orbit, Mars in weeks). All were engineering-feasible and killed by politics/treaties/fallout, not physics. The payoff is enormous dv/payload; the cost is a **public-outcry mechanic** — using (or even *attempting*) the extreme tiers is so provocative that the other players are invited to **gang up to stop you** (a table-wide "someone's about to do something insane" response, near-*casus-belli* at the Orion end, a shrug at the RTG end). Open design: how outcry is triggered/measured, what "ganging up" lets opponents actually do, and how it scales with the tier. Models the real reason these died.
+14. **Megastructure endgame objectives.** Solar Power Satellites and O'Neill colonies were feasible 1970s studies, buildable only with cheap heavy lift — i.e. once you have Sea Dragon-tier launch. High-VP endgame goals that reward (and require) the heavy-lift investment.
+15. **Gun-launch / mass-driver sites.** A HARP-style space gun (Earth) for rugged, G-hardened uncrewed cargo to low dv — cheap but nothing fragile or crewed survives. (Lunar mass driver already added as equipment — see below.) Earth gun-launch is lower priority: doesn't scale to the Mars endgame.
+16. **Reusability shelf — historical anchors for the reuse mechanic (NOT cards).** Decided these don't earn their own cards; they're reference points for when reusability lands as an *upgrade you add to a rocket*: **DC-X / Delta Clipper** (McDonnell Douglas, *flew* 1993 — the proof VTVL propulsive landing works, 22 yrs before Falcon 9; the recovery-mode anchor), **Douglas SASSTO** (Bono, 1967 — literally a Saturn S-IVB with reusability bolted on; the cleanest illustration of "reuse is a modification, not an identity"), **Convair Nexus** and **Bono's ROMBUS/Pegasus/Ithacus** (reusable SSTO super-heavies). All reusable SSTOs → also reinforce that SSTO is the dream that never closes. When reuse exists, DC-X/Delta Clipper is the natural "reusable VTVL" flavor; until then they add nothing the deck doesn't have. (SpaceShipOne excluded — suborbital tourism.)
+
+## Permanently rejected (do not bring back)
+
+These have been tried in past sessions and don't work. Note them so future Claudes don't propose them again.
+
+- **Additive rocket equation model** (carrying upper stack as cargo on top). Requires recursive backward planning, unfit for a game. See `docs/01-physics-model.md` for the explicit refusal.
+- **Ceiling-rounding of dv**. Briefly tried; over-powered every stack by ~1-2 dv. Use nearest-integer rounding.
+- **Clustering Saturn V boosters to fit Apollo on the board**. Heritage cards represent the historical vehicle AS FLOWN. Saturn V's S-IC is one card despite 5× F-1 internally. Apollo fits on a single Saturn V; if playtest shows it's tight, nudge individual card masses by a few tons.
+- **Per-engine Merlin/F-1 cards**. Engines should be stages, not individual engine bells. Internal clustering is invisible on the card.
+- **Named-after-Falcon for generic kerolox booster**. Anachronistic — Falcon 9 flew in 2010, Saturn V in 1967. Generic names with historical footnotes only.
+
+## Important design principles
+
+These have emerged across sessions and should be preserved:
+
+1. **Physical and scientific honesty.** Real Isps, real masses (snapped to token ladder). Rounding OK; fabrication not.
+2. **Token-grid simplicity.** Glance lookup, not fractional rocket-equation per turn.
+3. **Displacement model is the playable abstraction.** Additive model is for real engineers.
+4. **Moon vs Mars teach opposite lessons.** Atmospheric Return is dead weight at airless Moon but essential at Mars.
+5. **Apollo-class missions should be ACHIEVABLE but TIGHT.** Mirrors historical knife-edge.
+6. **Every mission should be roughly scientifically accurate — this is the master validation rule.** A real vehicle should be able to do (approximately) its real historical mission under the game's rules, and should fail at missions it really couldn't do. "A single Saturn V can't do a crewed Mars landing+return" and "Shuttle reaches LEO but not the Moon" are instances, not separate rules. **When a real vehicle can't do its real mission, that's a flag — and the fix is almost always the RULES, not the card numbers.** The masses and Isps are sacred-ish (snapped real values); the trajectory/cost rules are the tuning surface. Tune rules first.
+   - **State invariants precisely — and if a surprising result is *true*, keep it.** "Saturn V can't reach Mars" is too loose: a stripped one-way shot to Mars orbit IS possible (Viking reached Mars; a one-way crewed flyby was physically on the table). That's a true fact, so the board may permit it. The real invariant is the *crewed landing+return*. Don't "fix" a result just because it's surprising — only if it's false.
+   - **Emergent proof this works:** refueling a Starship in LEO comes out to **~15 tanker launches** (12 if a tanker dumps everything to barely reach orbit, 16 if it reserves 1 dv for rendezvous) — the number SpaceX has floated publicly. Never a design target; it falls out of the math. When the model produces real-world numbers nobody hand-tuned, the model is trustworthy. (Computed by `src/playtest.py`: deliver `total − dry` propellant via tankers off the Starship push-strip.)
+7. **Strategic depth emerges from physics, not special rules.** Trust the model.
+   - **Deliberate dead-ends are good — don't "balance" them away.** The tower brute-force shows the giant engines (Nova, Sea Dragon) are *never* the optimal choice. That's a FEATURE: it mirrors the real historical decision not to build them, and gives players trap options to get lost in and learn from. A card being dominated is not a bug to fix; trap/dead-end cards add texture. Keep them.
+8. **Heritage cards = whole stages AS FLOWN.** Physical clusters internal to one stage = 1 card; physically separate stages = separate cards (Shuttle's 2 SRBs).
+9. **Physical possibility, not historical sanity, is the gate. Let players mount mad missions.** If the rocket equation lets you do it, the board should permit it — even if no sane agency ever would. A one-way crewed Mars suicide shot on chemical tech (For All Mankind's North-Korea-on-an-ancient-Soyuz gambit) *closes* on Apollo-class cards (16 vs 15 dv, no return, food barely lasting) — so it's a legal, if insane, strategy. What makes these missions *risky* rather than *forbidden* is consumables running out, the failure/event deck, and needing a later rescue — not a rule that bans them. Don't over-constrain the physics to enforce "good taste."
+10. **Orbit is a milestone you earn, not a starting capability.** The first orbital rockets (R-7 → Sputnik/Gagarin; Atlas → Glenn) were *stage-and-a-half* kerolox lofting a **sub-token** capsule (Vostok 4.7t, Mercury 1.4t — smaller than one 10t yellow). In cards that's **K2 "Kerolox Booster" (the R-7/Atlas) + a Crew Capsule carried as equipment (~2.5t), = 9 dv → orbit.** Tier-1 **K1 "Kerolox Sustainer"** alone tops out ~7 dv: suborbital only (Redstone/Shepard hop, or a V-2 ballistic strike — "bomb London"). So early crewed capsules are **sub-grid equipment, not 10t cargo tokens**, and *First Orbit* is a tier-2 (R-7) achievement above the suborbital start. No new card needed; don't nudge K1.

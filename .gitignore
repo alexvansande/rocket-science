@@ -1,0 +1,13 @@
+# Generated build output — regenerated from data/ + src/ (see README pipeline)
+build/
+
+# Alex's board-art working folder — large binaries, versioned outside git
+files/board art/
+
+# macOS cruft
+.DS_Store
+**/.DS_Store
+
+# Python bytecode cache
+__pycache__/
+*.pyc

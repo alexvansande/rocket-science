@@ -1,0 +1,152 @@
+[
+  {
+    "id": "obj01",
+    "name": "FIRST ORBIT",
+    "tagline": "Vostok 1, Gagarin 1961",
+    "desc": "First crew capsule to reach LEO and return alive.",
+    "requires": "Crew Capsule at LEO, then return to Earth",
+    "type": "FIRST",
+    "vp": 1
+  },
+  {
+    "id": "obj02",
+    "name": "FIRST MOON LANDING",
+    "tagline": "Apollo 11, 1969",
+    "desc": "First crew to land on Moon surface and return alive.",
+    "requires": "Crew Capsule lands on Moon, returns to Earth",
+    "type": "FIRST",
+    "vp": 2
+  },
+  {
+    "id": "obj03",
+    "name": "FIRST ROBOT ON MARS",
+    "tagline": "Viking 1, 1976",
+    "desc": "First unmanned probe to land on Mars.",
+    "requires": "Robotic lander on Mars surface",
+    "type": "FIRST",
+    "vp": 1
+  },
+  {
+    "id": "obj04",
+    "name": "FIRST CREW ON MARS",
+    "tagline": "End-game capstone",
+    "desc": "First crew to land on Mars and return alive to Earth. Requires pre-deployed Greenhouse OR Martian ISRU.",
+    "requires": "Crew on Mars surface + return to Earth",
+    "type": "FIRST",
+    "vp": 4,
+    "note": "Game-winning objective"
+  },
+  {
+    "id": "obj05",
+    "name": "LARGEST SPACE STATION",
+    "tagline": "ISS, Mir, Skylab heritage",
+    "desc": "Most cargo tokens attached to a Crew Habitat in Earth orbit (LEO).",
+    "requires": "Habitat in LEO + most attached tokens",
+    "type": "MOST",
+    "vp": 1,
+    "note": "Stealable: claim transfers when another player surpasses you"
+  },
+  {
+    "id": "obj06",
+    "name": "LARGEST LUNAR BASE",
+    "tagline": "Artemis, Lunar Gateway",
+    "desc": "Most cargo tokens attached to a Crew Habitat on the Moon.",
+    "requires": "Habitat on Moon + most attached tokens",
+    "type": "MOST",
+    "vp": 2,
+    "note": "Stealable"
+  },
+  {
+    "id": "obj07",
+    "name": "LARGEST MARTIAN BASE",
+    "tagline": "Permanent presence",
+    "desc": "Most cargo tokens attached to a Crew Habitat on Mars.",
+    "requires": "Habitat on Mars + most attached tokens",
+    "type": "MOST",
+    "vp": 2,
+    "note": "Stealable"
+  },
+  {
+    "id": "obj08",
+    "name": "RESCUE",
+    "tagline": "Apollo 13",
+    "desc": "Bring another player's stranded crew home alive.",
+    "requires": "Rendezvous with stranded craft + return crew to Earth",
+    "type": "RESCUE",
+    "vp": 2,
+    "note": "Claimable once per stranded crew"
+  },
+  {
+    "id": "obj09",
+    "name": "MARS SAMPLE RETURN",
+    "tagline": "Mars Sample Return mission",
+    "desc": "Deliver a Sample Container to Mars surface, then return it to Earth.",
+    "requires": "Sample Container lands on Mars, returns to Earth surface",
+    "type": "FIRST",
+    "vp": 2
+  },
+  {
+    "id": "obj10",
+    "name": "VENERA",
+    "tagline": "First probe to Venus, 1970",
+    "desc": "Deliver 10t (1 yellow token) past Earth escape + 1 Dv into deep space.",
+    "requires": "10t at escape + 1 Dv",
+    "type": "FLYBY",
+    "vp": 1
+  },
+  {
+    "id": "obj11",
+    "name": "INTERNATIONAL STATION",
+    "tagline": "ISS, the cooperative milestone",
+    "desc": "Deliver cargo to a Crew Habitat built by another player. The cargo joins their station; place markers on this card matching your delivery size. Claim the card. Any later delivery to another player's station that exceeds the highest single delivery on the card steals it; new claimant places their markers, old markers stay.",
+    "requires": "Single delivery of cargo to another player's orbital Habitat",
+    "type": "MOST",
+    "vp": 1,
+    "note": "Stealable by larger single delivery. Markers track contributions"
+  },
+  {
+    "id": "obj12",
+    "name": "CASSINI",
+    "tagline": "Saturn orbiter, 2004",
+    "desc": "Deliver 10t past Earth escape + 4 Dv into deep space.",
+    "requires": "10t at escape + 4 Dv",
+    "type": "FLYBY",
+    "vp": 2
+  },
+  {
+    "id": "obj13",
+    "name": "VOYAGER",
+    "tagline": "Grand tour of outer planets, 1977",
+    "desc": "Deliver 10t past Earth escape + 5 Dv into deep space.",
+    "requires": "10t at escape + 5 Dv",
+    "type": "FLYBY",
+    "vp": 2
+  },
+  {
+    "id": "obj14",
+    "name": "NEW HORIZONS",
+    "tagline": "Pluto flyby, 2015",
+    "desc": "Deliver 10t past Earth escape + 8 Dv into deep space.",
+    "requires": "10t at escape + 8 Dv",
+    "type": "FLYBY",
+    "vp": 3
+  },
+  {
+    "id": "obj15",
+    "name": "JWST",
+    "tagline": "Sun-Earth L2 observatory, 2021",
+    "desc": "Deploy a Science Package at Earth escape + 1 Dv. Requires Solar Array.",
+    "requires": "Science Package at escape + 1 Dv with Solar Array",
+    "type": "FIRST",
+    "vp": 1
+  },
+  {
+    "id": "obj16",
+    "name": "MARS COLONY",
+    "tagline": "Self-sustaining outpost",
+    "desc": "4-person crew on Mars surface, sustained by a Greenhouse, for 12 months.",
+    "requires": "4 crew + Habitat + Greenhouse on Mars, 12 turns endurance",
+    "type": "ENDURANCE",
+    "vp": 3
+  }
+]
