@@ -194,6 +194,39 @@ def engine_card_html(e):
 </div>'''
 
 
+WC_BY_TOKEN = {"K": "wc-super", "R": "wc-heavy", "O": "wc-medium", "Y": "wc-light"}
+WC_NAME = {"wc-super": "SUPER", "wc-heavy": "HEAVY", "wc-medium": "MEDIUM", "wc-light": "LIGHT"}
+
+def bundle_card_html(b):
+    """A rocket-bundle multiplier card: clip onto one rocket of a weight class to fly it as
+    N identical rockets (carry N x cargo at the same dv). The big multiplier sits on the
+    weight-class colour ribbon. Lives on the rocket pages."""
+    n = b["mult"]
+    token = b["token"]
+    wclass = WC_BY_TOKEN.get(token, "wc-medium")
+    wlabel = WC_NAME[wclass]
+    return f'''
+<div class="card bundle {wclass}">
+  <div class="illus"><div class="bundle-big">&times;{n}</div></div>
+  <div class="content">
+    <div class="title">ROCKET BUNDLE</div>
+    <div class="herit">{wlabel} class &middot; clips to a {token}-class rocket</div>
+    <div class="bundle-rule">Fly <b>{n} identical rockets</b> as one: this {wlabel.lower()} rocket carries
+       <b>&times;{n} its cargo at the same dv</b>.</div>
+    <div class="bundle-rule small">The stage beneath must lift {n}&times; this rocket's total mass. Max cluster 4&times;.</div>
+  </div>
+</div>'''
+
+
+def card_page(title, num, total, card_htmls):
+    """Render one A4 sheet from a list of pre-built card HTML strings (engines, bundles, …)."""
+    return f'''
+<section class="page">
+  <header><span class="ph-title">{esc(title)}</span><span class="ph-num">TRISKELION | p{num}/{total}</span></header>
+  <div class="grid">{_grid_cards(card_htmls)}</div>
+</section>'''
+
+
 def equipment_card_html(eq):
     extra = "burner" if eq["name"] == "BURNER ENGINE" else ""
     extra += " consumables" if eq["name"] == "CONSUMABLES" else ""
@@ -338,6 +371,13 @@ header { display: flex; justify-content: space-between; align-items: baseline; b
 
 /* Blank card outline — fills the unused slots on a deck's last page (spare blanks) */
 .card.blank { background: #fff; }
+
+/* Rocket-bundle multiplier cards (live on the rocket pages) — big ×N on the colour ribbon */
+.card.bundle .bundle-big { font-size: 40pt; font-weight: 800; letter-spacing: -2pt; line-height: 1; }
+.wc-super .bundle-big, .wc-heavy .bundle-big { color: #fff; }
+.wc-medium .bundle-big, .wc-light .bundle-big { color: #1a1a1a; }
+.card.bundle .bundle-rule { font-size: 7pt; line-height: 1.3; margin: 2mm 0 1mm; }
+.card.bundle .bundle-rule.small { font-size: 5.8pt; color: #555; }
 
 /* Card backs (even pages) — a full sheet of identical deck backs */
 .card.cback { align-items: center; justify-content: center; text-align: center; }
@@ -492,7 +532,11 @@ def main():
     with open("../data/objectives.json") as f:
         objectives = json.load(f)
 
-    n_engine_pages = _npages(len(page1_engines))
+    bundles = data.get("bundles", [])
+    # The rocket deck = engine cards followed by the rocket-bundle multiplier cards.
+    engine_cards = [engine_card_html(e) for e in page1_engines] + [bundle_card_html(b) for b in bundles]
+
+    n_engine_pages = _npages(len(engine_cards))
     n_equip_pages = _npages(len(data["equipment"]))
     n_obj_pages = _npages(len(objectives))
     TOTAL_PAGES = n_engine_pages + n_equip_pages + n_obj_pages
@@ -501,11 +545,11 @@ def main():
     # Engine + equipment fronts get the red ROCKETS back; objectives get the gold MISSIONS back.
     pages = []
     pgnum = 0
-    # Engines
-    for ei, i in enumerate(range(0, len(page1_engines), PER_PAGE)):
+    # Engines + rocket bundles (one red ROCKETS deck)
+    for pi, i in enumerate(range(0, len(engine_cards), PER_PAGE)):
         pgnum += 1
-        title = "ENGINE CARDS" if n_engine_pages == 1 else f"ENGINE CARDS (page {ei+1})"
-        pages.append(engine_page(title, pgnum, TOTAL_PAGES, page1_engines[i:i+PER_PAGE]))
+        title = "ENGINE & BUNDLE CARDS" if n_engine_pages == 1 else f"ENGINE & BUNDLE CARDS (page {pi+1})"
+        pages.append(card_page(title, pgnum, TOTAL_PAGES, engine_cards[i:i+PER_PAGE]))
         pages.append(back_page("ROCKETS", "rockets"))
     # Equipment
     for i in range(0, len(data["equipment"]), PER_PAGE):

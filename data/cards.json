@@ -1299,5 +1299,39 @@
       "kind": "equipment",
       "tech_label": "L3"
     }
+  ],
+  "bundles": [
+    {
+      "mult": 2,
+      "token": "K"
+    },
+    {
+      "mult": 2,
+      "token": "R"
+    },
+    {
+      "mult": 4,
+      "token": "R"
+    },
+    {
+      "mult": 2,
+      "token": "O"
+    },
+    {
+      "mult": 4,
+      "token": "O"
+    },
+    {
+      "mult": 2,
+      "token": "Y"
+    },
+    {
+      "mult": 3,
+      "token": "Y"
+    },
+    {
+      "mult": 4,
+      "token": "Y"
+    }
   ]
 }
