@@ -45,9 +45,23 @@ ENGINES = [e for e in D["engines"]
 def ve(e):
     return e["isp_s"] * 9.81 / 1000.0
 
+# Cluster multipliers are NOT free 1–4× any more — a rocket can only be multiplied by a
+# Rocket Bundle card that exists for its weight class. Read the allowed multipliers straight
+# from data["bundles"], keyed by the leading token of the rocket's total mass (Y/O/R/K).
+TOKEN_BANDS = [(640, "K"), (160, "R"), (40, "O"), (10, "Y")]
+def leading_token(mass):
+    for thr, tok in TOKEN_BANDS:
+        if mass >= thr:
+            return tok
+    return "Y"
+
+ALLOWED_MULTS = {tok: {1} for tok in ("K", "R", "O", "Y")}   # a single rocket is always legal
+for _b in D.get("bundles", []):
+    ALLOWED_MULTS.setdefault(_b["token"], {1}).add(_b["mult"])
+
 # Every (engine, cluster-count) transition: lifts cargo M, then weighs N·total.
 # Rebuildable so we can run the whole analysis with a card set (e.g. excluding the Nuclear
-# Engine — NERVA dominates every efficient upper, so "hide nuclear" shows the chemical deck).
+# Engine, or only the cards that flew). Cluster counts come from ALLOWED_MULTS, not range(1,4).
 def build_trans(exclude=()):
     excl = set(exclude)
     trans = []
@@ -56,7 +70,8 @@ def build_trans(exclude=()):
             continue
         is_tank = e["name"] in ENGINELESS
         is_hyd_engine = (e.get("fuel_type", "").upper() == "HYDROLOX") and not is_tank
-        for n in range(1, CLUSTER + 1):
+        mults = ALLOWED_MULTS.get(leading_token(e.get("total_mass_t", 0)), {1})
+        for n in sorted(mults):
             trans.append({
                 "name": e["name"], "n": n,
                 "ve": ve(e), "wet": n * e["total_mass_t"], "dry": n * e["dry_mass_t"],
