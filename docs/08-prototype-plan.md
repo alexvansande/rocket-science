@@ -26,6 +26,8 @@ CI copies `data/*.json` into the site. Card faces reuse the kit's renderer: `bui
 
 ### M1 — Mission sandbox (one player, no turn limits)
 
+**Progress (Sep 2026):** the table layout (`build/table.html`) is now playable for Blue: Research, Launch (+ free Mission Control), Mission Control, firing a placed rocket by picking a strip row, moving the token over reachable spaces, End turn with park-or-fail. Not yet: equipment and bundles in play, separation/splitting, aerobraking, consumables, unspent-Δv re-fire, goals.
+
 Every card in hand, unlimited taps. Launch, pick a row, pay stages with cargo tokens, split, aerobrake, park or fail, eat consumables on the Mars route.
 
 - **Done when:** Apollo 11, the Shuttle and Starship-to-Mars can be flown by clicking, and the same flights pass as scripted tests.

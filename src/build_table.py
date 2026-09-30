@@ -37,25 +37,47 @@ PLAYERS = [  # seat, colour, rotation, centre
     ("right",  "White",  "#e9e6df", 270, (BOARD_X + BOARD_W + 20 + SEAT_H / 2, BOARD_Y + BOARD_H / 2)),
 ]
 
-def bundle(token, mult):
-    return bundle_card_html(next(b for b in DATA["bundles"] if b["token"] == token and b["mult"] == mult))
+# ---- card registry: every card gets an id; the page's game script uses these ----
+def _shown_rows(e):
+    """The strip rows exactly as printed on the card (same cut as build_kit)."""
+    if e.get("kind") == "fixed" or not e.get("strip"):
+        return []
+    eq = [r for r in e["strip"] if r.get("eq")]
+    tok = [r for r in e["strip"] if not r.get("eq")]
+    return tok[: max(0, 9 - len(eq))] + eq
 
 
-# Sample hands (layout demo only): each seat holds a plausible set for its program
-HANDS = {
-    "bottom": [engine_card_html(ENG["HEAVY KEROLOX BOOSTER"]), engine_card_html(ENG["HEAVY HYDROLOX CORE"]),
-               engine_card_html(ENG["HEAVY HYDROLOX UPPER"]), engine_card_html(ENG["HYPERGOLIC TRANSFER STAGE"]),
-               equipment_card_html(EQ["ATMOSPHERIC RETURN"])],
-    "left": [engine_card_html(ENG["KEROLOX BOOSTER"]), engine_card_html(ENG["KEROLOX UPPER"]),
-             engine_card_html(ENG["HYDROLOX UPPER"]), equipment_card_html(EQ["CREW CAPSULE"]),
-             equipment_card_html(EQ["SCIENCE PACKAGE"])],
-    "top": [engine_card_html(ENG["SUPER HEAVY"]), engine_card_html(ENG["STARSHIP"]),
-            engine_card_html(ENG["METHALOX BOOSTER"]), equipment_card_html(EQ["SOLAR ARRAY"]),
-            equipment_card_html(EQ["ROVER"])],
-    "right": [engine_card_html(ENG["HEAVY SOLID BOOSTER"]), bundle("K", 2),
-              engine_card_html(ENG["HYDROLOX DROP TANK"]), engine_card_html(ENG["ORBITER"]),
-              equipment_card_html(EQ["LANDING GEAR"])],
+CARDS = {}
+for i, e in enumerate(DATA["engines"]):
+    CARDS[f"e{i}"] = {"kind": "engine", "name": e["name"], "T": e["total_mass_t"], "ign": e.get("ignition", ""),
+                      "rows": [{"cargo": r["cargo_t"], "dv": r["dv"], "eq": r.get("eq", 0)} for r in _shown_rows(e)],
+                      "html": engine_card_html(e)}
+for i, q in enumerate(DATA["equipment"]):
+    CARDS[f"q{i}"] = {"kind": "equipment", "name": q["name"], "T": 2.5, "rows": [], "html": equipment_card_html(q)}
+for i, b in enumerate(DATA["bundles"]):
+    CARDS[f"b{i}"] = {"kind": "bundle", "name": f"x{b['mult']} {b['token']} BUNDLE", "T": 0, "rows": [],
+                      "html": bundle_card_html(b)}
+BY_NAME = {c["name"]: cid for cid, c in CARDS.items()}
+
+
+def cid(name):
+    return BY_NAME[name]
+
+
+# Sample hands. Blue ("bottom") is you: a hand that can reach orbit on the basic pad.
+HAND_IDS = {
+    "bottom": [cid("KEROLOX SUSTAINER"), cid("KEROLOX BOOSTER"), cid("KEROLOX UPPER"),
+               cid("HYDROLOX UPPER"), cid("CREW CAPSULE")],
+    "left": [cid("HEAVY KEROLOX BOOSTER"), cid("HEAVY HYDROLOX CORE"), cid("HEAVY HYDROLOX UPPER"),
+             cid("SCIENCE PACKAGE"), cid("ATMOSPHERIC RETURN")],
+    "top": [cid("SUPER HEAVY"), cid("STARSHIP"), cid("METHALOX BOOSTER"), cid("SOLAR ARRAY"), cid("ROVER")],
+    "right": [cid("HEAVY SOLID BOOSTER"), cid("x2 K BUNDLE"), cid("HYDROLOX DROP TANK"), cid("ORBITER"),
+              cid("LANDING GEAR")],
 }
+HANDS = {k: [CARDS[c]["html"] for c in v] for k, v in HAND_IDS.items()}
+MARKET_IDS = [cid("LIGHT SOLID BOOSTER"), cid("HYPERGOLIC UPPER"), cid("SOLID KICK MOTOR"), cid("CONSUMABLES")]
+DECK_IDS = [c for c in CARDS if c not in MARKET_IDS and not any(c in h for h in HAND_IDS.values())]
+LAUNCH_TOKENS = "RRRR"      # the basic pad's lift (docs/07). One place to change it.
 
 TOKEN_COLORS = {"K": "#1c1c1c", "R": "#b3261e", "O": "#e07b00", "Y": "#f0b400"}
 
@@ -72,12 +94,13 @@ def card(html, x, y, rot=0):
 CARD_THICK = 0.3   # mm per card
 
 
-def stack(kind, label, x, y, n):
+def stack(kind, label, x, y, n, dom_id=None):
     """A face-down deck as a real CSS 3D box: the card back is the top face, lifted
     n x 0.3mm off the table, and four side faces carry a card-edge texture. The
     browser shows whichever sides actually face the viewer (no painted-on side view)."""
     t = round(n * CARD_THICK, 2)
-    return (f'<div class="deck" {at(x, y, CARD_W, CARD_H, f"--t:{t}mm;")}>'
+    idattr = f' id="{dom_id}"' if dom_id else ""
+    return (f'<div class="deck"{idattr} {at(x, y, CARD_W, CARD_H, f"--t:{t}mm;")}>'
             f'<div class="dshadow"></div>'
             f'<div class="dside front"></div><div class="dside back"></div>'
             f'<div class="dside left"></div><div class="dside right"></div>'
@@ -124,24 +147,28 @@ TAP = ('<svg viewBox="0 0 20 20" class="tap"><path d="M15 6 A7 7 0 1 0 17 11" fi
 MCOL_X, MCOL_W, MCOL_GAP = 172, 62, 4
 
 
-def space_center(name, color, flying=None):
-    """flying: {mission_index: (rocket card html, [cargo colours])} for missions in flight."""
-    flying = flying or {}
+ACT_KEYS = ["research", "launch", "mc"]
+
+
+def space_center(name, color, you=False):
+    """you=True: the interactive board (ids the game script drives)."""
     acts = "".join(
-        f'<div class="action" {at(8 + i * (CARD_W + 5), 20, CARD_W, CARD_H)}>'
+        f'<div class="action"{f' id="act-{ACT_KEYS[i]}" data-act="{ACT_KEYS[i]}"' if you else ""} {at(8 + i * (CARD_W + 5), 20, CARD_W, CARD_H)}>'
         f'<div class="ahead">{TAP}<span>{t}</span></div><div class="atext">{txt}</div></div>'
         for i, (t, txt) in enumerate(ACTIONS))
     missions = ""
     for i in range(4):
         mx = MCOL_X + i * (MCOL_W + MCOL_GAP)
         slot = f'<div class="cslot" {at(7.5, 9, CARD_W, CARD_H)}><span>rocket</span></div>'
-        if i in flying:
-            rocket, toks = flying[i]
-            body = slot + f'<div class="slot" {at(7.5, 9, CARD_W, CARD_H)}>{rocket}</div>'
-            body += "".join(cargo(c, 8 + k * 14, 88, 0) for k, c in enumerate(toks))
-            body += f'<div class="rest" {at(23, 126, 16, 20)}></div><div class="inflight" {at(0, 116, MCOL_W, None)}>in flight</div>'
-        else:
-            body = slot + f'<div class="rest" {at(23, 126, 16, 20)}></div>' + rocket_token(color, 26, 128, 16)
+        if you:   # empty shells; the game script fills card, cargo and token
+            missions += (f'<div class="marea mcol" id="mcol-{i}" data-i="{i}" {at(mx, 20, MCOL_W, 152)}>'
+                         f'<div class="mname">MISSION {"I II III IV".split()[i]}</div>'
+                         f'<div class="ctag" {at(0, 79, MCOL_W, None)}>cargo</div>{slot}'
+                         f'<div class="slot mslot" id="mslot-{i}" {at(7.5, 9, CARD_W, CARD_H)}></div>'
+                         f'<div class="mcargo" id="mcargo-{i}" {at(2, 86, MCOL_W - 4, 34)}></div>'
+                         f'<div class="rest" id="mrest-{i}" {at(23, 126, 16, 20)}></div></div>')
+            continue
+        body = slot + f'<div class="rest" {at(23, 126, 16, 20)}></div>' + rocket_token(color, 26, 128, 16)
         missions += (f'<div class="marea" {at(mx, 20, MCOL_W, 152)}><div class="mname">MISSION {"I II III IV".split()[i]}</div>'
                      f'<div class="ctag" {at(0, 79, MCOL_W, None)}>cargo</div>{body}</div>')
     return f'''<div class="pboard" style="--pc:{color};">
@@ -152,7 +179,7 @@ def space_center(name, color, flying=None):
 </div>'''
 
 
-def seat(seat_name, pname, color, rot, center, flying=None):
+def seat(seat_name, pname, color, rot, center):
     cx, cy = center
     x, y = cx - SEAT_W / 2, cy - SEAT_H / 2
     cards = HANDS[seat_name]
@@ -165,10 +192,13 @@ def seat(seat_name, pname, color, rot, center, flying=None):
         fan += (f'<div class="hc" style="{vars_}"><div class="flip">'
                 f'<div class="face back"><div class="card cback rockets"><span>ROCKETS</span></div></div>'
                 f'<div class="face front">{front}</div></div></div>')
-    fan = f'<div class="hand" {at(SEAT_W / 2 - CARD_W / 2, PB_H + 14, CARD_W, CARD_H)}>{fan}</div>'
-    discard = (f'<div class="dslot" {at(SEAT_W + 8, 50, CARD_W, CARD_H)}><span>DISCARD</span></div>')
+    you = seat_name == "bottom"
+    if you:
+        fan = ""   # the game script deals your hand
+    fan = f'<div class="hand"{' id="hand-you"' if you else ""} {at(SEAT_W / 2 - CARD_W / 2, PB_H + 14, CARD_W, CARD_H)}>{fan}</div>'
+    discard = (f'<div class="dslot"{' id="discard-you"' if you else ""} {at(SEAT_W + 8, 50, CARD_W, CARD_H)}><span>DISCARD</span></div>')
     return (f'<div class="seat" {at(x, y, SEAT_W, SEAT_H, f"transform:rotate({rot}deg);")}>'
-            f'{space_center(pname, color, flying)}{discard}{fan}'
+            f'{space_center(pname, color, you)}{discard}{fan}'
             f'<div class="zlabel handlabel" {at(0, PB_H + 14 + CARD_H + 16, SEAT_W, None, "text-align:center;")}>{pname} player’s hand</div></div>')
 
 
@@ -181,6 +211,7 @@ def main():
     parts = []
     # Main board
     parts.append(f'<img class="mainboard" src="board.webp" alt="Earth to Mars board" draggable="false" {at(BOARD_X, BOARD_Y, BOARD_W, BOARD_H)}>')
+    parts.append(f'<div id="boardlayer" {at(BOARD_X, BOARD_Y, BOARD_W, BOARD_H)}></div>')
 
     # Goals: FIRSTs (always open) + missions deck and 5-card market
     firsts = [o for o in OBJS if o["type"] == "FIRST"]
@@ -197,9 +228,8 @@ def main():
     # Rockets & tech: main deck + open market
     ry = BOARD_Y + BOARD_H + 22
     parts.append(zone_label("ROCKETS &amp; TECH · deck + open market", BOARD_X, ry - 13))
-    parts.append(stack("rockets", "ROCKETS", BOARD_X, ry, 27))
-    market = [engine_card_html(ENG["KEROLOX SUSTAINER"]), engine_card_html(ENG["KEROLOX BOOSTER"]),
-              engine_card_html(ENG["HYDROLOX UPPER"]), equipment_card_html(EQ["CREW CAPSULE"])]
+    parts.append(stack("rockets", "ROCKETS", BOARD_X, ry, len(DECK_IDS), "deck-rockets"))
+    market = [CARDS[c]["html"] for c in MARKET_IDS]
     for i, h in enumerate(market):
         parts.append(card(h, BOARD_X + (i + 1) * (CARD_W + GAP), ry))
 
@@ -209,14 +239,17 @@ def main():
     for i, (c, lbl) in enumerate([("K", "K · 640t"), ("R", "R · 160t"), ("O", "O · 40t"), ("Y", "Y · 10t")]):
         parts.append(bowl(c, lbl, bx + i * 70, ry + 30))
 
-    # Seats. Example in flight for Blue: a Falcon 9-style launch. 4 red at launch paid for
-    # the Kerolox Booster (RRR, 1 red discarded); its 120t row (OOO) paid for the Kerolox
-    # Upper, whose 20t row (YY) left 20t of payload in LEO.
-    for s, pname, color, rot, center in PLAYERS:
-        flying = {0: (engine_card_html(ENG["KEROLOX UPPER"]), ["Y", "Y"])} if s == "bottom" else None
-        parts.append(seat(s, pname, color, rot, center, flying))
-    lx, ly = board_pos("leo")
-    parts.append(rocket_token(PLAYERS[0][2], lx - 4, ly - 8, 14))
+    for s_, pname, color, rot, center in PLAYERS:
+        parts.append(seat(s_, pname, color, rot, center))
+
+    game = {
+        "cards": CARDS, "deck": DECK_IDS, "hand": HAND_IDS["bottom"], "launch": LAUNCH_TOKENS,
+        "you": PLAYERS[0][2], "tokenColors": TOKEN_COLORS,
+        "spaces": {sp["id"]: {"x": round(sp["x"] / 1000 * BOARD_W, 2), "y": round(sp["y"] / 707 * BOARD_H, 2),
+                              "stop": sp["stop"], "label": sp.get("label", "")} for sp in BOARD["spaces"]},
+        "links": [[l["a"], l["b"]] for l in BOARD["links"]],
+    }
+    game_json = json.dumps(game).replace("</", "<\\/")
 
     html = f'''<!DOCTYPE html>
 <html lang="en">
@@ -243,9 +276,14 @@ def main():
   <input id="zslider" type="range" min="0" max="1000" value="300" aria-label="Zoom">
   <button id="zin" aria-label="Zoom in">+</button>
   <button id="zfit">Fit</button>
+  <button id="endturn" class="endturn">End turn</button>
 </div>
 <div id="toast" role="status"></div>
+<div id="prompt" role="status"></div>
+<div id="closeup" hidden><div class="cu-inner"><div class="cu-card"></div></div></div>
+<script type="application/json" id="game-data">{game_json}</script>
 <script>{PANZOOM_JS}</script>
+<script>{GAME_JS}</script>
 </body>
 </html>'''
     with open("../build/table.html", "w") as f:
@@ -262,6 +300,10 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #332d29; fon
 #table { position: absolute; left: 0; top: 0; transform-origin: 0 0; will-change: transform; transform-style: preserve-3d; }
 
 #table > *, .seat > *, .pboard > *, .marea > * { position: absolute; }
+/* In a preserve-3d context Chrome hit-tests the tilted parent planes in front of their
+   children, so the planes ignore the pointer and only the things on the table take it. */
+#tilt, #table { pointer-events: none; }
+#table > * { pointer-events: auto; }
 #viewport img, #viewport svg { -webkit-user-drag: none; user-drag: none; }
 .mainboard { border-radius: 2mm; box-shadow: 0 0.6mm 0 #cfc6b4, 0 1.2mm 0 #b9ae98, 0 3mm 8mm rgba(0,0,0,.55); background: #fff; }
 .slot > .card { width: 100%; height: 100%; border-radius: 1.8mm; box-shadow: 0 1.2mm 3mm rgba(0,0,0,.45); }
@@ -329,6 +371,57 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #332d29; fon
   background: rgba(30,20,12,.75); color: #f3e6cf; cursor: pointer; padding: 0 12px; }
 .hud button:hover { background: rgba(60,40,24,.9); }
 @media (max-width: 600px) { .hud .ttl { display: none; } .hud input[type=range] { width: 90px; } }
+
+/* ---- game: clickable glow, used/free markers, mission columns, board highlights ---- */
+@keyframes glow { 0%,100% { box-shadow: 0 0 0 0.5mm rgba(255,196,64,.95), 0 0 2.5mm 0.6mm rgba(255,196,64,.55); }
+                  50% { box-shadow: 0 0 0 1.1mm rgba(255,196,64,.6), 0 0 7mm 2.5mm rgba(255,196,64,.3); } }
+.action.can, .mslot.can > .card, .mcol.target, .hand.can .face.front > .card { animation: glow 1.4s ease-in-out infinite; }
+.action.can, .mslot.can, .mcol.target { cursor: pointer; }
+.action { transition: filter .3s, opacity .3s; }
+.action.used { filter: grayscale(1); opacity: .55; }
+.action.used::after { content: 'USED'; position: absolute; right: 3mm; bottom: 3mm; font: 800 3.2mm Helvetica, Arial, sans-serif; color: #8a2a1a;
+  border: 0.5mm solid #8a2a1a; padding: 0.3mm 1.2mm; border-radius: 1mm; transform: rotate(-12deg); }
+.action.free .ahead::after { content: 'FREE'; margin-left: auto; background: #f0b400; color: #1d1d1d; font-size: 2.5mm; padding: 0.3mm 1mm; border-radius: 1mm; }
+.mcargo { display: flex; flex-wrap: wrap; gap: 1mm; align-content: flex-start; justify-content: center; }
+.mcargo .tok { position: static; width: 10mm; height: 9mm; }
+.mcargo .tok.spent { opacity: .35; }
+.eqchip { font-size: 2.6mm; font-weight: 700; color: #1b3a6b; background: #e6ecf5; border-radius: 1mm; padding: 0.6mm 1.2mm; }
+.rest .tok { position: absolute; left: 3mm; top: 2mm; width: 10mm; height: 16mm; }
+.mslot.fired > .card { filter: saturate(.35) brightness(.92); }
+.mslot.fired::after { content: 'FIRED'; position: absolute; left: 50%; top: 45%; transform: translate(-50%,-50%) rotate(-14deg);
+  font: 800 5mm Helvetica, Arial, sans-serif; color: rgba(140,40,20,.8); border: 0.7mm solid rgba(140,40,20,.8); padding: 0.5mm 2mm; border-radius: 1mm; }
+.dslot { overflow: visible; }
+.dslot em { position: absolute; right: -2mm; top: -2mm; background: #1d1d1d; color: #fff; font: 700 3mm Helvetica; font-style: normal; border-radius: 3mm; padding: 0.5mm 1.5mm; }
+.flycard { position: absolute; width: 47mm; height: 66mm; z-index: 50; pointer-events: none; transform: translateZ(18mm);
+  transition: left .65s cubic-bezier(.3,.7,.2,1), top .65s cubic-bezier(.3,.7,.2,1); }
+#boardlayer { pointer-events: none; }
+.btok { position: absolute; width: 7mm; height: 11mm; margin: -9.5mm 0 0 -3.5mm; pointer-events: none;
+  transition: left .8s cubic-bezier(.3,.7,.2,1), top .8s cubic-bezier(.3,.7,.2,1); }
+.btok .tok { position: static; width: 100%; height: 100%; }
+.btok span { position: absolute; top: -3.8mm; left: 50%; transform: translateX(-50%); font: 800 2.6mm Helvetica, Arial, sans-serif; color: #fff;
+  background: #2f6db5; padding: 0 0.8mm; border-radius: 0.8mm; }
+@keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.2); } }
+.hl { position: absolute; width: 9mm; height: 9mm; margin: -4.5mm 0 0 -4.5mm; border-radius: 50%; pointer-events: auto; cursor: pointer;
+  border: 0.8mm solid #ffbf3c; background: rgba(255,191,60,.3); animation: pulse 1.2s ease-in-out infinite; }
+.hl.nopark { border-style: dashed; border-color: #ff7a2e; background: rgba(255,122,46,.18); }
+.hl.here { border-color: #fff; background: rgba(255,255,255,.3); }
+.hl:hover { background: rgba(255,191,60,.7); }
+.hl::before { content: ''; position: absolute; inset: -3mm; border-radius: 50%; }   /* bigger, invisible click target */
+
+#prompt { position: fixed; top: 14px; left: 50%; transform: translateX(-50%); max-width: min(92vw, 760px); text-align: center;
+  background: rgba(25,20,16,.88); color: #f3e6cf; font: 600 14px/1.4 Helvetica, Arial, sans-serif; padding: 9px 18px; border-radius: 20px;
+  opacity: 0; transition: opacity .25s; pointer-events: none; }
+#prompt.on { opacity: 1; }
+#closeup { position: fixed; inset: 0; background: rgba(20,15,10,.62); display: flex; align-items: center; justify-content: center; z-index: 5; }
+#closeup[hidden] { display: none; }
+.cu-inner { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+.cu-card { --cuz: 3; width: 47mm; height: 66mm; transform: scale(var(--cuz));
+  margin: calc(33mm * (var(--cuz) - 1)) calc(23.5mm * (var(--cuz) - 1)); }
+.cu-card > .card { width: 100%; height: 100%; border-radius: 1.5mm; box-shadow: 0 2mm 8mm rgba(0,0,0,.5); }
+#closeup tr.pick { cursor: pointer; }
+#closeup tr.pick:hover td { background: #ffe29a; }
+.hud .endturn { background: #d9a441; color: #1d1d1d; border-color: #d9a441; }
+.hud .endturn:hover { background: #e9b451; }
 '''
 
 PANZOOM_JS = r'''
@@ -381,6 +474,7 @@ PANZOOM_JS = r'''
     if (h === except) return; h.classList.remove('open'); h.querySelectorAll('.hc.sel').forEach(c => c.classList.remove('sel'));
   });
   const tap = target => {
+    if (window.game && game.tap(target)) { closeAll(document.getElementById('hand-you')); return; }
     const card = target.closest && target.closest('.hc');
     if (!card) { closeAll(); return; }                        // anything else flips hands back
     const hand = card.parentElement;
@@ -427,6 +521,245 @@ PANZOOM_JS = r'''
   const m = location.hash.match(/view=([\d.]+),([\d.]+),([\d.]+)/);
   if (m) { s = +m[3]; x = innerWidth / 2 - m[1] * MM * s; y = innerHeight * 0.55 - m[2] * MM * s; apply(); }
   else fit();
+})();
+'''
+
+GAME_JS = r'''
+// Minimal game loop for YOUR seat (Blue): Research, Launch, Mission Control, fire a
+// rocket (pick a row), move the spacecraft, End turn. State lives here; the table
+// HTML is the view. No rules engine yet beyond what these actions need.
+(() => {
+  const G = JSON.parse(document.getElementById('game-data').textContent);
+  const MM = 96 / 25.4, $ = id => document.getElementById(id);
+  const VAL = { K: 640, R: 160, O: 40, Y: 10 }, ROMAN = ['I', 'II', 'III', 'IV'];
+  const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  const mass = toks => toks.reduce((m, t) => m + VAL[t], 0);
+  const tokensFor = t => { const out = []; for (const k of 'KROY') while (t >= VAL[k] - 1e-9) { out.push(k); t -= VAL[k]; } return out; };
+  const tri = (c, cls = '') => `<svg class="tok ${cls}" viewBox="0 0 20 18"><polygon points="10,1 19,17 1,17" fill="${G.tokenColors[c]}" stroke="rgba(0,0,0,.35)" stroke-width="0.8" stroke-linejoin="round"/><polygon points="10,1 19,17 10,12" fill="rgba(255,255,255,.14)"/></svg>`;
+  const MEEPLE = `<svg class="tok meeple" viewBox="0 0 16 26"><path d="M8,1 C12,5 12.5,10 12,17 L15,22 L15,25 L11,23 L5,23 L1,25 L1,22 L4,17 C3.5,10 4,5 8,1 Z" fill="${G.you}" stroke="rgba(0,0,0,.45)" stroke-width="0.9" stroke-linejoin="round"/><circle cx="8" cy="10" r="2" fill="rgba(255,255,255,.55)"/></svg>`;
+  const BACK = '<div class="card cback rockets"><span>ROCKETS</span></div>';
+  const adj = {}; for (const [a, b] of G.links) { (adj[a] = adj[a] || []).push(b); (adj[b] = adj[b] || []).push(a); }
+
+  const st = {
+    turn: 1, deck: shuffle(G.deck.slice()), hand: G.hand.slice(), discard: [],
+    used: { research: false, launch: false, mc: false }, freeMC: 0,
+    missions: [0, 1, 2, 3].map(i => ({ i, active: false, space: null, tokens: [], paid: false, eq: 0, card: null, fired: false })),
+    mode: 'idle', handOpen: false, sel: null, pending: null, firing: null, move: null,
+  };
+  const hand = $('hand-you'), toastEl = $('toast'), promptEl = $('prompt'), closeup = $('closeup');
+
+  // ---- helpers --------------------------------------------------------------
+  let tt; const toast = msg => { toastEl.textContent = msg; toastEl.classList.add('on'); clearTimeout(tt); tt = setTimeout(() => toastEl.classList.remove('on'), 2800); };
+  const prompt = msg => { promptEl.textContent = msg || idlePrompt(); promptEl.classList.add('on'); };
+  const idlePrompt = () => `Turn ${st.turn} · Research, Launch or Mission Control (glowing), or click a glowing rocket to fire it. Then End turn.`;
+  const posOf = el => { let x = 0, y = 0; while (el && el.id !== 'table') { x += el.offsetLeft; y += el.offsetTop; el = el.offsetParent; } return { x: x / MM, y: y / MM }; };
+  function fly(html, fromEl, toEl, done) {                    // a card lifted off the table and slid across
+    const a = posOf(fromEl), b = posOf(toEl), f = document.createElement('div');
+    f.className = 'slot flycard'; f.innerHTML = html; f.style.left = a.x + 'mm'; f.style.top = a.y + 'mm';
+    $('table').appendChild(f); void f.offsetWidth;
+    f.style.left = b.x + 'mm'; f.style.top = b.y + 'mm';
+    let fin = false; const end = () => { if (fin) return; fin = true; f.remove(); done && done(); };
+    f.addEventListener('transitionend', end); setTimeout(end, 950);
+  }
+  function reach(from, n) {                                    // spaces within n crossings (1 dv each)
+    const d = { [from]: 0 }, q = [from];
+    while (q.length) { const s = q.shift(); if (d[s] >= n) continue; for (const t of adj[s] || []) if (!(t in d)) { d[t] = d[s] + 1; q.push(t); } }
+    return d;
+  }
+  const pendingCard = () => st.pending == null ? null : G.cards[st.hand[st.pending]];
+  const lightsOnEarth = c => ['earth', 'both'].includes(c.ign);
+  const eligible = m => { const c = pendingCard(); return !!c && m.active && mass(m.tokens) >= c.T - 1e-9 && (m.space !== 'earth' || lightsOnEarth(c)); };
+  const reason = m => { const c = pendingCard(); if (!m.active) return 'That mission slot is empty. Launch first.';
+    if (mass(m.tokens) < c.T) return `Mission ${ROMAN[m.i]} has ${mass(m.tokens)}t of cargo; ${c.name} costs ${c.T}t.`;
+    return `${c.name} can't light on Earth. It's an upper stage.`; };
+
+  // ---- view -----------------------------------------------------------------
+  function buildHand() {
+    const n = st.hand.length, squeeze = Math.min(1, 5 / Math.max(n, 1)), spread = n > 6 ? 264 / n : 44;
+    hand.innerHTML = st.hand.map((id, k) => { const o = k - (n - 1) / 2;
+      return `<div class="hc" data-k="${k}" style="--cx:${(o * 22 * squeeze).toFixed(1)};--cy:${(Math.abs(o) * 3).toFixed(1)};--cr:${(o * 7 * squeeze).toFixed(1)};--ox:${(o * spread).toFixed(1)};--oy:${(Math.abs(o) * 2).toFixed(1)};--or:${(o * 2.5).toFixed(1)};z-index:${k + 1}"><div class="flip"><div class="face back">${BACK}</div><div class="face front">${G.cards[id].html}</div></div></div>`; }).join('');
+  }
+  function syncHand() {
+    void hand.offsetWidth;                                     // let a freshly built hand flip, not jump
+    hand.classList.toggle('open', st.handOpen);
+    hand.querySelectorAll('.hc').forEach((el, k) => el.classList.toggle('sel', st.sel === k));
+  }
+  function can() {
+    const idle = st.mode === 'idle';
+    return {
+      research: idle && !st.used.research && st.deck.length > 0,
+      launch: idle && !st.used.launch && st.missions.some(m => !m.active),
+      mc: idle && (!st.used.mc || st.freeMC > 0) && st.missions.some(m => m.active && m.tokens.length),
+    };
+  }
+  function render() {
+    const c = can();
+    for (const k of ['research', 'launch', 'mc']) {
+      const el = $('act-' + k);
+      el.classList.toggle('used', st.used[k] && !(k === 'mc' && st.freeMC > 0));
+      el.classList.toggle('can', c[k]);
+      el.classList.toggle('free', k === 'mc' && st.freeMC > 0);
+    }
+    for (const m of st.missions) {
+      const slot = $('mslot-' + m.i);
+      slot.innerHTML = m.card ? G.cards[m.card].html : '';
+      slot.classList.toggle('fired', !!m.card && m.fired);
+      slot.classList.toggle('can', st.mode === 'idle' && !!m.card && !m.fired);
+      $('mcargo-' + m.i).innerHTML = m.tokens.map(t => tri(t, m.paid ? 'spent' : '')).join('') + (m.eq ? `<span class="eqchip">${m.eq} equipment slot${m.eq > 1 ? 's' : ''}</span>` : '');
+      $('mrest-' + m.i).innerHTML = m.active ? '' : MEEPLE;
+      $('mcol-' + m.i).classList.toggle('target', st.mode === 'mc-target' && eligible(m));
+      let bt = $('btok-' + m.i);
+      if (m.active) {
+        if (!bt) { bt = document.createElement('div'); bt.id = 'btok-' + m.i; bt.className = 'btok'; bt.innerHTML = MEEPLE + `<span>${ROMAN[m.i]}</span>`; $('boardlayer').appendChild(bt); }
+        const p = G.spaces[m.space], off = st.missions.filter(o => o.active && o.space === m.space && o.i < m.i).length;
+        bt.style.left = (p.x + off * 5) + 'mm'; bt.style.top = p.y + 'mm';
+      } else if (bt) bt.remove();
+    }
+    hand.classList.toggle('can', st.mode === 'mc-pick');
+    const deck = $('deck-rockets');
+    deck.style.setProperty('--t', (st.deck.length * 0.3).toFixed(2) + 'mm'); deck.style.visibility = st.deck.length ? '' : 'hidden';
+    const top = st.discard[st.discard.length - 1], ds = $('discard-you');
+    ds.innerHTML = top ? `<div class="slot" style="inset:0">${G.cards[top].html}</div><em>${st.discard.length}</em>` : '<span>DISCARD</span>';
+  }
+
+  // ---- actions --------------------------------------------------------------
+  function research() {
+    st.used.research = true;
+    const id = st.deck.pop();
+    render();
+    fly(BACK, $('deck-rockets'), hand, () => {
+      st.hand.push(id); buildHand(); st.handOpen = true; st.sel = st.hand.length - 1; syncHand(); render();
+      toast(`Research: ${G.cards[id].name} joins your hand.`); prompt();
+    });
+  }
+  function launch() {
+    const m = st.missions.find(m => !m.active);
+    Object.assign(m, { active: true, space: 'earth', tokens: G.launch.split(''), paid: false, eq: 0, card: null, fired: false });
+    st.used.launch = true; st.freeMC++;
+    render(); toast(`Mission ${ROMAN[m.i]} is on the pad with ${mass(m.tokens)}t of lift.`);
+    startMC();
+  }
+  function startMC() {
+    st.mode = 'mc-pick'; st.handOpen = true; st.sel = null; syncHand(); render();
+    prompt(`Mission Control${st.freeMC ? ' (free)' : ''}: pick a rocket from your hand, then click it again to confirm. Click the table to cancel.`);
+  }
+  function handClick(k) {
+    if (st.mode === 'mc-pick') {
+      if (st.sel !== k) { st.sel = k; syncHand(); return; }
+      const c = G.cards[st.hand[k]];
+      if (c.kind !== 'engine') return toast(`${c.kind === 'bundle' ? 'Bundles' : 'Equipment'} can't be played yet. Coming soon.`);
+      if (!c.rows.length) return toast(`${c.name} is a fixed-function card; it can't be flown yet.`);
+      st.pending = k;
+      const ok = st.missions.filter(eligible);
+      if (!ok.length) { const m = st.missions.find(m => m.active) || st.missions[0]; toast(reason(m)); st.pending = null; return; }
+      st.mode = 'mc-target'; st.handOpen = false; syncHand(); render();
+      return prompt(`Choose the glowing mission for ${c.name} (costs ${c.T}t).`);
+    }
+    if (st.mode !== 'idle') return;
+    if (!st.handOpen) { st.handOpen = true; st.sel = null; return syncHand(); }
+    if (st.sel === k) return toast('Play cards with Mission Control.');
+    st.sel = k; syncHand();
+  }
+  function place(m) {
+    const k = st.pending, id = st.hand[k], c = G.cards[id], old = m.card;
+    if (st.freeMC > 0) st.freeMC--; else st.used.mc = true;
+    st.hand.splice(k, 1); st.pending = null; st.sel = null; st.mode = 'idle';
+    buildHand(); syncHand();
+    const from = hand; render();
+    fly(c.html, from, $('mslot-' + m.i), () => {
+      if (old) st.discard.push(old);
+      m.card = id; m.fired = false; m.paid = true; render();
+      prompt(`Click ${c.name} on Mission ${ROMAN[m.i]} to fire it.`);
+    });
+  }
+  function openCloseup(m) {
+    const c = G.cards[m.card];
+    st.mode = 'row'; st.firing = m;
+    const box = closeup.querySelector('.cu-card');
+    box.innerHTML = c.html;
+    box.style.setProperty('--cuz', Math.min(3.6, innerHeight * 0.78 / (66 * MM), innerWidth * 0.9 / (47 * MM)).toFixed(2));
+    box.querySelectorAll('table.strip tr').forEach((tr, r) => { tr.classList.add('pick'); tr.dataset.r = r; });
+    closeup.hidden = false; render();
+    prompt(`${c.name}: pick a row. Its tokens stay aboard; its Δv is how far you can move.`);
+  }
+  function pickRow(r) {
+    const m = st.firing, c = G.cards[m.card], row = c.rows[r];
+    const had = mass(m.tokens), spare = had - c.T;
+    closeup.hidden = true;
+    m.tokens = row.eq ? [] : tokensFor(row.cargo); m.eq = row.eq || 0; m.paid = false; m.fired = true;
+    st.mode = 'move'; st.move = { m, reach: reach(m.space, row.dv) };
+    render(); showReach();
+    toast(`Paid ${c.T}t${spare > 0 ? `, ${spare}t discarded` : ''}. ${row.eq ? row.eq + ' equipment' : row.cargo + 't'} aboard.`);
+    prompt(`Move Mission ${ROMAN[m.i]} up to ${row.dv} space${row.dv > 1 ? 's' : ''}: click a glowing space. Dashed = you can't end your turn there.`);
+  }
+  function showReach() {
+    const layer = $('boardlayer'), { m, reach: d } = st.move;
+    for (const sid in d) {
+      const p = G.spaces[sid], h = document.createElement('div');
+      h.className = 'hl' + (sid === m.space ? ' here' : '') + (G.spaces[sid].stop === 'none' ? ' nopark' : '');
+      h.dataset.s = sid; h.style.left = p.x + 'mm'; h.style.top = p.y + 'mm';
+      h.title = (p.label || sid) + (d[sid] ? ` · ${d[sid]} Δv` : ' · stay');
+      layer.appendChild(h);
+    }
+  }
+  const clearReach = () => $('boardlayer').querySelectorAll('.hl').forEach(h => h.remove());
+  function moveTo(sid) {
+    const m = st.move.m; m.space = sid; clearReach(); st.mode = 'idle'; st.move = null; render();
+    const sp = G.spaces[sid];
+    if (sp.stop === 'none') toast(`Mission ${ROMAN[m.i]} can't stop here. Fire another stage before you end your turn, or it fails.`);
+    else toast(`Mission ${ROMAN[m.i]} reached ${sp.label || 'its new position'}.`);
+    prompt();
+  }
+  function cancel() {
+    if (st.mode === 'move') { clearReach(); toast('Stayed in place.'); }
+    closeup.hidden = true; st.mode = 'idle'; st.pending = null; st.firing = null; st.move = null;
+    st.handOpen = false; st.sel = null; syncHand(); render(); prompt();
+  }
+  function endTurn() {
+    if (st.mode !== 'idle') cancel();
+    const lost = [];
+    for (const m of st.missions) if (m.active && G.spaces[m.space].stop === 'none') {
+      lost.push(ROMAN[m.i]); if (m.card) st.discard.push(m.card);
+      Object.assign(m, { active: false, space: null, tokens: [], paid: false, eq: 0, card: null, fired: false });
+    }
+    st.used = { research: false, launch: false, mc: false }; st.freeMC = 0; st.turn++;
+    render(); prompt();
+    toast(lost.length ? `Mission ${lost.join(' & ')} couldn't stop mid-flight and was lost.` : `Turn ${st.turn}.`);
+  }
+  const why = k => ({
+    research: st.used.research ? 'You already researched this turn.' : 'The deck is empty.',
+    launch: st.used.launch ? 'You already launched this turn.' : 'All four mission tokens are in use.',
+    mc: st.used.mc && !st.freeMC ? 'Mission Control is used for this turn.' : 'No mission has cargo to spend. Launch first.',
+  })[k];
+
+  // ---- input (called from the table's pointer handler) -------------------------
+  window.game = {
+    tap(target) {
+      const t = target.closest ? target : target.parentElement;
+      const act = t.closest('[data-act]');
+      if (act) { const k = act.dataset.act; if (st.mode !== 'idle') cancel(); if (can()[k]) ({ research, launch, mc: startMC })[k](); else toast(why(k)); return true; }
+      const hc = t.closest('#hand-you .hc');
+      if (hc) { handClick(+hc.dataset.k); return true; }
+      const hl = t.closest('.hl');
+      if (hl && st.mode === 'move') { moveTo(hl.dataset.s); return true; }
+      const col = t.closest('.mcol');
+      if (col) {
+        const m = st.missions[+col.dataset.i];
+        if (st.mode === 'mc-target') { eligible(m) ? place(m) : toast(reason(m)); return true; }
+        if (st.mode === 'idle' && t.closest('.mslot') && m.card) { m.fired ? toast('This stage has fired. Place the next one with Mission Control.') : openCloseup(m); return true; }
+        return true;
+      }
+      if (st.mode === 'move') { toast('Click a glowing space to move, or press Esc to stay put.'); return true; }
+      if (st.mode !== 'idle') cancel();
+      else if (st.handOpen) { st.handOpen = false; st.sel = null; syncHand(); }
+      return false;
+    },
+  };
+  closeup.addEventListener('click', e => { const tr = e.target.closest('tr.pick'); if (tr) pickRow(+tr.dataset.r); else cancel(); });
+  $('endturn').addEventListener('click', endTurn);
+  addEventListener('keydown', e => { if (e.key === 'Escape' && st.mode !== 'idle') cancel(); });
+
+  buildHand(); syncHand(); render(); prompt();
 })();
 '''
 
