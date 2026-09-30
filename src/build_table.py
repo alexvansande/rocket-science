@@ -27,8 +27,8 @@ TABLE_W, TABLE_H = 1300, 1240
 CARD_W, CARD_H, GAP = 47, 66, 6
 BOARD_W, BOARD_H = 594, 420            # printed at A2
 BOARD_X, BOARD_Y = 353, 410
-SEAT_W, SEAT_H = 400, 290              # Space Center board (170 deep) + hand in front
-PB_H = 170
+SEAT_W, SEAT_H = 440, 285              # Space Center board (180 deep) + hand in front
+PB_H = 180
 
 PLAYERS = [  # seat, colour, rotation, centre
     ("bottom", "Blue",   "#2f6db5", 0,   (BOARD_X + BOARD_W / 2, 1081)),
@@ -115,37 +115,39 @@ def bowl(color, label, cx, cy, r=30):
 
 # ---- Space Center (player board) -----------------------------------------
 ACTIONS = [
-    ("RESEARCH", "Take 1 card: top of the deck, the market, or your own discard pile."),
-    ("BUILD", "Play 1 improvement from your hand onto your Space Center."),
-    ("LAUNCH", "Launch a rocket from your hand. Pick a row; fly N spaces from Earth; put its cargo in a mission area.<br><b>Basic pad: up to 480t.</b>"),
-    ("MOVE", "Pay a rocket's T: cost with a mission's cargo. Pick a row; fly its &Delta;v; its cargo replaces the old."),
+    ("RESEARCH", "Buy one card: from the deck, the open market, or your own discard pile."),
+    ("LAUNCH", "Put a mission token on Earth. Place <b>4 red</b> cargo tokens in its mission area. Then take a <b>free Mission Control</b>."),
+    ("MISSION CONTROL", "Spend a mission's cargo tokens to place a rocket card on it. Discard the rest, or pass them to another mission (separation)."),
 ]
 TAP = ('<svg viewBox="0 0 20 20" class="tap"><path d="M15 6 A7 7 0 1 0 17 11" fill="none" stroke="currentColor" '
        'stroke-width="2.2" stroke-linecap="round"/><polygon points="12,2 18,6 12,9" fill="currentColor"/></svg>')
+MCOL_X, MCOL_W, MCOL_GAP = 172, 62, 4
 
 
 def space_center(name, color, flying=None):
-    """flying: {mission_index: [cargo colours]} for missions currently on the board."""
+    """flying: {mission_index: (rocket card html, [cargo colours])} for missions in flight."""
     flying = flying or {}
     acts = "".join(
-        f'<div class="action" {at(8 + i * (CARD_W + 5), 22, CARD_W, CARD_H)}>'
+        f'<div class="action" {at(8 + i * (CARD_W + 5), 20, CARD_W, CARD_H)}>'
         f'<div class="ahead">{TAP}<span>{t}</span></div><div class="atext">{txt}</div></div>'
         for i, (t, txt) in enumerate(ACTIONS))
     missions = ""
     for i in range(4):
-        mx, my = 222 + (i % 2) * 87, 22 + (i // 2) * 72
-        body = ""
+        mx = MCOL_X + i * (MCOL_W + MCOL_GAP)
+        slot = f'<div class="cslot" {at(7.5, 9, CARD_W, CARD_H)}><span>rocket</span></div>'
         if i in flying:
-            body = "".join(cargo(c, 20 + k * 13, 34, 0) for k, c in enumerate(flying[i]))
-            body += '<div class="inflight">in flight</div>'
+            rocket, toks = flying[i]
+            body = slot + f'<div class="slot" {at(7.5, 9, CARD_W, CARD_H)}>{rocket}</div>'
+            body += "".join(cargo(c, 8 + k * 14, 88, 0) for k, c in enumerate(toks))
+            body += f'<div class="rest" {at(23, 126, 16, 20)}></div><div class="inflight" {at(0, 116, MCOL_W, None)}>in flight</div>'
         else:
-            body = rocket_token(color, 60, 34, 16)
-        missions += (f'<div class="marea" {at(mx, my, 83, 68)}><div class="mname">MISSION {"I II III IV".split()[i]}</div>'
-                     f'<div class="rest" {at(58, 32, 16, 20)}></div>{body}</div>')
+            body = slot + f'<div class="rest" {at(23, 126, 16, 20)}></div>' + rocket_token(color, 26, 128, 16)
+        missions += (f'<div class="marea" {at(mx, 20, MCOL_W, 152)}><div class="mname">MISSION {"I II III IV".split()[i]}</div>'
+                     f'<div class="ctag" {at(0, 79, MCOL_W, None)}>cargo</div>{body}</div>')
     return f'''<div class="pboard" style="--pc:{color};">
   <div class="pb-title">SPACE CENTER <span>· {name}</span></div>
   {acts}
-  <div class="improve" {at(8, 94, 4 * CARD_W + 15, 68)}>improvements are built here, or on top of an action</div>
+  <div class="improve" {at(8, 92, 3 * CARD_W + 10, 80)}>completed goals<br>reward side up</div>
   {missions}
 </div>'''
 
@@ -207,9 +209,11 @@ def main():
     for i, (c, lbl) in enumerate([("K", "K · 640t"), ("R", "R · 160t"), ("O", "O · 40t"), ("Y", "Y · 10t")]):
         parts.append(bowl(c, lbl, bx + i * 70, ry + 30))
 
-    # Seats. Example in-flight mission for Blue: 3 orange cargo aboard, token in LEO.
+    # Seats. Example in flight for Blue: a Falcon 9-style launch. 4 red at launch paid for
+    # the Kerolox Booster (RRR, 1 red discarded); its 120t row (OOO) paid for the Kerolox
+    # Upper, whose 20t row (YY) left 20t of payload in LEO.
     for s, pname, color, rot, center in PLAYERS:
-        flying = {0: ["O", "O", "O"]} if s == "bottom" else None
+        flying = {0: (engine_card_html(ENG["KEROLOX UPPER"]), ["Y", "Y"])} if s == "bottom" else None
         parts.append(seat(s, pname, color, rot, center, flying))
     lx, ly = board_pos("leo")
     parts.append(rocket_token(PLAYERS[0][2], lx - 4, ly - 8, 14))
@@ -279,21 +283,22 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #332d29; fon
   background: radial-gradient(circle at 50% 45%, #3b2718 0 55%, #5a3b22 70%, #8a6038 86%, #4a2f1b 100%);
   box-shadow: 0 2mm 5mm rgba(0,0,0,.5), inset 0 2mm 5mm rgba(0,0,0,.6); }
 
-.pboard { left: 0; top: 0; width: 400mm; height: 170mm; border-radius: 4mm;
+.pboard { left: 0; top: 0; width: 440mm; height: 180mm; border-radius: 4mm;
   background: linear-gradient(#f7f2e7, #efe7d6); border: 2.2mm solid var(--pc);
   box-shadow: 0 0.6mm 0 #d8cdb6, 0 1.2mm 0 #c3b69c, 0 3mm 8mm rgba(0,0,0,.5); font-family: Helvetica, Arial, sans-serif; color: #1d1d1d; }
 .pb-title { left: 8mm; top: 5mm; font-weight: 800; font-size: 5mm; letter-spacing: 0.6mm; }
 .pb-title span { font-weight: 600; color: #6b6356; }
 .action { background: #fff; border: 0.35mm solid #2a2a2a; border-radius: 1.8mm; overflow: hidden; }
-.ahead { display: flex; align-items: center; gap: 1.5mm; background: #1d1d1d; color: #fff; padding: 2mm 2.5mm; font-weight: 800; font-size: 3.6mm; letter-spacing: 0.4mm; }
+.ahead { display: flex; align-items: center; gap: 1.5mm; background: #1d1d1d; color: #fff; padding: 2mm 2mm; font-weight: 800; font-size: 3.1mm; letter-spacing: 0.2mm; white-space: nowrap; }
 .tap { width: 4mm; height: 4mm; color: #f0b400; flex: none; }
-.atext { padding: 2.5mm; font-size: 2.9mm; line-height: 1.35; color: #333; }
+.atext { padding: 2.5mm; font-size: 3.1mm; line-height: 1.4; color: #333; }
 .improve { border: 0.4mm dashed #b3a78f; border-radius: 1.8mm; color: #a0947c; font-size: 2.8mm; display: flex; align-items: center; justify-content: center; text-align: center; padding: 4mm; }
 .marea { border: 0.4mm solid #cbbd9f; border-radius: 1.8mm; background: rgba(255,255,255,.5); }
 .mname { left: 3mm; top: 2.5mm; font-weight: 800; font-size: 3mm; letter-spacing: 0.4mm; color: #6b6356; }
 .rest { border-radius: 50%; border: 0.4mm dashed #b3a78f; }
-.marea .meeple { left: 59.7mm !important; top: 33.5mm !important; }
-.inflight { left: 3mm; bottom: 3mm; font-size: 2.6mm; color: #8a7e66; font-style: italic; }
+.cslot { border: 0.4mm dashed #c9bc9f; border-radius: 1.8mm; display: flex; align-items: center; justify-content: center; }
+.cslot span, .ctag { color: #b3a78f; font-size: 2.6mm; font-weight: 700; letter-spacing: 0.4mm; text-transform: uppercase; text-align: center; }
+.inflight { font-size: 2.6mm; color: #8a7e66; font-style: italic; text-align: center; }
 .dslot { border: 0.5mm dashed rgba(255,236,200,.45); border-radius: 1.8mm; display: flex; align-items: center; justify-content: center; }
 .dslot span { color: rgba(255,236,200,.55); font: 700 3mm Helvetica, Arial, sans-serif; letter-spacing: 0.5mm; transform: rotate(-90deg); }
 .hand { overflow: visible; }

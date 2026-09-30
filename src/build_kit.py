@@ -138,7 +138,8 @@ def engine_card_html(e):
                 cargo_cell = (f'<td class="ct">{render_tokens(tokens_for_mass(r["cargo_t"]))}</td>'
                               f'<td class="tt">{esc(r["cargo_t"])}t</td>')
             rows.append(f'<tr>{cargo_cell}<td class="dv">{esc(r["dv"])}</td></tr>')
-        body = '<table class="strip"><tbody>' + "".join(rows) + '</tbody></table>'
+        body = ('<div class="howto">Move spacecraft, keep remaining tokens</div>'
+                '<table class="strip"><tbody>' + "".join(rows) + '</tbody></table>')
 
     # Equipment-carry note (renders below the strip if the engine carries equipment)
     eq_carry = e.get("equipment_carry", 0)
@@ -455,7 +456,7 @@ header { display: flex; justify-content: space-between; align-items: baseline; b
 .tk-mult { font-weight: bold; font-size: 6pt; vertical-align: -0.5pt; margin-right: 0.3pt; }  /* "25×" before a token glyph */
 
 table.strip { width: 100%; margin-top: 0.5mm; border-collapse: collapse; font-size: 6pt; }
-table.strip td { padding: 0.2mm 1mm 0.2mm 0; vertical-align: middle; }
+table.strip td { padding: 0.1mm 1mm 0.1mm 0; vertical-align: middle; }
 .ct { white-space: nowrap; }
 .tt { color: #888; font-size: 5pt; }
 .dv { font-weight: bold; text-align: right; font-size: 6.5pt; }
@@ -469,6 +470,7 @@ table.strip td { padding: 0.2mm 1mm 0.2mm 0; vertical-align: middle; }
   letter-spacing: 0.2pt;
 }
 
+.howto { font-size: 3.9pt; font-weight: bold; color: #555; margin: 0.7mm 0 0.2mm; white-space: nowrap; }
 .req { position: absolute; bottom: 1mm; left: calc(18mm + 2mm); right: 2mm; font-style: italic; font-size: 4.5pt; color: #888; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* Equipment */

@@ -34,9 +34,9 @@ Every card in hand, unlimited taps. Launch, pick a row, pay stages with cargo to
 
 ### M2 — The Space Center turn
 
-The player board with its four printed actions, each tapped once. Research (blind, open market, own discard). Build onto the Space Center. Launch from hand, gated by pad mass. Hidden hand.
+The player board with its three printed actions (Research, Launch, Mission Control), each used once. Launch places 4 red tokens + a free Mission Control. Hidden hand.
 
-- **Needs:** starting hand, market size N, how many copies of each card, and **Space Center improvement cards, which don't exist yet.** The deck has only rockets, equipment and bundles. Placeholders (extra Move, extra Research) are enough to start.
+- **Needs:** starting hand, market size N, how many copies of each card.
 
 ### M3 — Goals
 
@@ -60,7 +60,6 @@ Online multiplayer (needs a small server), event/failure deck, factions, Mars la
 |---|---|---|
 | Board open questions (rocket icons, hatched bars, Mars descent) | M1 | Hatched = burn; rocket icon = nothing; Mars descent 1 burn + 3 free with heatshield |
 | Starting hand, market N, card copies | M2 | K1, K2, H1, Crew Capsule, Atmospheric Return; N = 4; 2 copies of tier-1, 1 of the rest |
-| Space Center improvement cards | M2 | "+1 Move", "+1 Research", "+1 Launch" |
 | Goal requirements as data | M3 | Hand-write them for the 16 main goals |
 | Goal reward sides | M3 | Pad upgrades + the three improvements above |
 | Endgame | M4 | First to N VP |
