@@ -69,10 +69,19 @@ def card(html, x, y, rot=0):
     return f'<div class="slot" {at(x, y, CARD_W, CARD_H, f"transform:rotate({rot}deg);")}>{html}</div>'
 
 
-def stack(kind, label, x, y, n=6):
-    """A face-down deck: a card back with visible thickness."""
-    return (f'<div class="slot stack {kind}" {at(x, y, CARD_W, CARD_H)} style="--n:{n}">'
-            f'<div class="card cback {kind}"><span>{label}</span></div></div>')
+CARD_THICK = 0.3   # mm per card
+
+
+def stack(kind, label, x, y, n):
+    """A face-down deck as a real CSS 3D box: the card back is the top face, lifted
+    n x 0.3mm off the table, and four side faces carry a card-edge texture. The
+    browser shows whichever sides actually face the viewer (no painted-on side view)."""
+    t = round(n * CARD_THICK, 2)
+    return (f'<div class="deck" {at(x, y, CARD_W, CARD_H, f"--t:{t}mm;")}>'
+            f'<div class="dshadow"></div>'
+            f'<div class="dside front"></div><div class="dside back"></div>'
+            f'<div class="dside left"></div><div class="dside right"></div>'
+            f'<div class="dtop"><div class="card cback {kind}"><span>{label}</span></div></div></div>')
 
 
 def zone_label(text, x, y, w=None, align="left"):
@@ -179,14 +188,14 @@ def main():
         parts.append(card(objective_card_html(o), fx + i * (CARD_W + GAP), 318))
     mx = fx + 6 * (CARD_W + GAP) + 24
     parts.append(zone_label("MISSIONS · deck + 5 open", mx, 305))
-    parts.append(stack("missions", "MISSIONS", mx, 318, 10))
+    parts.append(stack("missions", "MISSIONS", mx, 318, 17))
     for i, name in enumerate(["LARGEST SPACE STATION", "VENERA", "COMSAT", "WEATHER WATCH", "INTERCONTINENTAL EXPRESS"]):
         parts.append(card(objective_card_html(OBJ[name]), mx + (i + 1) * (CARD_W + GAP) - 2, 318))
 
     # Rockets & tech: main deck + open market
     ry = BOARD_Y + BOARD_H + 22
     parts.append(zone_label("ROCKETS &amp; TECH · deck + open market", BOARD_X, ry - 13))
-    parts.append(stack("rockets", "ROCKETS", BOARD_X, ry, 14))
+    parts.append(stack("rockets", "ROCKETS", BOARD_X, ry, 27))
     market = [engine_card_html(ENG["KEROLOX SUSTAINER"]), engine_card_html(ENG["KEROLOX BOOSTER"]),
               engine_card_html(ENG["HYDROLOX UPPER"]), equipment_card_html(EQ["CREW CAPSULE"])]
     for i, h in enumerate(market):
@@ -245,16 +254,24 @@ TABLE_CSS = r'''
 html, body { margin: 0; height: 100%; overflow: hidden; background: #332d29; font-size: 9px; }
 #viewport { position: fixed; inset: 0; overflow: hidden; cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; perspective: 1900px; perspective-origin: 50% 35%; }
 #viewport.drag { cursor: grabbing; }
-#tilt { position: absolute; inset: 0; transform: rotateX(18deg); transform-origin: 50% 55%; }
-#table { position: absolute; left: 0; top: 0; transform-origin: 0 0; will-change: transform; }
+#tilt { position: absolute; inset: 0; transform: rotateX(18deg); transform-origin: 50% 55%; transform-style: preserve-3d; }
+#table { position: absolute; left: 0; top: 0; transform-origin: 0 0; will-change: transform; transform-style: preserve-3d; }
 
 #table > *, .seat > *, .pboard > *, .marea > * { position: absolute; }
 #viewport img, #viewport svg { -webkit-user-drag: none; user-drag: none; }
 .mainboard { border-radius: 2mm; box-shadow: 0 0.6mm 0 #cfc6b4, 0 1.2mm 0 #b9ae98, 0 3mm 8mm rgba(0,0,0,.55); background: #fff; }
 .slot > .card { width: 100%; height: 100%; border-radius: 1.8mm; box-shadow: 0 1.2mm 3mm rgba(0,0,0,.45); }
-.stack > .card { box-shadow:
-    0.35mm 0.35mm 0 #e8e2d6, 0.7mm 0.7mm 0 #cfc7b8, 1.05mm 1.05mm 0 #e8e2d6, 1.4mm 1.4mm 0 #cfc7b8,
-    1.75mm 1.75mm 0 #e8e2d6, 2.1mm 2.1mm 0 #bdb4a3, 3mm 3.5mm 6mm rgba(0,0,0,.5); }
+/* 3D decks: a box whose top face is the card back; sides show stacked card edges */
+.deck { transform-style: preserve-3d; }
+.deck > div { position: absolute; }
+.dtop { inset: 0; transform: translateZ(var(--t)); }
+.dtop > .card { width: 100%; height: 100%; border-radius: 1.2mm; }
+.dside { background: repeating-linear-gradient(var(--dir), #f4efe4 0 0.22mm, #cbc2b1 0.22mm 0.3mm); }
+.dside.front { left: 0; top: 100%; width: 100%; height: var(--t); transform-origin: top; transform: rotateX(90deg); --dir: to bottom; filter: brightness(.93); }
+.dside.back { left: 0; bottom: 100%; width: 100%; height: var(--t); transform-origin: bottom; transform: rotateX(-90deg); --dir: to bottom; }
+.dside.left { top: 0; right: 100%; width: var(--t); height: 100%; transform-origin: right; transform: rotateY(90deg); --dir: to right; filter: brightness(.85); }
+.dside.right { top: 0; left: 100%; width: var(--t); height: 100%; transform-origin: left; transform: rotateY(-90deg); --dir: to right; filter: brightness(.85); }
+.dshadow { inset: -1mm; border-radius: 3mm; background: rgba(0,0,0,.45); filter: blur(2.2mm); transform: translate(0.8mm, 1.6mm); }
 .card.cback span { font-size: 13pt; }
 .zlabel { color: rgba(255,236,200,.62); font: 700 3.3mm/1 Helvetica, Arial, sans-serif; letter-spacing: 0.5mm; text-transform: uppercase; white-space: nowrap; }
 .tok { filter: drop-shadow(0 0.7mm 0.6mm rgba(0,0,0,.55)); }
@@ -327,7 +344,7 @@ PANZOOM_JS = r'''
     const px = x + lcx * MM * s, py = innerHeight * 0.55 + (y + lcy * MM * s - innerHeight * 0.55) * TILT, r = lr * MM * s;
     vp.style.background = `radial-gradient(circle ${r}px at ${px}px ${py}px, #8a7c70 0%, #75685d 12%, #5e534a 26%, #4a413b 42%, #3b3430 62%, #332d29 80%) #332d29`;
   };
-  const apply = () => { tb.style.transform = `translate(${x}px,${y}px) scale(${s})`; slider.value = toSlider(s); lamp(); };
+  const apply = () => { tb.style.transform = `translate(${x}px,${y}px) scale3d(${s},${s},${s})`; slider.value = toSlider(s); lamp(); };
   const fit = () => {
     s = Math.min(innerWidth / W, innerHeight / (H * TILT)) * 0.9;
     x = (innerWidth - W * s) / 2; y = (innerHeight - H * s) / 2; apply();
@@ -348,7 +365,9 @@ PANZOOM_JS = r'''
   document.getElementById('zin').onclick = () => zoomAt(s * 1.3, innerWidth / 2, innerHeight / 2);
   document.getElementById('zout').onclick = () => zoomAt(s / 1.3, innerWidth / 2, innerHeight / 2);
   document.getElementById('zfit').onclick = fit;
-  addEventListener('resize', fit);
+  // Resizing keeps whatever is at the centre of the screen there (no snap back to fit)
+  let vw = innerWidth, vh = innerHeight;
+  addEventListener('resize', () => { x += (innerWidth - vw) / 2; y += (innerHeight - vh) / 2; vw = innerWidth; vh = innerHeight; apply(); });
 
   // ---- hands ---------------------------------------------------------------
   let toastTimer;
@@ -399,7 +418,10 @@ PANZOOM_JS = r'''
   vp.addEventListener('pointerup', up); vp.addEventListener('pointercancel', up);
   addEventListener('keydown', e => { if (e.key === 'Escape') closeAll(); });
 
-  fit();
+  // #view=x,y,zoom (table mm + scale) opens on a given spot: handy for sharing a view
+  const m = location.hash.match(/view=([\d.]+),([\d.]+),([\d.]+)/);
+  if (m) { s = +m[3]; x = innerWidth / 2 - m[1] * MM * s; y = innerHeight * 0.55 - m[2] * MM * s; apply(); }
+  else fit();
 })();
 '''
 
