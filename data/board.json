@@ -1,6 +1,7 @@
 {
   "board": "Earth to Mars (dual loop)",
-  "source": "Transcribed from Alex's 'earth to mars.pdf' (Jun 2026). Positions are in a 1000x707 frame matching the original's layout, simplified.",
+  "image": "board.webp",
+  "source": "Transcribed from Alex's 'earth to mars.pdf' (Jun 2026). Space x/y are the space's centre on the board image, in a 1000x707 frame (the 4000x2828 site/board.webp at 1/4 scale). Orbit spaces are whole rings; 'ring' names the body they circle.",
   "crossing_types": {
     "burn": "Burn 1 dv to cross, either direction (grey bar).",
     "aero": "Burn 1 dv to go up; free going down if the mission carries Atmospheric Return (blue dashed).",
@@ -121,18 +122,17 @@
       "label": "Lunar Orbit",
       "kind": "orbit",
       "park": true,
-      "x": 362,
-      "y": 125,
-      "ring": "moon",
-      "label_side": "left"
+      "x": 378,
+      "y": 159,
+      "ring": "moon"
     },
     {
       "id": "lunar_descent",
       "kind": "descent",
       "park": false,
       "icon": "triangle",
-      "x": 447,
-      "y": 152
+      "x": 439,
+      "y": 145
     },
     {
       "id": "moon",
@@ -257,8 +257,8 @@
       "label": "Mars Orbit",
       "kind": "orbit",
       "park": true,
-      "x": 100,
-      "y": 255,
+      "x": 89,
+      "y": 262,
       "ring": "mars"
     },
     {
@@ -267,8 +267,8 @@
       "kind": "surface",
       "park": true,
       "airless": true,
-      "x": 55,
-      "y": 212
+      "x": 42,
+      "y": 286
     },
     {
       "id": "deimos",
@@ -276,8 +276,8 @@
       "kind": "surface",
       "park": true,
       "airless": true,
-      "x": 290,
-      "y": 300
+      "x": 278,
+      "y": 246
     },
     {
       "id": "md1",

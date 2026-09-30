@@ -15,9 +15,9 @@ Status: **draft for discussion, Sep 2026.** Goal: a playable version of the rule
 ```
 site/play/index.html     the game page
 site/play/engine.js      rules: state, legal actions, apply
-site/play/ui.js          board (SVG from board.json), player boards, hand, cards
+site/play/ui.js          board (Alex's art, site/board.webp, with tokens placed from board.json), player boards, hand, cards
 site/play/tests/         reference missions as action scripts (node --test)
-data/board.json          spaces, links, crossing types, parking (transcribed Sep 2026)
+data/board.json          spaces, links, crossing types, parking, positions on the image
 ```
 
 CI copies `data/*.json` into the site. Card faces reuse the kit's renderer: `build_kit.py` also exports each card's HTML so the prototype shows the real cards, not look-alikes.
