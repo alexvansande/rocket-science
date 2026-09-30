@@ -7,7 +7,8 @@ Instead of asking "does THIS mission close?" (that's playtest.py), this asks
 cards show up in those optimal towers (so we can see what's strong or overpowered).
 
 Method (per Alex): work bottom-up in the chain model.
-  - A "stage" is a cluster of N identical cards (N = 1..4, the clustering cap).
+  - A "stage" is a cluster of N identical cards (N limited to the Rocket Bundle
+    multipliers carded for the rocket's weight class — see ALLOWED_MULTS).
   - A cluster of N cards of type E has wet mass N·total_E and lifts a cargo M with
         dv = round(ve_E · ln(N·total_E / (N·dry_E + M)))     (feasible while M < N·fuel_E)
   - The mass the NEXT stage down must lift is just N·total_E — INDEPENDENT of M.
@@ -23,7 +24,6 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 CARDS = os.path.join(HERE, "..", "data", "cards.json")
 OUT = os.path.join(HERE, "..", "build", "tower-search.json")
 MAXH = 8                       # max tower height (stages) to explore
-CLUSTER = 4                    # up to 4 of the same card per stage
 EQUIP_T = 2.5
 
 with open(CARDS) as f:
@@ -53,9 +53,9 @@ def leading_token(mass):
     for thr, tok in TOKEN_BANDS:
         if mass >= thr:
             return tok
-    return "Y"
+    return "E"  # sub-token: equipment scale (Burner Engine)
 
-ALLOWED_MULTS = {tok: {1} for tok in ("K", "R", "O", "Y")}   # a single rocket is always legal
+ALLOWED_MULTS = {tok: {1} for tok in ("K", "R", "O", "Y", "E")}   # a single rocket is always legal
 for _b in D.get("bundles", []):
     ALLOWED_MULTS.setdefault(_b["token"], {1}).add(_b["mult"])
 
@@ -79,6 +79,7 @@ def build_trans(exclude=()):
                 "ign": e.get("ignition", ""), "tech": e.get("tech_label", ""),
                 "tank": is_tank, "hyd": is_hyd_engine,
             })
+
     return trans
 
 TRANS = build_trans()
@@ -88,11 +89,35 @@ def stage_dv(t, cargo):
         return None
     return round(t["ve"] * math.log(t["wet"] / (t["dry"] + cargo)))
 
+# Burner Engine — EQUIPMENT, not a stage. It ATTACHES to the cargo it pushes (no
+# displacement bay), so it's bounded by the equipment-carry rule: a cargo token
+# carries 1 equipment card per 10t (one orange = 4). Serial burns are therefore
+# capacity-limited, and each burn must push <= its 40t cap (payload + the burners
+# above it). For a 10t payload that means at most ONE burner (+1 dv) — no chains.
+BURNER = next((q for q in D["equipment"] if q["name"] == "BURNER ENGINE"), None)
+
+def burner_options(payload):
+    """(bonus_dv, added_mass, pseudo_stages[top-first]) for strapping k serial
+    Burners onto the payload."""
+    opts = [(0, 0.0, [])]
+    if not BURNER:
+        return opts
+    cap_cards = int(payload // 10)               # 1 equipment slot per 10t of cargo
+    bt, cap = BURNER["mass_t"], BURNER["max_push_t"]
+    for k in range(1, cap_cards + 1):
+        if payload + (k - 1) * bt > cap:         # the deepest burner's push
+            break
+        stages = [{"card": BURNER["name"], "n": 1, "lifts_t": round(payload + i * bt, 1),
+                   "wet_t": bt, "stage_dv": BURNER["burn_dv"], "ign": "space",
+                   "tech": BURNER.get("tech_label", "Bn")} for i in range(k)]
+        opts.append((k * BURNER["burn_dv"], k * bt, stages))
+    return opts
+
 def _stagedict(t, cargo, dv):
-    return {"card": t["name"], "n": t["n"], "lifts_t": round(cargo), "wet_t": round(t["wet"]),
+    return {"card": t["name"], "n": t["n"], "lifts_t": round(cargo, 1), "wet_t": round(t["wet"], 1),
             "stage_dv": dv, "ign": t["ign"], "tech": t["tech"]}
 
-GROUND = {"earth", "both", "ground"}
+GROUND = {"earth", "both"}
 
 # `above_hyd` = is the card DIRECTLY above this stage a hydrolox engine? (needed to legalise a tank)
 _MAXDV = {}
@@ -123,8 +148,24 @@ def maxdv(m, h, above_hyd):
     return best
 
 def query(payload, h):
-    r = maxdv(payload, h, False)                 # the bare payload is not a hydrolox engine
-    return r if r is not None else (0, [])
+    """Max dv for the payload with <= h engine stages, trying each legal number of
+    payload-attached Burners on top (they're equipment — they don't count as stages)."""
+    best = (0, [])
+    for bonus, addm, bstages in burner_options(payload):
+        r = maxdv(payload + addm, h, False)      # the bare payload is not a hydrolox engine
+        if r is not None and r[0] + bonus > best[0]:
+            best = (r[0] + bonus, bstages + r[1])
+    return best
+
+def minmass_b(payload, d):
+    """Cheapest launchable stack for the payload, trying each legal number of
+    payload-attached Burners (their +1s reduce what the engines must deliver)."""
+    best = (float("inf"), None)
+    for bonus, addm, bstages in burner_options(payload):
+        mass, tower = minmass(payload + addm, max(d - bonus, 0), False)
+        if tower is not None and mass + addm < best[0]:
+            best = (mass + addm, bstages + tower)
+    return best
 
 # Board mission dv totals — what the envelope numbers actually buy (docs/04).
 MISSIONS = [
@@ -207,7 +248,7 @@ def compute_variant(payload):
 
     missions, usage = [], {}
     for label, need in MISSIONS:
-        mass, tower = minmass(payload, need, False)
+        mass, tower = minmass_b(payload, need)
         if tower is None:
             continue
         for s in tower:
@@ -218,7 +259,7 @@ def compute_variant(payload):
 
     raw = []
     for dgoal in range(1, ceiling["dv"] + 1):
-        mass, stack = minmass(payload, dgoal, False)
+        mass, stack = minmass_b(payload, dgoal)
         if stack is None:
             continue
         raw.append({"dv": sum(s["stage_dv"] for s in stack), "liftoff_t": round(mass + payload),
@@ -238,6 +279,8 @@ def compute_variant(payload):
         for s in p["stack"]:
             pu[s["card"]] = pu.get(s["card"], 0) + 1
     single = {t["name"]: stage_dv(t, 10) for t in TRANS if t["n"] == 1 and stage_dv(t, 10)}
+    if BURNER:
+        single[BURNER["name"]] = BURNER["burn_dv"]
     most = [n for n, _ in sorted(pu.items(), key=lambda x: -x[1])[:3]]
     return {"envelope": env, "max_towers": max_towers, "ceiling": ceiling, "missions": missions,
             "pareto": pareto, "pareto_usage": pu, "card_single_dv": single, "usage": usage,
@@ -250,7 +293,8 @@ def main():
     set_active_cards(NEVER_FLEW)
     hist = compute_variant(PAYLOAD)               # historical — only hardware that actually flew
 
-    report = {"max_height": MAXH, "cluster_cap": CLUSTER, "payload_t": PAYLOAD,
+    report = {"max_height": MAXH, "payload_t": PAYLOAD,
+              "bundle_mults": {tok: sorted(m) for tok, m in ALLOWED_MULTS.items()},
               "milestones": MILESTONES, "never_flew": NEVER_FLEW,
               "variants": {"theoretical": theo, "historical": hist}}
     # back-compat: also surface the theoretical fields at top level for any older reader

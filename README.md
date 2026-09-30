@@ -4,12 +4,15 @@ A board game that teaches rocket physics through interplanetary mission planning
 
 Designer: Alex Van de Sande.
 
+**Site:** https://alexvansande.github.io/rocket-science/ — the card kit and playtest report, rebuilt from `data/` on every push to `main` (`.github/workflows/pages.yml`, landing page in `site/`). The playable prototype will live there too.
+
 ## Repo layout
 
 ```
 data/         # cards.json, objectives.json — the game's source of truth
 src/          # Python build scripts (HTML+PDF generation, SVG silhouettes)
 docs/         # Design documentation (you are here)
+site/         # Landing page for GitHub Pages (built outputs are added by CI)
 build/        # Generated PDFs and HTML output (git-ignore in production)
 ```
 

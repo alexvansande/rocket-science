@@ -15,26 +15,6 @@ def load_cards(path=CARDS_PATH):
     with open(path) as f:
         data = json.load(f)
 
-    for e in data["engines"]:
-        if e["name"] == "ION ENGINE":
-            e["kind"] = "fixed"
-            if not e.get("fixed_text"):
-                e["fixed_text"] = "1 Dv/turn while powered. Requires power. Lifetime cap ~15 Dv."
-            e["strip"] = []
-        if e["name"] == "HYPERGOLIC BOOSTER" and not e.get("fuel_type"):
-            e["fuel_type"] = "HYPERGOLIC"
-
-    if not any(eq["name"] == "BURNER ENGINE" for eq in data["equipment"]):
-        data["equipment"].append({
-            "name": "BURNER ENGINE",
-            "desc": "Single 1-Dv burn for a craft <=10t (1 yellow token). Single use.",
-            "note": "Sub-grid maneuver: capture, insertion, mid-course",
-            "kind": "equipment",
-        })
-
-    # Drop NAV SATELLITE so equipment fits the 4x4 grid cleanly.
-    data["equipment"] = [eq for eq in data["equipment"] if eq["name"] != "NAV SATELLITE"]
-
     data.setdefault("model", {})
     data["model"]["board_symbols"] = {
         "circle": "CIRCLE = stable. Craft may park here indefinitely.",
@@ -99,7 +79,7 @@ FUEL_CLASS = {
     "HYPERGOLIC": "f-hyp", "SOLID": "f-sol", "ION": "f-ion",
     "NUCLEAR": "f-nuc", "": "f-other",
 }
-IGN_LABEL = {"earth": "GND", "space": "SPC", "both": "G+S"}
+IGN_LABEL = {"earth": "GND", "space": "SPC", "both": "G+S", "mars-surface": "MARS"}
 
 def weight_class(e):
     """Return weight-class CSS class based on the leading (largest) token of total mass.
@@ -194,26 +174,39 @@ def engine_card_html(e):
 </div>'''
 
 
-WC_BY_TOKEN = {"K": "wc-super", "R": "wc-heavy", "O": "wc-medium", "Y": "wc-light"}
-WC_NAME = {"wc-super": "SUPER", "wc-heavy": "HEAVY", "wc-medium": "MEDIUM", "wc-light": "LIGHT"}
+WC_BY_TOKEN = {"K": "wc-super", "R": "wc-heavy", "O": "wc-medium", "Y": "wc-light", "E": "wc-eq"}
+WC_NAME = {"wc-super": "SUPER", "wc-heavy": "HEAVY", "wc-medium": "MEDIUM", "wc-light": "LIGHT",
+           "wc-eq": "EQUIPMENT"}
 
 def bundle_card_html(b):
-    """A rocket-bundle multiplier card: clip onto one rocket of a weight class to fly it as
-    N identical rockets (carry N x cargo at the same dv). The big multiplier sits on the
-    weight-class colour ribbon. Lives on the rocket pages."""
+    """A bundle multiplier card: clip onto one rocket (or sub-token craft) to fly it as
+    N identical ones (carry N x cargo at the same dv). The big multiplier sits on the
+    class colour ribbon. Rocket bundles live on the rocket pages; the blue EQUIPMENT
+    bundles live on the equipment pages."""
     n = b["mult"]
     token = b["token"]
     wclass = WC_BY_TOKEN.get(token, "wc-medium")
     wlabel = WC_NAME[wclass]
+    if token == "E":
+        title = "EQUIPMENT BUNDLE"
+        herit = "EQUIPMENT class &middot; clips to a sub-token craft (equipment-scale)"
+        rule = (f'Fly <b>{n} identical craft</b> as one: this craft carries '
+                f'<b>&times;{n} its equipment at the same dv</b>.')
+        small = f"The stage beneath must lift {n}&times; the craft's mass."
+    else:
+        title = "ROCKET BUNDLE"
+        herit = f"{wlabel} class &middot; clips to a {token}-class rocket"
+        rule = (f'Fly <b>{n} identical rockets</b> as one: this {wlabel.lower()} rocket carries '
+                f'<b>&times;{n} its cargo at the same dv</b>.')
+        small = f"The stage beneath must lift {n}&times; this rocket's total mass."
     return f'''
 <div class="card bundle {wclass}">
   <div class="illus"><div class="bundle-big">&times;{n}</div></div>
   <div class="content">
-    <div class="title">ROCKET BUNDLE</div>
-    <div class="herit">{wlabel} class &middot; clips to a {token}-class rocket</div>
-    <div class="bundle-rule">Fly <b>{n} identical rockets</b> as one: this {wlabel.lower()} rocket carries
-       <b>&times;{n} its cargo at the same dv</b>.</div>
-    <div class="bundle-rule small">The stage beneath must lift {n}&times; this rocket's total mass. Max cluster 4&times;.</div>
+    <div class="title">{title}</div>
+    <div class="herit">{herit}</div>
+    <div class="bundle-rule">{rule}</div>
+    <div class="bundle-rule small">{small}</div>
   </div>
 </div>'''
 
@@ -285,30 +278,36 @@ def back_page(label, cls):
 </section>'''
 
 
-def engine_page(title, num, total, engines):
-    cards = _grid_cards([engine_card_html(e) for e in engines])
-    return f'''
-<section class="page">
-  <header><span class="ph-title">{esc(title)}</span><span class="ph-num">TRISKELION | p{num}/{total}</span></header>
-  <div class="grid">{cards}</div>
-</section>'''
+BACK_KIND = {"rockets": ("ROCKETS", "rockets"), "missions": ("MISSIONS", "missions")}
 
-
-def equipment_page(num, total, equipment):
-    cards = _grid_cards([equipment_card_html(eq) for eq in equipment])
+def mixed_back_page(kinds):
+    """Backs for a MIXED front sheet (e.g. equipment + filler missions on one page).
+    kinds = per-slot back kind in FRONT order ('rockets' | 'missions'). Each row of 4
+    is horizontally REVERSED so the backs land behind their fronts under a long-edge
+    duplex flip (uniform sheets never needed this; mixed ones do)."""
+    kinds = list(kinds) + ["rockets"] * (PER_PAGE - len(kinds))
+    cells = []
+    for r in range(0, PER_PAGE, 4):
+        for k in kinds[r:r + 4][::-1]:
+            label, cls = BACK_KIND[k]
+            cells.append(f'<div class="card cback {cls}"><span>{label}</span></div>')
     return f'''
-<section class="page">
-  <header><span class="ph-title">EQUIPMENT CARDS</span><span class="ph-num">TRISKELION | p{num}/{total}</span></header>
-  <div class="grid">{cards}</div>
+<section class="page back-page">
+  <header><span class="ph-title">CARD BACKS (mixed)</span><span class="ph-num">TRISKELION | card backs</span></header>
+  <div class="grid">{"".join(cells)}</div>
 </section>'''
 
 
 OBJ_TYPE_COLOR = {
-    "FIRST":     "#b8860b",
-    "FLYBY":     "#5d2a91",
-    "MOST":      "#1b3a6b",
-    "RESCUE":    "#a83232",
-    "ENDURANCE": "#1b4332",
+    "FIRST":      "#b8860b",
+    "FLYBY":      "#5d2a91",
+    "MOST":       "#1b3a6b",
+    "RESCUE":     "#a83232",
+    "ENDURANCE":  "#1b4332",
+    # filler contract types (the 12 expendable space-fillers on the equipment sheet)
+    "COMMERCIAL": "#0e7490",
+    "MILITARY":   "#556b2f",
+    "SCIENCE":    "#46237a",
 }
 
 OBJ_TYPE_ICON = {
@@ -317,6 +316,9 @@ OBJ_TYPE_ICON = {
     "MOST":      '<svg viewBox="0 0 20 20"><rect x="3" y="13" width="4" height="5" fill="#1b3a6b"/><rect x="8" y="8" width="4" height="10" fill="#1b3a6b"/><rect x="13" y="3" width="4" height="15" fill="#1b3a6b"/></svg>',
     "RESCUE":    '<svg viewBox="0 0 20 20"><path d="M3 10 Q 10 2 17 10 Q 10 18 3 10 Z" fill="none" stroke="#a83232" stroke-width="2"/><circle cx="10" cy="10" r="3" fill="#a83232"/></svg>',
     "ENDURANCE": '<svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="7" fill="none" stroke="#1b4332" stroke-width="2"/><line x1="10" y1="10" x2="10" y2="5" stroke="#1b4332" stroke-width="2"/><line x1="10" y1="10" x2="14" y2="12" stroke="#1b4332" stroke-width="2"/></svg>',
+    "COMMERCIAL": '<svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="none" stroke="#0e7490" stroke-width="2"/><text x="10" y="14.2" font-size="11" font-weight="bold" text-anchor="middle" fill="#0e7490">$</text></svg>',
+    "MILITARY":   '<svg viewBox="0 0 20 20"><path d="M10 2 L17 5 V10 Q17 16 10 18 Q3 16 3 10 V5 Z" fill="#556b2f"/></svg>',
+    "SCIENCE":    '<svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="2" fill="#46237a"/><ellipse cx="10" cy="10" rx="8" ry="3" fill="none" stroke="#46237a" stroke-width="1.2"/><ellipse cx="10" cy="10" rx="8" ry="3" fill="none" stroke="#46237a" stroke-width="1.2" transform="rotate(60 10 10)"/><ellipse cx="10" cy="10" rx="8" ry="3" fill="none" stroke="#46237a" stroke-width="1.2" transform="rotate(120 10 10)"/></svg>',
 }
 
 
@@ -374,8 +376,9 @@ header { display: flex; justify-content: space-between; align-items: baseline; b
 
 /* Rocket-bundle multiplier cards (live on the rocket pages) — big ×N on the colour ribbon */
 .card.bundle .bundle-big { font-size: 40pt; font-weight: 800; letter-spacing: -2pt; line-height: 1; }
-.wc-super .bundle-big, .wc-heavy .bundle-big { color: #fff; }
+.wc-super .bundle-big, .wc-heavy .bundle-big, .wc-eq .bundle-big { color: #fff; }
 .wc-medium .bundle-big, .wc-light .bundle-big { color: #1a1a1a; }
+.wc-eq .illus { background: #1b3a6b; }  /* E leading: equipment blue */
 .card.bundle .bundle-rule { font-size: 7pt; line-height: 1.3; margin: 2mm 0 1mm; }
 .card.bundle .bundle-rule.small { font-size: 5.8pt; color: #555; }
 
@@ -387,6 +390,8 @@ header { display: flex; justify-content: space-between; align-items: baseline; b
 
 .illus { width: 18mm; min-width: 18mm; padding: 1mm; display: flex; align-items: center; justify-content: center; position: relative; }
 .illus svg { width: 100%; height: 100%; max-height: 62mm; }
+/* Engine art stops above the tech badge so tall stacks' bells don't run under it */
+.eng .illus { padding-bottom: 7.5mm; }
 .tech-label {
   position: absolute;
   bottom: 1.5mm;
@@ -533,12 +538,21 @@ def main():
         objectives = json.load(f)
 
     bundles = data.get("bundles", [])
+    rocket_bundles = [b for b in bundles if b["token"] != "E"]
+    equip_bundles = [b for b in bundles if b["token"] == "E"]
     # The rocket deck = engine cards followed by the rocket-bundle multiplier cards.
-    engine_cards = [engine_card_html(e) for e in page1_engines] + [bundle_card_html(b) for b in bundles]
+    # The blue EQUIPMENT bundles (xN equipment) live on the equipment pages instead.
+    engine_cards = [engine_card_html(e) for e in page1_engines] + [bundle_card_html(b) for b in rocket_bundles]
+    equip_cards = [equipment_card_html(q) for q in data["equipment"]] + [bundle_card_html(b) for b in equip_bundles]
+
+    # FILLER objectives (marked "filler": true — expendable space-fillers) ride in the
+    # spare slots of the last equipment sheet instead of the main objectives page.
+    filler_objs = [o for o in objectives if o.get("filler")]
+    main_objs = [o for o in objectives if not o.get("filler")]
 
     n_engine_pages = _npages(len(engine_cards))
-    n_equip_pages = _npages(len(data["equipment"]))
-    n_obj_pages = _npages(len(objectives))
+    n_equip_pages = _npages(len(equip_cards))
+    n_obj_pages = _npages(len(main_objs))
     TOTAL_PAGES = n_engine_pages + n_equip_pages + n_obj_pages
 
     # Every front page is followed by its back page, so even pages = card backs.
@@ -551,15 +565,24 @@ def main():
         title = "ENGINE & BUNDLE CARDS" if n_engine_pages == 1 else f"ENGINE & BUNDLE CARDS (page {pi+1})"
         pages.append(card_page(title, pgnum, TOTAL_PAGES, engine_cards[i:i+PER_PAGE]))
         pages.append(back_page("ROCKETS", "rockets"))
-    # Equipment
-    for i in range(0, len(data["equipment"]), PER_PAGE):
+    # Equipment (+ the blue equipment-bundle multipliers). The LAST sheet's spare
+    # slots take the filler contract cards (gold MISSIONS backs -> mixed back sheet).
+    equip_chunks = [equip_cards[i:i + PER_PAGE] for i in range(0, len(equip_cards), PER_PAGE)]
+    for ci, chunk in enumerate(equip_chunks):
         pgnum += 1
-        pages.append(equipment_page(pgnum, TOTAL_PAGES, data["equipment"][i:i+PER_PAGE]))
-        pages.append(back_page("ROCKETS", "rockets"))
-    # Objectives
-    for i in range(0, len(objectives), PER_PAGE):
+        kinds = ["rockets"] * len(chunk)
+        title = "EQUIPMENT CARDS"
+        if ci == len(equip_chunks) - 1 and filler_objs:
+            fill = [objective_card_html(o) for o in filler_objs][: PER_PAGE - len(chunk)]
+            chunk = chunk + fill
+            kinds += ["missions"] * len(fill)
+            title = "EQUIPMENT + FILLER CONTRACTS"
+        pages.append(card_page(title, pgnum, TOTAL_PAGES, chunk))
+        pages.append(mixed_back_page(kinds) if "missions" in kinds else back_page("ROCKETS", "rockets"))
+    # Objectives (the 16 main cards; fillers already placed above)
+    for i in range(0, len(main_objs), PER_PAGE):
         pgnum += 1
-        pages.append(objective_page(pgnum, TOTAL_PAGES, objectives[i:i+PER_PAGE]))
+        pages.append(objective_page(pgnum, TOTAL_PAGES, main_objs[i:i + PER_PAGE]))
         pages.append(back_page("MISSIONS", "missions"))
 
     pages_html = "\n".join(pages)
@@ -597,8 +620,8 @@ def main():
     with open(OUT_HTML, "w") as f:
         f.write(doc)
     print(f"Wrote {OUT_HTML}")
-    print(f"  Engines: {len(page1_engines)} (one progression deck)")
-    print(f"  Equipment: {len(data['equipment'])}")
+    print(f"  Engines: {len(page1_engines)} + {len(rocket_bundles)} rocket bundles")
+    print(f"  Equipment: {len(data['equipment'])} + {len(equip_bundles)} equipment bundles")
     print(f"  Data: {len(data_json)} bytes")
 
 

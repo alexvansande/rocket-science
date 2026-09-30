@@ -1,6 +1,8 @@
 # 03 — Equipment Deck
 
-16 equipment cards, sub-token mass (~2.5t each), carried by engine cards with `equipment_carry` capacity.
+16 equipment cards, sub-token mass (~2.5t each), carried by engine cards with `equipment_carry` capacity. (The deck auto-paginates past 16 cards per page.)
+
+In play (Sep 2026, `docs/07`): equipment comes **from your hand**, rides aboard a mission like a rocket stage, and gives special actions and sometimes prizes instead of Δv.
 
 ## Categories (with tech labels)
 
@@ -25,6 +27,7 @@
 
 ### Ascent (L-tier, paired with L1 lander engine)
 - **L2 — Light Ascent Engine**: Tiny hypergolic ascent stage. 2 Dv lifting 1 equipment card (~2.5t). Single use.
+- **L3 — Lunar Mass Driver**: Electromagnetic catapult on an airless surface. Reusable: launches 1 equipment card from surface to orbit each turn, no propellant. Requires power. Moon / airless worlds only.
 
 ### ISRU (R-tier)
 - **R1 — Hydrolox Refinery**: Electrolyzes water ice into hydrogen + oxygen. Deploy on Moon or Mars surface. Rotate once per turn; on 4th rotation gain one free hydrolox tank token. Requires power.
@@ -32,7 +35,7 @@
 
 ### Single-use / no tier
 - **Cn — Consumables**: Holds 4 consumables (food for 4-person crew × 4 months). Rotate card 90° per consumable used.
-- **Bn — Burner Engine**: Single 1-Dv burn for a craft ≤10t (1 yellow). Single use. Models Apollo SPS short burns, BepiColombo chemical insertion, cubesat kick motors.
+- ~~**Bn — Burner Engine**~~ — **ARCHIVED (Sep 2026).** No mission or goal used it, and once a yellow token carries 4 equipment cards, Burners stack into free Δv chains. Kept in `cards.json` under `archived_equipment`. Bring it back only with its own stacking limit (e.g. one per mission). Old text: **Bn — Burner Engine**: Single 1-Dv burn for a craft ≤40t (1 orange token — buffed from 1 yellow, June 2026). Single use. Models Apollo SPS short burns, BepiColombo chemical insertion, cubesat kick motors. Attaches to the cargo it pushes (uses one of its equipment slots — see the carry rule below), so serial burns are capacity-limited: a 10t payload carries at most 1 Burner (+1 dv). Included in `tower_search.py`, where it shows up as a cheap +1 finisher on light stacks.
 
 ## Equipment carry rules (engines that carry equipment for free)
 
@@ -47,6 +50,14 @@
 | Mars Ascent Vehicle (Hp3) | 4 equipment cards |
 
 Equipment carry capacity is separate from the propellant bay. Equipment rides along free, does NOT enter the rocket equation. Reflects real spacecraft adapters where instruments mount in cubbies separate from propellant tanks.
+
+## Equipment riding on cargo tokens
+
+Cargo tokens carry equipment **by mass: each card is ~2.5t, so one yellow (10t) buys 4 equipment cards, one orange 16, and so on — DECIDED (Sep 2026).** Same logic as rockets: spend the tokens aboard to play equipment from your hand. (Replaces the old 1-card-per-10t rule, which only existed to cap Burner chains; the Burner is now archived.)
+
+## Equipment Bundle cards (×2 / ×3 / ×4)
+
+Three blue **EQUIPMENT BUNDLE** multiplier cards live on the equipment pages (`data["bundles"]`, token `"E"`). Same math as the rocket bundles: clip one onto an equipment-scale craft to fly **N identical craft as one action** — N× the equipment delivered at the same dv; the stage beneath must lift N× the craft's mass. The launch-N-cubesats-in-one-action card.
 
 ## Rotation indicators
 

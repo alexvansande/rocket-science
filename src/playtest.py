@@ -31,12 +31,16 @@ import math
 import os
 import sys
 
+import regen_strips  # side-effect-free import; expected_strip() audits for stale strips
+
 G0 = 9.81
 HERE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(HERE, "..", "data", "cards.json")
 OUT_JSON = os.path.join(HERE, "..", "build", "playtest-results.json")
 
-MASS_LADDER = [10, 20, 30, 40, 80, 120, 160, 320, 480, 640, 1280, 1920, 2560]
+# Token ladder + the deliberate super-heavy overflows (Super Heavy / Nova 3840,
+# Sea Dragon 16000) — they print as "N × ⬛" and never park, so they're by design.
+MASS_LADDER = [10, 20, 30, 40, 80, 120, 160, 320, 480, 640, 1280, 1920, 2560, 3840, 16000]
 TOKEN_VALUE = {"Y": 10, "O": 40, "R": 160, "K": 640}
 EQUIP_T = 2.5  # an equipment card is sub-grid, ~2.5t; counts as cargo unless carried free
 
@@ -108,6 +112,25 @@ def run_audit():
                              "msg": f"dry({dry})+fuel({fuel}) != total({total})"})
         if total not in MASS_LADDER:
             warnings.append({"card": name, "msg": f"total {total}t not on the mass ladder"})
+        # Dry-mass floor (docs/01): dry >= total/16, rounded up. K2 is the documented
+        # exemption — dry 20 < 30 props up the First Orbit knife-edge (K2+capsule = 9).
+        if dry + 1e-9 < total / 16 and name != "KEROLOX BOOSTER":
+            warnings.append({"card": name,
+                             "msg": f"dry {dry}t below the total/16 floor ({total / 16:g}t)"})
+        # Refuel cleanliness (docs/01): for R-class-and-up cards (total >= 320), the
+        # refuel cost (fuel = total - dry) must lay out in at most TWO token colours
+        # with no sub-token remainder — round dry until it does (tested at dry-change
+        # time against the missions; K2 is exempt, pinned by First Orbit).
+        if total >= 320 and fuel is not None and name != "KEROLOX BOOSTER":
+            rem, colors = fuel, 0
+            for v in (640, 160, 40, 10):
+                if rem >= v:
+                    colors += 1
+                    rem %= v
+            if colors > 2 or rem > 0:
+                warnings.append({"card": name,
+                                 "msg": f"refuel {fuel}t needs >2 token colours — round dry "
+                                        f"per the docs/01 refuel-cleanliness rule"})
         if "exhaust_velocity_kms" in e and abs(ve_of(e) - e["exhaust_velocity_kms"]) > 0.05:
             warnings.append({"card": name,
                              "msg": f"stored ve {e['exhaust_velocity_kms']} != Isp-derived {ve_of(e):.3f}"})
@@ -134,7 +157,15 @@ def run_audit():
         if bad:
             problems.append({"card": name, "field": "strip", "msg": "; ".join(bad)})
 
-        if e.get("kind") == "stage" and not (e.get("strip") or []) and name != "LIGHT DESCENT ENGINE":
+        # Staleness: the printed strip must be EXACTLY what regen_strips would produce
+        # (catches missing/extra rows, which the per-row recompute above cannot see).
+        expected = regen_strips.expected_strip(e)
+        if (e.get("strip") or []) != expected:
+            problems.append({"card": name, "field": "strip",
+                             "msg": "strip is stale — differs from regen_strips output "
+                                    "(run src/regen_strips.py)"})
+
+        if e.get("kind") == "stage" and not (e.get("strip") or []):
             warnings.append({"card": name, "msg": "kind='stage' but empty strip"})
 
     return {
@@ -317,6 +348,24 @@ def build_missions():
           note=f"carries Orbiter (80t) + {HUBBLE_T}t payload")
     m.add("ORBITER", HUBBLE_T, "OMS circularization", note="burns its own reserve")
     m.note("Orbiter re-enters on its built-in heat shield (free aerobrake). Hubble stays in LEO.")
+    M.append(m)
+
+    # 2b. SLS Block 1 / Artemis I — the Drop Tank under a NON-Orbiter hydrolox engine.
+    # Encodes the ruling that the tank pairs with ANY hydrolox engine riding directly
+    # above it (here H1 — whose heritage is literally the DCSS/ICPS). No new card needed.
+    ORION_T = 10
+    m = Mission("SLS Block 1 (Artemis I) — 2 SRBs + Drop Tank + ICPS (H1), Orion to lunar orbit",
+                required_dv=(SEG["surface->LEO"] + SEG["LEO->escape"] + SEG["escape->lunar_orbit"]),
+                crew=True, transit_months=1)
+    m.add("HEAVY SOLID BOOSTER", 0, "liftoff (2 SRBs, parallel)", parallel_dv=1,
+          note="2x Heavy Solid Booster fire together; parallel dv does not add")
+    m.add("HYDROLOX DROP TANK", T("HYDROLOX UPPER") + ORION_T, "core-stage burn to orbit",
+          note=f"the ICPS (H1) above burns the tank's fuel; carries H1 (30t) + Orion ({ORION_T}t)")
+    m.add("HYDROLOX UPPER", ORION_T, "ICPS sends Orion translunar", note="Orion = 10t (1 yellow)")
+    m.note("The Shuttle tank reused as the SLS core: same Drop Tank card, but the hydrolox "
+           "engine riding it is the small H1 upper (DCSS/ICPS heritage) instead of the Orbiter. "
+           "Closes with margin — the tank-pairs-with-any-hydrolox-engine ruling makes SLS "
+           "buildable from existing cards.")
     M.append(m)
 
     # 3a. Starship to Mars — expendable, no refuel.

@@ -30,9 +30,10 @@
     "ignition": {
       "earth": "ground-capable",
       "space": "vacuum only",
-      "both": "ground and space"
+      "both": "ground and space",
+      "mars-surface": "ignites from the Mars surface (low-gravity ascent)"
     },
-    "notes": "Only isp_s is real/sacred. dry_mass is a tuning dial. total/fuel flex to fit the ladder."
+    "notes": "Only isp_s is real/sacred. dry_mass is a tuning dial with a FLOOR (dry >= total/16, rounded up) and a CLEANLINESS target (total >= 320: refuel = total - dry lays out in <= 2 token colours). Exemption: Kerolox Booster (K2) dry 20 \u2014 the First Orbit knife-edge; tested at 30 and 40, both break it. total/fuel flex to fit the ladder. real_total_mass_t = historical mass, printed on the card beside the in-game rounding."
   },
   "engines": [
     {
@@ -57,7 +58,7 @@
           "dv": 1
         },
         {
-          "cargo_t": 1270,
+          "cargo_t": 1120,
           "dv": 2
         },
         {
@@ -84,7 +85,8 @@
       "page": 1,
       "precursor_tier": 4,
       "tech_label": "K3",
-      "flown": true
+      "flown": true,
+      "real_total_mass_t": 2290
     },
     {
       "name": "HEAVY HYDROLOX CORE",
@@ -108,11 +110,11 @@
           "dv": 1
         },
         {
-          "cargo_t": 290,
+          "cargo_t": 280,
           "dv": 2
         },
         {
-          "cargo_t": 220,
+          "cargo_t": 200,
           "dv": 3
         },
         {
@@ -148,7 +150,8 @@
       "page": 1,
       "precursor_tier": 4,
       "tech_label": "H3",
-      "flown": true
+      "flown": true,
+      "real_total_mass_t": 481
     },
     {
       "name": "HEAVY HYDROLOX UPPER",
@@ -200,7 +203,8 @@
       "page": 1,
       "precursor_tier": 3,
       "tech_label": "H2",
-      "flown": true
+      "flown": true,
+      "real_total_mass_t": 119
     },
     {
       "name": "HYPERGOLIC TRANSFER STAGE",
@@ -242,7 +246,8 @@
       "equipment_carry": 2,
       "precursor_tier": 3,
       "tech_label": "Hp2",
-      "flown": true
+      "flown": true,
+      "real_total_mass_t": 30
     },
     {
       "name": "MARS ASCENT VEHICLE",
@@ -296,7 +301,8 @@
       ],
       "page": 1,
       "tech_label": "L1",
-      "flown": true
+      "flown": true,
+      "real_total_mass_t": 10.3
     },
     {
       "name": "HEAVY SOLID BOOSTER",
@@ -339,7 +345,8 @@
       "page": 1,
       "precursor_tier": 4,
       "tech_label": "S3",
-      "flown": true
+      "flown": true,
+      "real_total_mass_t": 590
     },
     {
       "name": "HYDROLOX DROP TANK",
@@ -354,8 +361,8 @@
       "total_tokens": "K",
       "dry_tokens": "O",
       "kind": "stage",
-      "reuse_note": "No engine - carries a HYDROLOX engine as cargo",
-      "requires": "Pairs with Orbiter (engine-only)",
+      "reuse_note": "No engine - a HYDROLOX engine must ride directly above and burn this tank",
+      "requires": "Pairs with any hydrolox engine (Orbiter = Shuttle, Hydrolox Upper = SLS)",
       "fixed_text": null,
       "strip": [
         {
@@ -363,7 +370,7 @@
           "dv": 1
         },
         {
-          "cargo_t": 410,
+          "cargo_t": 400,
           "dv": 2
         },
         {
@@ -371,7 +378,7 @@
           "dv": 3
         },
         {
-          "cargo_t": 250,
+          "cargo_t": 240,
           "dv": 4
         },
         {
@@ -410,7 +417,8 @@
       ],
       "page": 1,
       "tech_label": "Sh1",
-      "flown": true
+      "flown": true,
+      "real_total_mass_t": 760
     },
     {
       "name": "ORBITER",
@@ -446,7 +454,8 @@
       "page": 1,
       "equipment_carry": 4,
       "tech_label": "Sh1",
-      "flown": true
+      "flown": true,
+      "real_total_mass_t": 110
     },
     {
       "name": "SUPER HEAVY",
@@ -456,10 +465,10 @@
       "isp_s": 327,
       "exhaust_velocity_kms": 3.208,
       "total_mass_t": 3840,
-      "dry_mass_t": 200,
-      "fuel_mass_t": 3640,
+      "dry_mass_t": 320,
+      "fuel_mass_t": 3520,
       "total_tokens": "KKKKKK",
-      "dry_tokens": "RO",
+      "dry_tokens": "RR",
       "kind": "stage",
       "reuse_note": "Relaunchable. Discard card for +1 Dv",
       "requires": "Successful launch with Starship",
@@ -478,70 +487,11 @@
           "dv": 3
         },
         {
-          "cargo_t": 1080,
+          "cargo_t": 640,
           "dv": 4
         },
         {
-          "cargo_t": 640,
-          "dv": 5
-        },
-        {
           "cargo_t": 480,
-          "dv": 6
-        },
-        {
-          "cargo_t": 300,
-          "dv": 7
-        },
-        {
-          "cargo_t": 160,
-          "dv": 8
-        },
-        {
-          "cargo_t": 40,
-          "dv": 9
-        }
-      ],
-      "page": 1,
-      "precursor_tier": 5,
-      "tech_label": "M3",
-      "flown": true
-    },
-    {
-      "name": "STARSHIP",
-      "fuel_type": "METHALOX",
-      "heritage": "Starship upper stage - 6 Raptor",
-      "ignition": "space",
-      "isp_s": 363,
-      "exhaust_velocity_kms": 3.561,
-      "total_mass_t": 1920,
-      "dry_mass_t": 80,
-      "fuel_mass_t": 1840,
-      "total_tokens": "KKK",
-      "dry_tokens": "OO",
-      "kind": "stage",
-      "reuse_note": "Reusable, heat-shielded. Needs refuel for deep space. Carries 4 extra equipment cards. Upper stage \u2014 rides Super Heavy off Earth (T/W<1 fully fuelled).",
-      "requires": "Successful launch with Methalox Booster",
-      "fixed_text": null,
-      "strip": [
-        {
-          "cargo_t": 1280,
-          "dv": 1
-        },
-        {
-          "cargo_t": 1170,
-          "dv": 2
-        },
-        {
-          "cargo_t": 640,
-          "dv": 3
-        },
-        {
-          "cargo_t": 480,
-          "dv": 4
-        },
-        {
-          "cargo_t": 460,
           "dv": 5
         },
         {
@@ -553,27 +503,76 @@
           "dv": 7
         },
         {
-          "cargo_t": 120,
+          "cargo_t": 40,
           "dv": 8
+        }
+      ],
+      "page": 1,
+      "precursor_tier": 5,
+      "tech_label": "M3",
+      "flown": true,
+      "real_total_mass_t": 3600
+    },
+    {
+      "name": "STARSHIP",
+      "fuel_type": "METHALOX",
+      "heritage": "Starship upper stage - 6 Raptor",
+      "ignition": "space",
+      "isp_s": 363,
+      "exhaust_velocity_kms": 3.561,
+      "total_mass_t": 1920,
+      "dry_mass_t": 160,
+      "fuel_mass_t": 1760,
+      "total_tokens": "KKK",
+      "dry_tokens": "R",
+      "kind": "stage",
+      "reuse_note": "Reusable, heat-shielded. Needs refuel for deep space. Carries 4 extra equipment cards. Upper stage \u2014 rides Super Heavy off Earth (T/W<1 fully fuelled).",
+      "requires": "Successful launch with Methalox Booster",
+      "fixed_text": null,
+      "strip": [
+        {
+          "cargo_t": 1280,
+          "dv": 1
         },
         {
-          "cargo_t": 80,
-          "dv": 9
+          "cargo_t": 960,
+          "dv": 2
+        },
+        {
+          "cargo_t": 640,
+          "dv": 3
+        },
+        {
+          "cargo_t": 480,
+          "dv": 4
+        },
+        {
+          "cargo_t": 320,
+          "dv": 5
+        },
+        {
+          "cargo_t": 160,
+          "dv": 6
+        },
+        {
+          "cargo_t": 120,
+          "dv": 7
         },
         {
           "cargo_t": 40,
-          "dv": 10
+          "dv": 8
         },
         {
-          "cargo_t": 20,
-          "dv": 11
+          "cargo_t": 10,
+          "dv": 9
         }
       ],
       "page": 1,
       "equipment_carry": 4,
       "precursor_tier": 4,
       "tech_label": "M2",
-      "flown": true
+      "flown": true,
+      "real_total_mass_t": 1300
     },
     {
       "name": "KEROLOX BOOSTER",
@@ -586,7 +585,7 @@
       "dry_mass_t": 20,
       "fuel_mass_t": 460,
       "total_tokens": "RRR",
-      "dry_tokens": "YY",
+      "dry_tokens": "O",
       "kind": "stage",
       "reuse_note": "Cluster for more push",
       "requires": "Successful launch with Kerolox Sustainer",
@@ -597,7 +596,7 @@
           "dv": 1
         },
         {
-          "cargo_t": 260,
+          "cargo_t": 240,
           "dv": 2
         },
         {
@@ -633,7 +632,8 @@
       "page": 1,
       "precursor_tier": 3,
       "tech_label": "K2",
-      "flown": true
+      "flown": true,
+      "real_total_mass_t": 440
     },
     {
       "name": "HYDROLOX UPPER",
@@ -679,7 +679,8 @@
       "page": 1,
       "precursor_tier": 2,
       "tech_label": "H1",
-      "flown": true
+      "flown": true,
+      "real_total_mass_t": 23
     },
     {
       "name": "HYPERGOLIC UPPER",
@@ -875,8 +876,8 @@
       "isp_s": 290,
       "exhaust_velocity_kms": 2.845,
       "total_mass_t": 40,
-      "dry_mass_t": 2,
-      "fuel_mass_t": 38,
+      "dry_mass_t": 2.5,
+      "fuel_mass_t": 37.5,
       "total_tokens": "O",
       "dry_tokens": "Y",
       "kind": "stage",
@@ -922,9 +923,9 @@
       "name": "KEROLOX SUSTAINER",
       "fuel_type": "KEROLOX",
       "heritage": "Atlas-Mercury class; single-engine kerolox sustainer (generic)",
-      "ignition": "ground",
+      "ignition": "earth",
       "isp_s": 290,
-      "exhaust_velocity_kms": 2.85,
+      "exhaust_velocity_kms": 2.845,
       "total_mass_t": 160,
       "dry_mass_t": 12,
       "fuel_mass_t": 148,
@@ -968,7 +969,8 @@
         }
       ],
       "tech_label": "K1",
-      "flown": true
+      "flown": true,
+      "real_total_mass_t": 120
     },
     {
       "name": "SEA DRAGON",
@@ -978,10 +980,10 @@
       "isp_s": 263,
       "exhaust_velocity_kms": 2.58,
       "total_mass_t": 16000,
-      "dry_mass_t": 800,
-      "fuel_mass_t": 15200,
+      "dry_mass_t": 1120,
+      "fuel_mass_t": 14880,
       "total_tokens": "KKKKKKKKKKKKKKKKKKKKKKKKK",
-      "dry_tokens": "KR",
+      "dry_tokens": "KRRR",
       "kind": "stage",
       "reuse_note": "Pressure-fed, sea-launched, expendable. ~550t to LEO with its upper.",
       "requires": "Requires Sea launch",
@@ -993,7 +995,7 @@
           "dv": 4
         },
         {
-          "cargo_t": 1920,
+          "cargo_t": 1280,
           "dv": 5
         },
         {
@@ -1001,12 +1003,8 @@
           "dv": 6
         },
         {
-          "cargo_t": 480,
+          "cargo_t": 160,
           "dv": 7
-        },
-        {
-          "cargo_t": 40,
-          "dv": 8
         }
       ],
       "page": 1,
@@ -1022,10 +1020,10 @@
       "isp_s": 420,
       "exhaust_velocity_kms": 4.12,
       "total_mass_t": 2560,
-      "dry_mass_t": 200,
-      "fuel_mass_t": 2360,
+      "dry_mass_t": 160,
+      "fuel_mass_t": 2400,
       "total_tokens": "KKKK",
-      "dry_tokens": "RO",
+      "dry_tokens": "R",
       "kind": "stage",
       "reuse_note": "Pressure-fed hydrolox upper. Pairs with the Sea Dragon first stage.",
       "requires": "Pairs with Sea Dragon",
@@ -1040,11 +1038,11 @@
           "dv": 2
         },
         {
-          "cargo_t": 1190,
+          "cargo_t": 1120,
           "dv": 3
         },
         {
-          "cargo_t": 890,
+          "cargo_t": 800,
           "dv": 4
         },
         {
@@ -1052,7 +1050,7 @@
           "dv": 5
         },
         {
-          "cargo_t": 470,
+          "cargo_t": 480,
           "dv": 6
         },
         {
@@ -1060,16 +1058,20 @@
           "dv": 7
         },
         {
-          "cargo_t": 160,
+          "cargo_t": 240,
           "dv": 8
         },
         {
-          "cargo_t": 120,
+          "cargo_t": 160,
           "dv": 9
         },
         {
-          "cargo_t": 40,
+          "cargo_t": 80,
           "dv": 10
+        },
+        {
+          "cargo_t": 40,
+          "dv": 11
         }
       ],
       "page": 1,
@@ -1103,7 +1105,7 @@
           "dv": 2
         },
         {
-          "cargo_t": 1130,
+          "cargo_t": 1120,
           "dv": 3
         },
         {
@@ -1300,6 +1302,19 @@
       "tech_label": "L3"
     }
   ],
+  "archived_equipment": [
+    {
+      "name": "BURNER ENGINE",
+      "desc": "Single 1-Dv burn for a craft <=40t (1 orange token). Single use.",
+      "note": "Sub-grid maneuver: capture, insertion, mid-course. Apollo SPS short burns, cubesat kick motors.",
+      "kind": "equipment",
+      "tech_label": "Bn",
+      "mass_t": 2.5,
+      "burn_dv": 1,
+      "max_push_t": 40,
+      "archived_note": "Archived Sep 2026: unused by any mission/goal; with 4 equipment per yellow token it allows free +dv chains. Restore by moving back into 'equipment' (needs its own stacking limit)."
+    }
+  ],
   "bundles": [
     {
       "mult": 2,
@@ -1332,6 +1347,18 @@
     {
       "mult": 4,
       "token": "Y"
+    },
+    {
+      "mult": 2,
+      "token": "E"
+    },
+    {
+      "mult": 3,
+      "token": "E"
+    },
+    {
+      "mult": 4,
+      "token": "E"
     }
   ]
 }

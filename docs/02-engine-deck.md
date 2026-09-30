@@ -1,6 +1,6 @@
 # 02 — Engine Deck
 
-20 engine cards, organized as heritage + two-precursor tech tree.
+24 engine cards, organized as heritage + two-precursor tech tree.
 
 ## Heritage + two-precursor model
 
@@ -43,17 +43,21 @@ Every engine card has a tech_label visible bottom-left of the silhouette:
 
 ## Ignition tags
 
-Each engine has an `ignition` field showing where it can ignite:
-- `ground` / `earth` / `both` — can light at sea level (most boosters, methalox engines, solid boosters)
+Each engine has an `ignition` field showing where it can ignite (vocabulary normalized June 2026 — `earth` / `both` / `space` / `mars-surface`, nothing else):
+- `earth` / `both` — can light at sea level (most boosters, methalox engines, solid boosters). `both` also restarts in vacuum.
 - `space` — vacuum-only; cannot ignite in atmosphere (most upper stages, NERVA, ion, in-space hypergolics)
 - `mars-surface` — designed to ignite from Mars surface (currently just the MAV)
+
+Card badges: GND / G+S / SPC / MARS (rendered by `IGN_LABEL` in `build_kit.py`).
 
 **Implicit rule:** an engine's first stage must be tagged for the launch surface. This is enforced by the data, not by a hard rule — the card's tag tells the player where it lights.
 
 **The tag also encodes "can this be a first stage" — including thrust-to-weight, not just ignition altitude.** The displacement model tracks *ideal Δv only*; it has no concept of thrust-to-weight (see `docs/01`). So a high-mass-ratio upper stage like **Starship** would *look* like a single-stage-to-orbit on its strip (Starship + 80t ≈ 9 dv). In reality it can't: fully fuelled, Starship's T/W ≈ 0.9 — it can't leave the pad, which is the whole reason Super Heavy exists. We model that limit by tagging Starship **`space`** (it must ride a booster off Earth), even though its Raptors *do* fire at sea level. So `space` reads as "**upper stage — not an Earth first stage**," whether the reason is vacuum-only ignition (NERVA, hydrolox uppers) or thrust-to-weight (Starship).
 - **Exception, by physics:** Starship *can* lift off from **Mars/the Moon** (low gravity → T/W > 1) — the Mars-return architecture needs this. The `space` tag is about *Earth* liftoff; surface launches from low-gravity bodies are allowed (the playtest models Starship's Mars ascent directly).
 
-## Unlock mechanic (provisional)
+## Unlock mechanic (provisional — superseded)
+
+> **Superseded (Sep 2026)** by `docs/07-rules-v0.md`: unlocks now come from **double-sided goal cards** (the reward is printed on the back) and **launch pads by mass**. The chain below is kept as history and as a source of reward ideas.
 
 Each card prints a `Requires` line. Players start with TIER 1 cards only and unlock higher tiers through play.
 
@@ -69,7 +73,16 @@ Each card prints a `Requires` line. Players start with TIER 1 cards only and unl
 
 **Fixed-function cards** (no progression):
 - L1 (Light Descent) — lander, no precursor required
-- Sh1 (Orbiter + Drop Tank) — Shuttle pair, must be used together
+- Sh1 (Orbiter + Drop Tank) — the Shuttle pair. The Orbiter only flies on the tank; the tank pairs with **any** hydrolox engine (see below).
+
+## Drop Tank pairing — any hydrolox engine (ruling, June 2026)
+
+The **Hydrolox Drop Tank** has no engines of its own. The rule: **a HYDROLOX engine card riding directly above the tank burns the tank's fuel** — the tank's strip is the burn, the engine above legalizes it. It is NOT locked to the Orbiter:
+
+- **Orbiter + Drop Tank** = the Space Shuttle (the original pairing).
+- **2× Heavy Solid Booster + Drop Tank + Hydrolox Upper (H1)** = **SLS Block 1** — the Shuttle tank reused as the SLS core, with the H1 (whose heritage is literally the DCSS/ICPS) burning it and then sending Orion translunar. Verified in `src/playtest.py`: Orion-class 10t to lunar orbit, 14 vs 13 dv required. No new "tiny hydrolox engine" card was needed — H1 is it.
+
+`tower_search.py` enforces the same rule (a tank is only a legal stage when a hydrolox engine sits directly above it), so the tank's strong showing in the tower analysis reflects the actual card rule.
 
 ## Special rules per family
 
@@ -126,6 +139,8 @@ Cards that have been resized during design — note for context:
 - Heavy Kerolox Booster: tuned to Saturn V S-IC (2560t, 5× F-1)
 - Heavy Hydrolox Core: tuned to Saturn V S-II (480t, 5× J-2)
 - Light Descent: reduced to real LM mass (10t, 1 yellow)
+- Dry-mass floor pass (June 2026, `dry >= total/16` — see docs/01): Super Heavy dry 200→320, Starship 80→120, Sea Dragon 800→1120, Solid Kick 2→2.5. K2 exempt (First Orbit knife-edge). All flown cards also gained `real_total_mass_t` (historical mass, printed as ~Nt beside the in-game rounding).
+- Refuel-cleanliness pass (June 2026, fuel ≤2 token colours for total ≥ 320 — see docs/01): Starship dry 120→160 (refuel KKRRR), Super Hydrolox Upper dry 200→160 (refuel KKKRRR, dv-6 row became a clean RRR). K2 dry 40 re-tested and re-rejected (breaks First Orbit / Commercial / Falcon 9).
 
 ## Dropped cards (do not re-add)
 

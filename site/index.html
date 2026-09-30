@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rocket Science</title>
+<meta name="description" content="A board game that teaches real rocket physics through interplanetary mission planning.">
+<style>
+  :root {
+    --bg: #f4f1ea; --fg: #1a1a1a; --muted: #5d5a54; --card: #ffffff; --line: #d9d4c8;
+    --red: #b01818; --orange: #d97600; --yellow: #e0a000; --black: #1a1a1a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #141414; --fg: #eeeae2; --muted: #a39f97; --card: #1f1f1f; --line: #333; --black: #eeeae2; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg);
+         font: 16px/1.55 Helvetica, Arial, sans-serif; }
+  main { max-width: 720px; margin: 0 auto; padding: 48px 16px 64px; }
+  .tokens { display: flex; gap: 6px; margin-bottom: 20px; }
+  .tokens span { width: 0; height: 0; border-left: 9px solid transparent; border-right: 9px solid transparent; border-bottom: 16px solid; }
+  h1 { font-size: 40px; letter-spacing: -0.5px; margin: 0 0 8px; }
+  .lede { color: var(--muted); font-size: 18px; margin: 0 0 36px; }
+  .links { display: grid; gap: 12px; }
+  a.tile { display: block; padding: 18px 20px; background: var(--card); border: 1px solid var(--line);
+           border-left: 5px solid var(--red); border-radius: 6px; color: inherit; text-decoration: none; }
+  a.tile:hover { border-color: var(--fg); border-left-color: var(--red); }
+  a.tile b { display: block; font-size: 17px; margin-bottom: 2px; }
+  a.tile span { color: var(--muted); font-size: 14px; }
+  a.tile.o { border-left-color: var(--orange); } a.tile.y { border-left-color: var(--yellow); }
+  .soon { margin-top: 28px; padding: 16px 20px; border: 1px dashed var(--line); border-radius: 6px; color: var(--muted); font-size: 14px; }
+  footer { margin-top: 40px; color: var(--muted); font-size: 13px; }
+  footer a { color: inherit; }
+</style>
+</head>
+<body>
+<main>
+  <div class="tokens" aria-hidden="true">
+    <span style="color:var(--black)"></span><span style="color:var(--red)"></span><span style="color:var(--orange)"></span><span style="color:var(--yellow)"></span>
+  </div>
+  <h1>Rocket Science</h1>
+  <p class="lede">A board game that teaches real rocket physics through interplanetary mission planning.
+  Real engines, real masses, and the rocket equation turned into something you can play at the table.</p>
+
+  <div class="links">
+    <a class="tile" href="triskelion-kit.html">
+      <b>Card kit</b>
+      <span>Every rocket, equipment and mission card, print-ready (A4, duplex backs).</span>
+    </a>
+    <a class="tile o" href="playtest-report.html">
+      <b>Playtest report</b>
+      <span>Reference missions flown against the board: Apollo 11, Shuttle, Starship to Mars and more.</span>
+    </a>
+    <a class="tile y" href="https://github.com/alexvansande/rocket-science/blob/main/docs/07-rules-v0.md">
+      <b>Rules (v0 draft)</b>
+      <span>The turn loop: Research, Build, Launch, Move.</span>
+    </a>
+  </div>
+
+  <div class="soon">A playable prototype will live here.</div>
+
+  <footer>
+    Designed by Alex Van de Sande ·
+    <a href="https://github.com/alexvansande/rocket-science">source</a> ·
+    rebuilt from the card data on every push.
+  </footer>
+</main>
+</body>
+</html>

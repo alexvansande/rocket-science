@@ -148,5 +148,126 @@
     "requires": "4 crew + Habitat + Greenhouse on Mars, 12 turns endurance",
     "type": "ENDURANCE",
     "vp": 3
+  },
+  {
+    "id": "fil01",
+    "name": "COMSAT",
+    "tagline": "Telstar, 1962",
+    "desc": "Deliver 1 equipment (communications satellite) to LEO.",
+    "requires": "1 equipment at LEO",
+    "type": "COMMERCIAL",
+    "vp": 1,
+    "filler": true
+  },
+  {
+    "id": "fil02",
+    "name": "GPS CONSTELLATION",
+    "tagline": "Navstar, 1978",
+    "desc": "Deliver 3 equipment (navigation satellites) to LEO in a single launch.",
+    "requires": "3 equipment at LEO, one launch",
+    "type": "COMMERCIAL",
+    "vp": 2,
+    "note": "An Equipment Bundle x3 does it in one action",
+    "filler": true
+  },
+  {
+    "id": "fil03",
+    "name": "TV BROADCAST",
+    "tagline": "Syncom 3, 1964",
+    "desc": "Deliver 1 equipment (broadcast satellite) to Geostationary Orbit.",
+    "requires": "1 equipment at GEO",
+    "type": "COMMERCIAL",
+    "vp": 2,
+    "filler": true
+  },
+  {
+    "id": "fil04",
+    "name": "ORBITAL TOURIST",
+    "tagline": "First paying guest, 2001",
+    "desc": "Carry a Crew Capsule to LEO and return the guest alive.",
+    "requires": "Crew Capsule to LEO + Atmospheric Return home",
+    "type": "COMMERCIAL",
+    "vp": 1,
+    "filler": true
+  },
+  {
+    "id": "fil05",
+    "name": "SPECIAL DELIVERY",
+    "tagline": "Theater ballistics, 1956",
+    "desc": "Lob 10t (1 yellow) to DV5, ballistic. Don't ask questions.",
+    "requires": "10t at DV5 \u00b7 pays on delivery",
+    "type": "MILITARY",
+    "vp": 1,
+    "filler": true
+  },
+  {
+    "id": "fil06",
+    "name": "UNNAMED PAYLOAD",
+    "tagline": "Heavy ballistic throw",
+    "desc": "Lob 20t (2 yellow) to DV6, ballistic. Don't ask questions.",
+    "requires": "20t at DV6 \u00b7 pays on delivery",
+    "type": "MILITARY",
+    "vp": 1,
+    "filler": true
+  },
+  {
+    "id": "fil07",
+    "name": "INTERCONTINENTAL EXPRESS",
+    "tagline": "The R-7's day job, 1959",
+    "desc": "Lob 10t (1 yellow) to DV7, ballistic. Don't ask questions.",
+    "requires": "10t at DV7 \u00b7 pays on delivery",
+    "type": "MILITARY",
+    "vp": 1,
+    "filler": true
+  },
+  {
+    "id": "fil08",
+    "name": "MAXIMUM THROW",
+    "tagline": "Heavy-lift demonstration",
+    "desc": "Lob 40t (1 orange) to DV8, ballistic. Don't ask questions.",
+    "requires": "40t at DV8 \u00b7 pays on delivery",
+    "type": "MILITARY",
+    "vp": 2,
+    "filler": true
+  },
+  {
+    "id": "fil09",
+    "name": "WEATHER WATCH",
+    "tagline": "TIROS-1, 1960",
+    "desc": "Deploy a Science Package in LEO and keep it there 4 months.",
+    "requires": "Science Package at LEO, 4 turns",
+    "type": "SCIENCE",
+    "vp": 1,
+    "filler": true
+  },
+  {
+    "id": "fil10",
+    "name": "HALLEY ARMADA",
+    "tagline": "Giotto & Vega, 1986",
+    "desc": "Fly a Science Package past Earth escape +2 Dv to meet a comet.",
+    "requires": "Science Package at escape +2 Dv",
+    "type": "SCIENCE",
+    "vp": 2,
+    "filler": true
+  },
+  {
+    "id": "fil11",
+    "name": "SOLAR PROBE",
+    "tagline": "Parker Solar Probe, 2018",
+    "desc": "Deliver a Science Package sunward to escape +4 Dv. Requires Atmospheric Return as heat shield.",
+    "requires": "Science Package + Atmospheric Return at escape +4 Dv",
+    "type": "SCIENCE",
+    "vp": 2,
+    "filler": true
+  },
+  {
+    "id": "fil12",
+    "name": "ICE MOON SURVEY",
+    "tagline": "Galileo \u00b7 Europa Clipper",
+    "desc": "Deliver a Science Package + RTG to escape +6 Dv, out among the outer-planet moons.",
+    "requires": "Science Package + RTG at escape +6 Dv",
+    "type": "SCIENCE",
+    "vp": 3,
+    "filler": true
   }
 ]

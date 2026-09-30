@@ -32,6 +32,8 @@ The "completes 2 of these to unlock tier 2" mechanic is the cleanest framing. Sp
 
 ## Unlock conditions (printed on engine cards)
 
+> **Superseded (Sep 2026)**: see `docs/07-rules-v0.md`. Goal cards are double-sided (goal on the front, upgrade reward on the back), and that is the unlock system. FIRSTs are all face-up from the start; other missions sit in a 5-card market row.
+
 See `docs/02-engine-deck.md` for the per-card unlock chain. Summary:
 
 **Internal progression** for K, H, S, Hp:
@@ -78,6 +80,14 @@ How players draw, claim, and score remains open. Sketched:
 3. **Hybrid**: 1-2 personal + 3-4 open market.
 
 Recommend hybrid, with the transient contract row as the shared open market and the constant FIRSTs as the racing spine.
+
+## Filler contract cards (12, June 2026 — expendable)
+
+The first batch of TRANSIENT contracts exists as 12 carded fillers occupying the spare slots of the second equipment sheet (gold MISSIONS backs via a mixed back sheet, so they shuffle into the mission deck when cut). Marked **`"filler": true`** in `data/objectives.json` — that flag is the "this is expendable" ink: **if a future layout needs the space, cut these first.** Three flavors, 4 each:
+
+- **COMMERCIAL (teal, $ icon):** Comsat (1 eq to LEO), GPS Constellation (3 eq, one launch — the Equipment Bundle ×3 hook), TV Broadcast (1 eq to GEO), Orbital Tourist (capsule up and safely back).
+- **MILITARY (olive, shield):** suborbital ballistic throws, "Don't ask questions" — 10t@DV5, 20t@DV6, 10t@DV7, 40t@DV8. No real place names; unnamed payloads.
+- **SCIENCE (indigo, atom):** Weather Watch (TIROS — Science Package in LEO, 4 turns), Halley Armada (escape +2), Solar Probe (escape +4, needs Atmospheric Return as heat shield), Ice Moon Survey (escape +6, needs RTG).
 
 ## VP-scoring conventions (current objective deck)
 

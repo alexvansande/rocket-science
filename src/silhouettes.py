@@ -5,6 +5,7 @@ Each function returns inline SVG markup. The 'active' part is filled white,
 everything else is a thin outline (#a0a0a0). Designed for a ~14mm wide
 illustration column on a dark fuel-color background.
 """
+import math
 
 # Common style attrs
 OUT = 'fill="none" stroke="#bdbdbd" stroke-width="0.7" stroke-linejoin="round"'
@@ -14,6 +15,17 @@ THIN = 'fill="none" stroke="#bdbdbd" stroke-width="0.5"'
 def style(active):
     """Return the SVG attribute string given whether a part is active."""
     return ACT if active else OUT
+
+
+def bell(cx, y, wt, wb, h, attr):
+    """Engine bell: throat width wt at y, flaring (curved) to exit width wb at y+h."""
+    l, r = cx - wt / 2, cx + wt / 2
+    return (f'<path d="M{l:.2f},{y} Q{l:.2f},{y + h * 0.65:.2f} {cx - wb / 2:.2f},{y + h} '
+            f'L{cx + wb / 2:.2f},{y + h} Q{r:.2f},{y + h * 0.65:.2f} {r:.2f},{y} Z" {attr}/>')
+
+
+def bells(xs, y, wt, wb, h, attr):
+    return "".join(bell(x, y, wt, wb, h, attr) for x in xs)
 
 
 # ============================================================
@@ -51,8 +63,9 @@ def saturn_v(stage):
       <!-- Fins -->
       <polygon points="8,170 2,186 8,186" {s1}/>
       <polygon points="32,170 38,186 32,186" {s1}/>
-      <!-- Engine block hint -->
-      <rect x="11" y="186" width="18" height="3" {s1}/>
+      <!-- Engine fairings + F-1 bells (4 of 5 visible in profile) -->
+      <rect x="10" y="186" width="20" height="2" {s1}/>
+      {bells((12, 17.3, 22.7, 28), 188, 3, 5.2, 9, s1)}
     </svg>'''
 
 
@@ -63,33 +76,36 @@ def saturn_v(stage):
 # ============================================================
 
 def shuttle_stack(part):
-    """part in {'srb', 'et', 'orbiter'}"""
+    """part in {'srb', 'et', 'orbiter'}
+    Side view, to scale (~2.4 units/m, bottoms aligned): SRB | External Tank |
+    orbiter in profile, belly against the tank, tail fin pointing away. All three
+    parts sit side by side, so any one of them can be highlighted cleanly."""
     srb = style(part == 'srb')
     et = style(part == 'et')
     orb = style(part == 'orbiter')
-    return f'''<svg viewBox="0 0 60 180" preserveAspectRatio="xMidYMid meet">
-      <!-- SRB (left side) -->
-      <rect x="6" y="40" width="10" height="120" {srb}/>
-      <polygon points="6,30 16,30 11,16" {srb}/>
-      <rect x="7" y="160" width="8" height="4" {srb}/>
-      <!-- External Tank (center) -->
-      <polygon points="20,18 32,18 30,30 22,30" {et}/>
-      <rect x="20" y="30" width="12" height="135" {et}/>
-      <polygon points="20,165 32,165 30,172 22,172" {et}/>
-      <!-- Orbiter (right side, attached to ET) -->
-      <!-- Nose -->
-      <polygon points="36,80 42,80 40,72" {orb}/>
-      <!-- Fuselage -->
-      <rect x="36" y="80" width="6" height="50" {orb}/>
-      <!-- Wing -->
-      <polygon points="42,116 54,140 42,140" {orb}/>
-      <polygon points="36,116 30,140 36,140" {orb}/>
-      <!-- Tail fin -->
-      <polygon points="36,90 36,76 33,80 33,90" {orb}/>
-      <!-- SSME engines hint -->
-      <rect x="36" y="130" width="6" height="3" {orb}/>
+    return f'''<svg viewBox="0 30 60 124" preserveAspectRatio="xMidYMid meet">
+      <!-- SRB (45.5m): rounded nose cone, segmented case, aft skirt + nozzle -->
+      <path d="M3,52 Q3,44 7.5,40 Q12,44 12,52 Z" {srb}/>
+      <rect x="3" y="52" width="9" height="86" {srb}/>
+      <polygon points="3,138 12,138 13,142 2,142" {srb}/>
+      {bell(7.5, 142, 4, 7, 7, srb)}
+      <!-- External Tank (47m): ogive nose, long cylinder, aft dome -->
+      <path d="M24,33 Q14,40 14,58 L14,138 Q14,145 24,146 Q34,145 34,138 L34,58 Q34,40 24,33 Z" {et}/>
+      <!-- Attach struts -->
+      <line x1="12" y1="60" x2="14" y2="60" {THIN}/><line x1="12" y1="132" x2="14" y2="132" {THIN}/>
+      <line x1="34" y1="62" x2="36" y2="62" {THIN}/><line x1="34" y1="136" x2="36" y2="136" {THIN}/>
+      <!-- Orbiter (37m) in profile: nose up, belly to the tank -->
+      <path d="M36,72 Q36,57 40,56 Q44,57 45,64 L46.5,70 L46.5,142 L36,142 Z" {orb}/>
+      <!-- Wing seen edge-on along the belly -->
+      <polygon points="36,106 38.5,138 38.5,142 36,142" {orb}/>
+      <!-- Vertical tail, swept, pointing away from the tank -->
+      <polygon points="46.5,114 57,134 57,142 46.5,142" {orb}/>
+      <!-- OMS pod -->
+      <path d="M46.5,126 Q50,127 50,134 L50,142 L46.5,142 Z" {orb}/>
+      <!-- Body flap + 3 SSMEs (2 visible) -->
+      <rect x="36" y="142" width="7" height="2" {orb}/>
+      {bells((40, 44.5), 142, 2.6, 4.2, 6, orb)}
     </svg>'''
-
 
 # ============================================================
 # STARSHIP STACK — 2 cards (Super Heavy, Starship)
@@ -98,29 +114,29 @@ def shuttle_stack(part):
 # ============================================================
 
 def starship_stack(part):
-    """part in {'booster', 'upper'}"""
+    """part in {'booster', 'upper'}  — to scale-ish: ship 50m, booster 71m, 9m wide."""
     sh = style(part == 'booster')
     ss = style(part == 'upper')
     return f'''<svg viewBox="0 0 40 200" preserveAspectRatio="xMidYMid meet">
-      <!-- Starship upper -->
-      <polygon points="14,12 26,12 22,2 18,2" {ss}/>
-      <rect x="14" y="12" width="12" height="60" {ss}/>
-      <!-- Forward flaps -->
-      <polygon points="14,18 8,22 14,28" {ss}/>
-      <polygon points="26,18 32,22 26,28" {ss}/>
-      <!-- Aft flaps -->
-      <polygon points="14,60 6,68 14,72" {ss}/>
-      <polygon points="26,60 34,68 26,72" {ss}/>
-      <!-- Hot-stage ring / separation -->
-      <rect x="12" y="72" width="16" height="2" {OUT}/>
+      <!-- Starship: ogive nose, steel body -->
+      <path d="M13.5,20 Q13.5,6 20,2 Q26.5,6 26.5,20 L26.5,72 L13.5,72 Z" {ss}/>
+      <!-- Forward flaps (small, high on the nose) -->
+      <polygon points="13.5,15 9.5,20 9.5,26 13.5,27" {ss}/>
+      <polygon points="26.5,15 30.5,20 30.5,26 26.5,27" {ss}/>
+      <!-- Aft flaps (big) -->
+      <polygon points="13.5,54 7.5,62 7.5,72 13.5,72" {ss}/>
+      <polygon points="26.5,54 32.5,62 32.5,72 26.5,72" {ss}/>
+      <!-- Vented hot-staging ring -->
+      <rect x="13.5" y="72" width="13" height="3" {OUT}/>
+      <line x1="16.5" y1="72" x2="16.5" y2="75" {THIN}/><line x1="20" y1="72" x2="20" y2="75" {THIN}/><line x1="23.5" y1="72" x2="23.5" y2="75" {THIN}/>
       <!-- Super Heavy booster -->
-      <rect x="12" y="74" width="16" height="108" {sh}/>
-      <!-- Grid fins (4 visible as 2 in profile) -->
-      <rect x="6" y="80" width="6" height="4" {sh}/>
-      <rect x="28" y="80" width="6" height="4" {sh}/>
-      <!-- Engine block -->
-      <rect x="14" y="182" width="12" height="3" {sh}/>
-      <polygon points="14,185 26,185 28,189 12,189" {sh}/>
+      <rect x="13.5" y="75" width="13" height="104" {sh}/>
+      <!-- Grid fins (thin, near the top) -->
+      <rect x="9" y="79" width="4.5" height="1.6" {sh}/>
+      <rect x="26.5" y="79" width="4.5" height="1.6" {sh}/>
+      <!-- Aft skirt + Raptor cluster -->
+      <polygon points="13.5,179 26.5,179 27.5,183 12.5,183" {sh}/>
+      {bells((15, 18.3, 21.7, 25), 183, 2, 3.2, 5, sh)}
     </svg>'''
 
 
@@ -130,27 +146,30 @@ def starship_stack(part):
 # ============================================================
 
 def soyuz_r7(part):
-    """part in {'boosters', 'upper'}"""
+    """part in {'boosters', 'upper'}
+    'boosters' = the K2 card = the whole stage-and-a-half (4 strap-ons + core,
+    which fire together) — so strap-ons AND core highlight. Blok-I upper outline."""
     boost = style(part == 'boosters')
-    core = style(False)  # core is never the "active" card in our mapping
     upper = style(part == 'upper')
+    def strapon(cx, a):
+        # Tapered strap-on: pointed tip, narrow top, wide base, bells below
+        return (f'<path d="M{cx},76 L{cx + 2.5},90 L{cx + 6},146 L{cx - 6},146 L{cx - 2.5},90 Z" {a}/>'
+                f'{bells((cx - 3, cx + 3), 146, 2, 3.4, 6, a)}')
     return f'''<svg viewBox="0 0 50 180" preserveAspectRatio="xMidYMid meet">
-      <!-- Escape tower -->
+      <!-- Escape tower + fairing -->
       <line x1="25" y1="2" x2="25" y2="10" {THIN}/>
-      <!-- Capsule -->
-      <rect x="22" y="10" width="6" height="8" {OUT}/>
-      <!-- Fairing taper -->
-      <polygon points="20,32 30,32 28,18 22,18" {OUT}/>
-      <!-- Upper stage -->
-      <rect x="20" y="32" width="10" height="22" {upper}/>
-      <!-- Interstage -->
-      <rect x="19" y="54" width="12" height="4" {OUT}/>
-      <!-- Central core (Blok-A) -->
-      <rect x="19" y="58" width="12" height="92" {core}/>
-      <polygon points="19,150 31,150 28,156 22,156" {core}/>
-      <!-- Side boosters (Blok B/V/G/D, conical) -->
-      <polygon points="6,88 14,88 17,148 3,148" {boost}/>
-      <polygon points="36,88 44,88 47,148 33,148" {boost}/>
+      <path d="M22,26 L22,16 Q22,10 25,10 Q28,10 28,16 L28,26 Z" {OUT}/>
+      <polygon points="22,26 28,26 30,34 20,34" {OUT}/>
+      <!-- Blok-I upper stage -->
+      <rect x="20" y="34" width="10" height="22" {upper}/>
+      <!-- Open-truss interstage -->
+      <polyline points="20,56 30,60 20,60 30,56" {THIN}/>
+      <!-- Core (Blok-A): waisted where the strap-ons nest -->
+      <path d="M20,60 L30,60 L30,92 L28.5,100 L28.5,146 L21.5,146 L21.5,100 L20,92 Z" {boost}/>
+      {bell(25, 146, 2.4, 4, 7, boost)}
+      <!-- Strap-ons (2 of 4 visible) -->
+      {strapon(12, boost)}
+      {strapon(38, boost)}
     </svg>'''
 
 
@@ -209,7 +228,7 @@ def apollo_csm():
       <line x1="28" y1="50" x2="36" y2="44" stroke="#bdbdbd" stroke-width="0.5"/>
       <circle cx="36" cy="44" r="2" {OUT}/>
       <!-- SPS bell -->
-      <polygon points="16,86 24,86 26,98 14,98" {sm}/>
+      {bell(20, 86, 5, 12, 14, sm)}
     </svg>'''
 
 
@@ -228,103 +247,13 @@ def atlas_centaur(part):
       <!-- Centaur upper stage (active) -->
       <rect x="14" y="36" width="12" height="34" {cent}/>
       <!-- Twin RL10 hint -->
-      <polygon points="16,70 18,76 14,76" {cent}/>
-      <polygon points="24,70 26,76 22,76" {cent}/>
+      {bells((17, 23), 70, 2, 4, 6, cent)}
       <!-- Interstage -->
       <rect x="12" y="76" width="16" height="4" {OUT}/>
       <!-- Atlas booster -->
       <rect x="12" y="80" width="16" height="84" {OUT}/>
       <!-- RD-180 / engine bell -->
-      <polygon points="14,164 26,164 24,172 16,172" {OUT}/>
-    </svg>'''
-
-
-# ============================================================
-# PROTON / HYPERGOLIC — 2 cards (boosters, upper Briz-M)
-# Proton: 6 oxidizer tanks around central tank, in profile shows
-# clustered tanks at the base. Upper stages above.
-# ============================================================
-
-def proton(part):
-    """part in {'boosters', 'upper'}"""
-    b = style(part == 'boosters')
-    u = style(part == 'upper')
-    return f'''<svg viewBox="0 0 50 180" preserveAspectRatio="xMidYMid meet">
-      <!-- Payload fairing -->
-      <polygon points="20,18 30,18 26,4 24,4" {OUT}/>
-      <rect x="20" y="18" width="10" height="4" {OUT}/>
-      <!-- Briz-M / upper stage -->
-      <rect x="20" y="22" width="10" height="18" {u}/>
-      <!-- Tapered interstage -->
-      <polygon points="20,40 30,40 32,46 18,46" {OUT}/>
-      <!-- Second stage -->
-      <rect x="18" y="46" width="14" height="40" {OUT}/>
-      <!-- Interstage -->
-      <rect x="17" y="86" width="16" height="3" {OUT}/>
-      <!-- First stage central tank -->
-      <rect x="18" y="89" width="14" height="62" {b}/>
-      <!-- Side oxidizer tanks (Proton's distinctive cluster - 6 tanks, show 2 in profile) -->
-      <rect x="8" y="105" width="10" height="46" {b}/>
-      <rect x="32" y="105" width="10" height="46" {b}/>
-      <!-- Engine bells -->
-      <rect x="9" y="151" width="8" height="5" {b}/>
-      <rect x="20" y="151" width="10" height="5" {b}/>
-      <rect x="33" y="151" width="8" height="5" {b}/>
-    </svg>'''
-
-
-# ============================================================
-# ARIANE 5 — 3 cards (EAP solid boosters, EPC core, ESC-A upper)
-# Central hydrolox core (EPC) + 2 solid boosters (EAP) + upper stage
-# ============================================================
-
-def ariane5(part):
-    """part in {'eap', 'epc', 'esc'}"""
-    eap = style(part == 'eap')
-    epc = style(part == 'epc')
-    esc = style(part == 'esc')
-    return f'''<svg viewBox="0 0 50 180" preserveAspectRatio="xMidYMid meet">
-      <!-- Payload fairing -->
-      <polygon points="20,18 30,18 26,4 24,4" {OUT}/>
-      <rect x="20" y="18" width="10" height="4" {OUT}/>
-      <!-- ESC-A upper -->
-      <rect x="20" y="22" width="10" height="20" {esc}/>
-      <!-- Interstage -->
-      <rect x="19" y="42" width="12" height="3" {OUT}/>
-      <!-- EPC core stage -->
-      <rect x="19" y="45" width="12" height="100" {epc}/>
-      <!-- Vulcain 2 engine bell -->
-      <polygon points="20,145 30,145 28,153 22,153" {epc}/>
-      <!-- EAP solid boosters (2 in profile) -->
-      <polygon points="6,42 14,42 11,32" {eap}/>
-      <rect x="6" y="42" width="8" height="105" {eap}/>
-      <polygon points="36,42 44,42 39,32" {eap}/>
-      <rect x="36" y="42" width="8" height="105" {eap}/>
-      <!-- SRB nozzles -->
-      <rect x="7" y="147" width="6" height="4" {eap}/>
-      <rect x="37" y="147" width="6" height="4" {eap}/>
-    </svg>'''
-
-
-# ============================================================
-# DELTA IV — 1 card (Hydrolox Booster = first stage)
-# Cylindrical hydrolox first stage with RS-68 nozzle
-# ============================================================
-
-def delta_iv():
-    s1 = style(True)
-    return f'''<svg viewBox="0 0 40 180" preserveAspectRatio="xMidYMid meet">
-      <!-- Payload fairing -->
-      <polygon points="14,28 26,28 22,8 18,8" {OUT}/>
-      <rect x="14" y="28" width="12" height="4" {OUT}/>
-      <!-- Upper stage (DCSS) -->
-      <rect x="14" y="32" width="12" height="30" {OUT}/>
-      <!-- Interstage -->
-      <rect x="12" y="62" width="16" height="4" {OUT}/>
-      <!-- First stage CBC (Common Booster Core) -->
-      <rect x="12" y="66" width="16" height="100" {s1}/>
-      <!-- RS-68 engine bell -->
-      <polygon points="14,166 26,166 24,176 16,176" {s1}/>
+      {bell(20, 164, 5, 9, 8, OUT)}
     </svg>'''
 
 
@@ -334,50 +263,26 @@ def delta_iv():
 # ============================================================
 
 def methalox_stack(part):
-    """part in {'booster', 'upper'}"""
+    """part in {'booster', 'upper'} — generic reusable methalox launcher."""
     b = style(part == 'booster')
     u = style(part == 'upper')
     return f'''<svg viewBox="0 0 40 180" preserveAspectRatio="xMidYMid meet">
       <!-- Payload fairing -->
-      <polygon points="14,16 26,16 22,4 18,4" {OUT}/>
-      <rect x="14" y="16" width="12" height="4" {OUT}/>
+      <path d="M13,30 L13,20 Q13,6 20,4 Q27,6 27,20 L27,30 Z" {OUT}/>
       <!-- Methalox upper -->
-      <rect x="14" y="20" width="12" height="36" {u}/>
-      <!-- Vacuum engine bell -->
-      <polygon points="16,56 24,56 26,62 14,62" {u}/>
+      <rect x="13" y="30" width="14" height="30" {u}/>
       <!-- Interstage -->
-      <rect x="12" y="62" width="16" height="4" {OUT}/>
+      <rect x="13" y="60" width="14" height="5" {OUT}/>
       <!-- Methalox booster (reusable) -->
-      <rect x="12" y="66" width="16" height="100" {b}/>
-      <!-- Grid fins -->
-      <rect x="6" y="74" width="6" height="6" {b}/>
-      <rect x="28" y="74" width="6" height="6" {b}/>
-      <!-- Engine cluster at base -->
-      <rect x="14" y="166" width="12" height="3" {b}/>
-      <polygon points="14,169 26,169 28,176 12,176" {b}/>
-    </svg>'''
-
-
-# ============================================================
-# VEGA — 1 card (Light Solid Engine = 4-stage all-solid)
-# Small thin rocket with 4 stages, distinctive shape
-# ============================================================
-
-def vega():
-    a = style(True)
-    return f'''<svg viewBox="0 0 30 180" preserveAspectRatio="xMidYMid meet">
-      <!-- Payload fairing -->
-      <polygon points="10,24 20,24 17,4 13,4" {OUT}/>
-      <!-- Stage 4 (AVUM, liquid) -->
-      <rect x="11" y="24" width="8" height="14" {OUT}/>
-      <!-- Stage 3 (Zefiro 9) -->
-      <rect x="11" y="38" width="8" height="22" {a}/>
-      <!-- Stage 2 (Zefiro 23) -->
-      <rect x="10" y="60" width="10" height="32" {a}/>
-      <!-- Stage 1 (P80, large solid) -->
-      <rect x="8" y="92" width="14" height="68" {a}/>
-      <!-- Engine bell -->
-      <polygon points="10,160 20,160 18,170 12,170" {a}/>
+      <rect x="13" y="65" width="14" height="100" {b}/>
+      <!-- Grid fins (thin) -->
+      <rect x="8.5" y="69" width="4.5" height="1.6" {b}/>
+      <rect x="27" y="69" width="4.5" height="1.6" {b}/>
+      <!-- Aft strakes + folded landing legs -->
+      <polygon points="13,146 13,165 9,165" {b}/>
+      <polygon points="27,146 27,165 31,165" {b}/>
+      <!-- Engine cluster -->
+      {bells((15.5, 20, 24.5), 165, 2.4, 4, 7, b)}
     </svg>'''
 
 
@@ -397,7 +302,7 @@ def light_solid_strapon():
       <polygon points="9,90 4,102 9,102" {a}/>
       <polygon points="21,90 26,102 21,102" {a}/>
       <!-- Nozzle -->
-      <polygon points="11,102 19,102 17,110 13,110" {a}/>
+      {bell(15, 102, 5, 9, 9, a)}
     </svg>'''
 
 
@@ -407,14 +312,16 @@ def light_solid_strapon():
 # ============================================================
 
 def solid_kick():
+    """S1 — Star-48-class kick motor: near-spherical solid motor + nozzle,
+    payload adapter ring on top (outline)."""
     a = style(True)
     return f'''<svg viewBox="0 0 40 60" preserveAspectRatio="xMidYMid meet">
-      <!-- Drum body -->
-      <rect x="10" y="14" width="20" height="24" {a}/>
-      <!-- Spin-stabilization detail (top dome) -->
-      <path d="M 10 14 Q 20 8 30 14" {a}/>
+      <rect x="14" y="6" width="12" height="3" {OUT}/>
+      <polygon points="14,9 26,9 28,13 12,13" {OUT}/>
+      <!-- Spherical motor case -->
+      <circle cx="20" cy="24" r="11" {a}/>
       <!-- Nozzle -->
-      <polygon points="14,38 26,38 24,50 16,50" {a}/>
+      {bell(20, 34, 4, 10, 14, a)}
     </svg>'''
 
 
@@ -424,18 +331,28 @@ def solid_kick():
 # ============================================================
 
 def nerva():
+    """N1 — NERVA stage: long LH2 tank, open thrust truss, reactor, big bell.
+    Yellow trefoil on the tank so kids read 'nuclear' at a glance."""
     a = style(True)
+    blades = []
+    for k in range(3):
+        t0 = math.radians(-180 + 120 * k)   # blades centred at -150°, -30°, 90° (classic trefoil)
+        t1 = t0 + math.radians(60)
+        p = lambda r, t: f"{15 + r * math.cos(t):.2f},{40 + r * math.sin(t):.2f}"
+        blades.append(f'<path d="M{p(1.6, t0)} L{p(5, t0)} A5,5 0 0,1 {p(5, t1)} L{p(1.6, t1)} A1.6,1.6 0 0,0 {p(1.6, t0)} Z" fill="#f2c200"/>')
     return f'''<svg viewBox="0 0 30 120" preserveAspectRatio="xMidYMid meet">
-      <!-- LH2 tank (spherical-cylindrical) -->
-      <path d="M 9 16 Q 9 8 15 8 Q 21 8 21 16 L 21 70 Q 21 78 15 78 Q 9 78 9 70 Z" {a}/>
-      <!-- Reactor shielding ring -->
-      <rect x="9" y="78" width="12" height="4" {a}/>
-      <!-- Reactor core / pressure vessel -->
-      <rect x="10" y="82" width="10" height="14" {a}/>
-      <!-- Engine nozzle (large, with characteristic conical taper) -->
-      <polygon points="11,96 19,96 22,114 8,114" {a}/>
-      <!-- Radiation symbol hint (3 small marks) -->
-      <circle cx="15" cy="40" r="1" fill="#bdbdbd"/>
+      <!-- LH2 tank -->
+      <path d="M8 14 Q8 5 15 5 Q22 5 22 14 L22 66 Q22 72 15 72 Q8 72 8 66 Z" {a}/>
+      <!-- Radiation trefoil -->
+      {"".join(blades)}
+      <circle cx="15" cy="40" r="1" fill="#f2c200"/>
+      <!-- Open thrust truss (the shield gap between tank and reactor) -->
+      <polyline points="10,71 20,80 10,80 20,71" {THIN}/>
+      <!-- Radiation shield + reactor -->
+      <rect x="10" y="80" width="10" height="3" {a}/>
+      <rect x="11" y="83" width="8" height="10" {a}/>
+      <!-- Nozzle -->
+      {bell(15, 93, 5, 15, 22, a)}
     </svg>'''
 
 
@@ -476,21 +393,22 @@ def ion_spacecraft():
 # ============================================================
 
 def hypergolic_upper():
+    """Hp1 — small storable-propellant upper (Aestus / AJ10 class): squat body
+    with bulging spherical tanks, payload adapter on top, long vacuum nozzle."""
     a = style(True)
     return f'''<svg viewBox="0 0 40 100" preserveAspectRatio="xMidYMid meet">
-      <!-- Payload mount -->
-      <rect x="14" y="10" width="12" height="3" {OUT}/>
-      <!-- Toroidal propellant tank (Briz-M characteristic) -->
-      <ellipse cx="20" cy="20" rx="14" ry="6" {a}/>
-      <!-- Central thrust structure -->
-      <rect x="16" y="26" width="8" height="40" {a}/>
-      <!-- Spherical propellant tanks (4, show 2) -->
-      <circle cx="10" cy="42" r="5" {a}/>
-      <circle cx="30" cy="42" r="5" {a}/>
-      <!-- Engine -->
-      <polygon points="16,66 24,66 26,76 14,76" {a}/>
+      <!-- Payload adapter (outline) -->
+      <polygon points="14,18 26,18 29,26 11,26" {OUT}/>
+      <!-- Stage body -->
+      <rect x="9" y="26" width="22" height="18" {a}/>
+      <!-- Spherical tanks bulging out the sides -->
+      <circle cx="10" cy="35" r="5" {a}/>
+      <circle cx="30" cy="35" r="5" {a}/>
+      <!-- Thrust frame -->
+      <polygon points="13,44 27,44 23,50 17,50" {a}/>
+      <!-- Long vacuum nozzle -->
+      {bell(20, 50, 4, 12, 22, a)}
     </svg>'''
-
 
 def mars_ascent_vehicle():
     """Compact two-stage Mars ascent vehicle. Bullet-shaped capsule on top of
@@ -509,7 +427,7 @@ def mars_ascent_vehicle():
       <line x1="14" y1="40" x2="36" y2="40" {OUT}/>
       <line x1="14" y1="55" x2="36" y2="55" {OUT}/>
       <!-- Central engine bell -->
-      <polygon points="20,75 30,75 33,90 17,90" {a}/>
+      {bell(25, 75, 6, 14, 15, a)}
       <!-- Landing legs (4, two visible) -->
       <line x1="16" y1="70" x2="6"  y2="102" stroke="#bdbdbd" stroke-width="1.2"/>
       <line x1="34" y1="70" x2="44" y2="102" stroke="#bdbdbd" stroke-width="1.2"/>
@@ -900,28 +818,25 @@ def eq_greenhouse():
 
 def sea_dragon(part):
     """The two-part Sea Dragon. part in {'first','upper'}.
-    Distinctive: fat crude pressure-fed hull, ONE enormous engine bell, launched from the
-    waterline (engine bell submerged at ignition, rocket rises out of the sea)."""
+    Real proportions: ~150m tall, 23m wide — a FAT crude pressure-fed hull, same
+    diameter both stages, ONE enormous engine bell, launched from the waterline."""
     first = style(part == 'first')
     upper = style(part == 'upper')
     return f'''<svg viewBox="0 0 40 200" preserveAspectRatio="xMidYMid meet">
-      <!-- Ogive payload nose (payload = always outline) -->
-      <path d="M20,4 Q11,26 13,52 L27,52 Q29,26 20,4 Z" {OUT}/>
-      <!-- Upper stage (H4) -->
-      <rect x="13" y="52" width="14" height="40" {upper}/>
-      <!-- Upper engine bell -->
-      <polygon points="16,92 24,92 26,100 14,100" {upper}/>
-      <!-- Interstage band -->
-      <rect x="11" y="101" width="18" height="3" {OUT}/>
-      <!-- First stage: fat crude pressure-fed hull (K4) -->
-      <rect x="11" y="104" width="18" height="72" {first}/>
+      <!-- Blunt payload nose (outline) -->
+      <path d="M6,44 Q6,14 20,8 Q34,14 34,44 Z" {OUT}/>
+      <!-- Upper stage (H4) + its single bell, sitting in the interstage -->
+      <rect x="6" y="44" width="28" height="48" {upper}/>
+      {bell(20, 92, 8, 18, 12, upper)}
+      <!-- Interstage skirt (outline, drawn over the upper bell) -->
+      <rect x="6" y="92" width="28" height="12" {OUT}/>
+      <!-- First stage (K4) -->
+      <rect x="6" y="104" width="28" height="66" {first}/>
       <!-- ONE enormous engine bell -->
-      <polygon points="13,176 27,176 33,196 7,196" {first}/>
-      <line x1="20" y1="176" x2="20" y2="196" {THIN}/>
-      <!-- Waterline (sea launch): engine bell sits in the sea at ignition -->
-      <path d="M2,189 q4,-3 8,0 t8,0 t8,0 t8,0 t8,0" {THIN}/>
+      {bell(20, 170, 14, 30, 22, first)}
+      <!-- Waterline (sea launch): the bell sits in the sea at ignition -->
+      <path d="M1,184 q4.75,-3 9.5,0 t9.5,0 t9.5,0 t9.5,0" {THIN}/>
     </svg>'''
-
 
 def kerolox_sustainer():
     """K1 — Atlas/Mercury-class slim 'stage-and-a-half' sustainer with a small capsule."""
@@ -934,32 +849,33 @@ def kerolox_sustainer():
       <!-- Slim sustainer body -->
       <rect x="15" y="32" width="10" height="138" {body}/>
       <!-- Stage-and-a-half: 1 sustainer + 2 booster bells -->
-      <polygon points="15,170 18.5,170 17.5,182 13.5,182" {body}/>
-      <polygon points="21.5,170 25,170 26.5,182 22.5,182" {body}/>
-      <polygon points="17.5,170 22.5,170 23.5,179 16.5,179" {body}/>
+      <polygon points="15,168 25,168 27,172 13,172" {body}/>
+      {bells((15.5, 24.5), 172, 2.4, 4.4, 9, body)}
+      {bell(20, 172, 2, 3.4, 7, body)}
     </svg>'''
 
 
 def super_heavy_kerolox():
-    """K4 'Super Heavy Kerolox Booster' (Nova) — direct-ascent super-Saturn, EIGHT F-1 bells."""
+    """K4 'Super Heavy Kerolox Booster' (Nova C8) — fatter than Saturn's S-IC,
+    EIGHT F-1s (5 visible in profile). Upper stack in outline."""
     body = style(True)
-    bells = "".join(
-        f'<polygon points="{x-0.9:.1f},170 {x+0.9:.1f},170 {x+1.3:.1f},181 {x-1.3:.1f},181" {body}/>'
-        for x in (10.2 + 19.6 / 7 * i for i in range(8)))
     return f'''<svg viewBox="0 0 40 200" preserveAspectRatio="xMidYMid meet">
-      <!-- Payload stack on top (outline) -->
-      <polygon points="17,14 23,14 21,6 19,6" {OUT}/>
-      <rect x="15" y="14" width="10" height="20" {OUT}/>
-      <polygon points="13,46 27,46 25,34 15,34" {OUT}/>
-      <!-- Big booster body (K4) -->
-      <rect x="10" y="46" width="20" height="124" {body}/>
+      <!-- Escape tower + capsule + upper stack (outline) -->
+      <line x1="20" y1="2" x2="20" y2="8" {THIN}/>
+      <polygon points="16,18 24,18 22,8 18,8" {OUT}/>
+      <polygon points="16,18 24,18 26,26 14,26" {OUT}/>
+      <rect x="14" y="26" width="12" height="18" {OUT}/>
+      <polygon points="14,44 26,44 31,54 9,54" {OUT}/>
+      <rect x="9" y="54" width="22" height="30" {OUT}/>
+      <polygon points="9,84 31,84 34,92 6,92" {OUT}/>
+      <!-- Big first stage (K4) -->
+      <rect x="6" y="92" width="28" height="84" {body}/>
       <!-- Stabilising fins -->
-      <polygon points="10,158 4,172 10,170" {body}/>
-      <polygon points="30,158 36,172 30,170" {body}/>
-      <!-- Eight F-1 engine bells -->
-      {bells}
+      <polygon points="6,160 1,178 6,176" {body}/>
+      <polygon points="34,160 39,178 34,176" {body}/>
+      <rect x="7" y="176" width="26" height="2" {body}/>
+      {bells((9.5, 14.75, 20, 25.25, 30.5), 178, 3, 5, 10, body)}
     </svg>'''
-
 
 def kerolox_upper():
     """Ku — Falcon 9 second stage (a single Merlin Vacuum) highlighted on the F9 stack."""
@@ -971,19 +887,19 @@ def kerolox_upper():
       <!-- Second stage (active) -->
       <rect x="15" y="32" width="10" height="46" {up}/>
       <!-- Single Merlin Vacuum bell -->
-      <polygon points="16,78 24,78 27,90 13,90" {up}/>
+      {bell(20, 78, 4, 12, 12, up)}
       <!-- Interstage -->
       <rect x="14" y="91" width="12" height="3" {OUT}/>
       <!-- First stage booster (outline) -->
       <rect x="14" y="94" width="12" height="84" {fs}/>
-      <!-- Grid fins -->
-      <rect x="9" y="98" width="5" height="4" {fs}/>
-      <rect x="26" y="98" width="5" height="4" {fs}/>
+      <!-- Grid fins (thin) -->
+      <rect x="9.5" y="98" width="4.5" height="1.6" {fs}/>
+      <rect x="26" y="98" width="4.5" height="1.6" {fs}/>
       <!-- Landing legs -->
       <line x1="14" y1="176" x2="9" y2="190" {fs}/>
       <line x1="26" y1="176" x2="31" y2="190" {fs}/>
       <!-- 9-Merlin base -->
-      <polygon points="14,178 26,178 28,190 12,190" {fs}/>
+      {bells((16, 20, 24), 178, 2, 3.4, 6, fs)}
     </svg>'''
 
 
@@ -1012,17 +928,8 @@ def silhouette_for_engine(name, page):
     if name == "HYPERGOLIC UPPER":        return hypergolic_upper()
     if name == "NUCLEAR ENGINE":          return nerva()
     if name == "ION ENGINE":              return ion_spacecraft()
-    # Page 2 (generic class) — also covers the page-2 specific entries
-    if name == "HYDROLOX BOOSTER":        return delta_iv()
-    if name == "HYDROLOX CORE":           return ariane5('epc')
-    if name == "SOLID BOOSTER":           return ariane5('eap')
     if name == "LIGHT SOLID BOOSTER":     return light_solid_strapon()
-    if name == "LIGHT SOLID ENGINE":      return vega()
     if name == "METHALOX BOOSTER":        return methalox_stack('booster')
-    if name == "METHALOX UPPER":          return methalox_stack('upper')
-    if name == "KEROLOX UPPER":           return soyuz_r7('upper')
-    if name == "HYPERGOLIC BOOSTER":      return proton('boosters')
-    if name == "SOLID KICK ENGINE":       return solid_kick()
     if name == "SOLID KICK MOTOR":        return solid_kick()
     return ""
 
