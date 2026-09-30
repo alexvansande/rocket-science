@@ -2,6 +2,8 @@
 
 The physical board is Alex's responsibility (designed separately from the card kit). This doc records the conventions the cards assume.
 
+**Machine-readable board (Sep 2026):** `data/board.json` transcribes `earth to mars.pdf` into spaces, links, crossing types and parking. `src/build_board.py` draws a 15 KB schematic from it (`build/board.svg`, also on the site). Its `open_questions` list the things the PDF doesn't settle.
+
 ## Spiral form (current — "Earth to Mars" dual loop)
 
 The current board (`files/board art/earth to mars.pdf`) is a **dual loop**: an Earth spiral and a Mars spiral, joined through a shared central **Deep Space Trajectory** ladder.

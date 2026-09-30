@@ -28,6 +28,7 @@ jobs:
         run: |
           mkdir -p ../build
           python3 build_kit.py
+          python3 build_board.py
           python3 playtest.py
           python3 tower_search.py
           python3 build_playtest_report.py
@@ -35,7 +36,7 @@ jobs:
         run: |
           mkdir -p _site
           cp site/* _site/
-          cp build/triskelion-kit.html build/playtest-report.html _site/
+          cp build/triskelion-kit.html build/playtest-report.html build/board.svg _site/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site

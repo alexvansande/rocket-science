@@ -1,0 +1,514 @@
+{
+  "board": "Earth to Mars (dual loop)",
+  "source": "Transcribed from Alex's 'earth to mars.pdf' (Jun 2026). Positions are in a 1000x707 frame matching the original's layout, simplified.",
+  "crossing_types": {
+    "burn": "Burn 1 dv to cross, either direction (grey bar).",
+    "aero": "Burn 1 dv to go up; free going down if the mission carries Atmospheric Return (blue dashed).",
+    "mars_aero": "Mars descent (red hatched). Treated like 'aero' for now; see open_questions.",
+    "hatched": "Hatched grey bar between LEO and Earth Escape. Not in the legend; treated as 'burn' for now.",
+    "dial": "Burn 1 dv OR skip a turn and eat `consumables` (crewed only) to cross.",
+    "forced": "Burn 1 dv AND skip a turn AND eat 1 consumable (crewed) to cross."
+  },
+  "spaces": [
+    {
+      "id": "earth",
+      "label": "Earth",
+      "kind": "surface",
+      "park": true,
+      "x": 725,
+      "y": 329
+    },
+    {
+      "id": "a1",
+      "kind": "ascent",
+      "park": false,
+      "x": 750,
+      "y": 331
+    },
+    {
+      "id": "a2",
+      "kind": "ascent",
+      "park": false,
+      "x": 776,
+      "y": 317
+    },
+    {
+      "id": "a3",
+      "kind": "ascent",
+      "park": false,
+      "x": 800,
+      "y": 297
+    },
+    {
+      "id": "a4",
+      "kind": "ascent",
+      "park": false,
+      "x": 816,
+      "y": 272
+    },
+    {
+      "id": "a5",
+      "kind": "ascent",
+      "park": false,
+      "x": 822,
+      "y": 239
+    },
+    {
+      "id": "a6",
+      "kind": "ascent",
+      "park": false,
+      "x": 817,
+      "y": 200
+    },
+    {
+      "id": "a7",
+      "kind": "ascent",
+      "park": false,
+      "x": 802,
+      "y": 160
+    },
+    {
+      "id": "a8",
+      "kind": "ascent",
+      "park": false,
+      "x": 770,
+      "y": 125
+    },
+    {
+      "id": "leo",
+      "label": "Low Earth Orbit",
+      "kind": "orbit",
+      "park": true,
+      "x": 560,
+      "y": 160,
+      "ring": "earth"
+    },
+    {
+      "id": "t1",
+      "kind": "transfer",
+      "park": false,
+      "icon": "rocket",
+      "x": 617,
+      "y": 90
+    },
+    {
+      "id": "t2",
+      "kind": "transfer",
+      "park": false,
+      "icon": "rocket",
+      "x": 530,
+      "y": 120
+    },
+    {
+      "id": "geo",
+      "label": "Geostationary Orbit",
+      "kind": "orbit",
+      "park": true,
+      "x": 705,
+      "y": 38
+    },
+    {
+      "id": "escape",
+      "label": "Earth Escape",
+      "kind": "escape",
+      "park": true,
+      "icon": "diamond",
+      "x": 415,
+      "y": 290
+    },
+    {
+      "id": "lunar_orbit",
+      "label": "Lunar Orbit",
+      "kind": "orbit",
+      "park": true,
+      "x": 362,
+      "y": 125,
+      "ring": "moon",
+      "label_side": "left"
+    },
+    {
+      "id": "lunar_descent",
+      "kind": "descent",
+      "park": false,
+      "icon": "triangle",
+      "x": 447,
+      "y": 152
+    },
+    {
+      "id": "moon",
+      "label": "Moon",
+      "kind": "surface",
+      "park": true,
+      "airless": true,
+      "x": 419,
+      "y": 125
+    },
+    {
+      "id": "ds1",
+      "label": "+1",
+      "kind": "deep",
+      "park": true,
+      "x": 410,
+      "y": 413
+    },
+    {
+      "id": "ds2",
+      "label": "+2",
+      "kind": "deep",
+      "park": true,
+      "x": 410,
+      "y": 442
+    },
+    {
+      "id": "ds3",
+      "label": "+3",
+      "kind": "deep",
+      "park": true,
+      "x": 410,
+      "y": 470
+    },
+    {
+      "id": "ds4",
+      "label": "+4",
+      "kind": "deep",
+      "park": true,
+      "x": 410,
+      "y": 497
+    },
+    {
+      "id": "ds5",
+      "label": "+5",
+      "kind": "deep",
+      "park": true,
+      "x": 410,
+      "y": 524
+    },
+    {
+      "id": "ds6",
+      "label": "+6",
+      "kind": "deep",
+      "park": true,
+      "x": 410,
+      "y": 551
+    },
+    {
+      "id": "ds7",
+      "label": "+7",
+      "kind": "deep",
+      "park": true,
+      "x": 410,
+      "y": 578
+    },
+    {
+      "id": "ds8",
+      "label": "+8",
+      "kind": "deep",
+      "park": true,
+      "x": 410,
+      "y": 605
+    },
+    {
+      "id": "ds9",
+      "label": "+9",
+      "kind": "deep",
+      "park": true,
+      "x": 410,
+      "y": 632
+    },
+    {
+      "id": "ds10",
+      "label": "+10",
+      "kind": "deep",
+      "park": true,
+      "x": 410,
+      "y": 660
+    },
+    {
+      "id": "ds11",
+      "label": "+11",
+      "kind": "deep",
+      "park": true,
+      "x": 410,
+      "y": 687
+    },
+    {
+      "id": "m2",
+      "kind": "deep",
+      "park": true,
+      "x": 235,
+      "y": 515
+    },
+    {
+      "id": "m3",
+      "kind": "deep",
+      "park": true,
+      "x": 115,
+      "y": 495
+    },
+    {
+      "id": "m4",
+      "kind": "deep",
+      "park": true,
+      "x": 72,
+      "y": 422
+    },
+    {
+      "id": "mars_orbit",
+      "label": "Mars Orbit",
+      "kind": "orbit",
+      "park": true,
+      "x": 100,
+      "y": 255,
+      "ring": "mars"
+    },
+    {
+      "id": "phobos",
+      "label": "Phobos",
+      "kind": "surface",
+      "park": true,
+      "airless": true,
+      "x": 55,
+      "y": 212
+    },
+    {
+      "id": "deimos",
+      "label": "Deimos",
+      "kind": "surface",
+      "park": true,
+      "airless": true,
+      "x": 290,
+      "y": 300
+    },
+    {
+      "id": "md1",
+      "kind": "descent",
+      "park": false,
+      "x": 98,
+      "y": 342
+    },
+    {
+      "id": "md2",
+      "kind": "descent",
+      "park": false,
+      "x": 120,
+      "y": 325
+    },
+    {
+      "id": "md3",
+      "kind": "descent",
+      "park": false,
+      "x": 143,
+      "y": 319
+    },
+    {
+      "id": "mars",
+      "label": "Mars",
+      "kind": "surface",
+      "park": true,
+      "x": 171,
+      "y": 320
+    }
+  ],
+  "links": [
+    {
+      "a": "earth",
+      "b": "a1",
+      "type": "aero"
+    },
+    {
+      "a": "a1",
+      "b": "a2",
+      "type": "aero"
+    },
+    {
+      "a": "a2",
+      "b": "a3",
+      "type": "aero"
+    },
+    {
+      "a": "a3",
+      "b": "a4",
+      "type": "aero"
+    },
+    {
+      "a": "a4",
+      "b": "a5",
+      "type": "aero"
+    },
+    {
+      "a": "a5",
+      "b": "a6",
+      "type": "aero"
+    },
+    {
+      "a": "a6",
+      "b": "a7",
+      "type": "aero"
+    },
+    {
+      "a": "a7",
+      "b": "a8",
+      "type": "aero"
+    },
+    {
+      "a": "a8",
+      "b": "leo",
+      "type": "aero"
+    },
+    {
+      "a": "leo",
+      "b": "t1",
+      "type": "aero"
+    },
+    {
+      "a": "t1",
+      "b": "t2",
+      "type": "hatched"
+    },
+    {
+      "a": "t2",
+      "b": "escape",
+      "type": "hatched"
+    },
+    {
+      "a": "t2",
+      "b": "geo",
+      "type": "hatched"
+    },
+    {
+      "a": "escape",
+      "b": "lunar_orbit",
+      "type": "burn"
+    },
+    {
+      "a": "lunar_orbit",
+      "b": "lunar_descent",
+      "type": "burn"
+    },
+    {
+      "a": "lunar_descent",
+      "b": "moon",
+      "type": "burn"
+    },
+    {
+      "a": "escape",
+      "b": "ds1",
+      "type": "burn"
+    },
+    {
+      "a": "ds1",
+      "b": "ds2",
+      "type": "burn"
+    },
+    {
+      "a": "ds2",
+      "b": "ds3",
+      "type": "burn"
+    },
+    {
+      "a": "ds3",
+      "b": "ds4",
+      "type": "burn"
+    },
+    {
+      "a": "ds4",
+      "b": "ds5",
+      "type": "burn"
+    },
+    {
+      "a": "ds5",
+      "b": "ds6",
+      "type": "burn"
+    },
+    {
+      "a": "ds6",
+      "b": "ds7",
+      "type": "burn"
+    },
+    {
+      "a": "ds7",
+      "b": "ds8",
+      "type": "burn"
+    },
+    {
+      "a": "ds8",
+      "b": "ds9",
+      "type": "burn"
+    },
+    {
+      "a": "ds9",
+      "b": "ds10",
+      "type": "burn"
+    },
+    {
+      "a": "ds10",
+      "b": "ds11",
+      "type": "burn"
+    },
+    {
+      "a": "ds1",
+      "b": "m2",
+      "type": "dial",
+      "consumables": 4
+    },
+    {
+      "a": "m2",
+      "b": "m3",
+      "type": "dial",
+      "consumables": 2
+    },
+    {
+      "a": "m3",
+      "b": "m4",
+      "type": "forced",
+      "consumables": 1
+    },
+    {
+      "a": "m4",
+      "b": "mars_orbit",
+      "type": "forced",
+      "consumables": 1
+    },
+    {
+      "a": "mars_orbit",
+      "b": "phobos",
+      "type": "burn"
+    },
+    {
+      "a": "mars_orbit",
+      "b": "deimos",
+      "type": "burn"
+    },
+    {
+      "a": "mars_orbit",
+      "b": "md1",
+      "type": "burn"
+    },
+    {
+      "a": "md1",
+      "b": "md2",
+      "type": "mars_aero"
+    },
+    {
+      "a": "md2",
+      "b": "md3",
+      "type": "mars_aero"
+    },
+    {
+      "a": "md3",
+      "b": "mars",
+      "type": "mars_aero"
+    }
+  ],
+  "open_questions": [
+    "The two spaces between LEO and Earth Escape carry a small red rocket icon. What does it mean?",
+    "Hatched grey bars (LEO to Escape) are not in the legend. Plain burn, or something else?",
+    "Earth Escape is marked with a diamond, not a dot. Can you park there?",
+    "GEO forks off the second rocket-icon space, so LEO to GEO = 3 dv, the same as Escape (real: ~3.9 vs ~3.2 km/s). Intended?",
+    "Mars descent has 4 crossings (so ascent = 4, matching docs/04), but docs/04 says descent = 3 propulsive / 1 with heatshield. Transcribed as: first crossing a burn, the 3 red-hatched ones free with Atmospheric Return (= 1 dv aerobraked, 4 propulsive). Docs call the red hatch 'purely aesthetic'. Which is right?",
+    "Parking assumed on every deep-space and Mars-route space (coasting counts as parked). The board has no markers there.",
+    "LEO has no dot but is surely a parking orbit.",
+    "Stray marks on the PDF: a pale blue disc left of Earth, a lone green dashed bar under the Mars route, a small empty square bottom-right. Leftovers?",
+    "Board routes check out against docs/04 except the Mars descent (4 crossings vs 3 in the docs). Lunar orbit -> Mars orbit is 6 dv fast / 4 slow; docs/04's '4' is the slow route."
+  ]
+}
