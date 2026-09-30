@@ -169,7 +169,7 @@ def board_pos(space_id):
 def main():
     parts = []
     # Main board
-    parts.append(f'<img class="mainboard" src="board.webp" alt="Earth to Mars board" {at(BOARD_X, BOARD_Y, BOARD_W, BOARD_H)}>')
+    parts.append(f'<img class="mainboard" src="board.webp" alt="Earth to Mars board" draggable="false" {at(BOARD_X, BOARD_Y, BOARD_W, BOARD_H)}>')
 
     # Goals: FIRSTs (always open) + missions deck and 5-card market
     firsts = [o for o in OBJS if o["type"] == "FIRST"]
@@ -243,12 +243,13 @@ def main():
 
 TABLE_CSS = r'''
 html, body { margin: 0; height: 100%; overflow: hidden; background: #332d29; font-size: 9px; }
-#viewport { position: fixed; inset: 0; overflow: hidden; cursor: grab; touch-action: none; perspective: 1900px; perspective-origin: 50% 35%; }
+#viewport { position: fixed; inset: 0; overflow: hidden; cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; perspective: 1900px; perspective-origin: 50% 35%; }
 #viewport.drag { cursor: grabbing; }
 #tilt { position: absolute; inset: 0; transform: rotateX(18deg); transform-origin: 50% 55%; }
 #table { position: absolute; left: 0; top: 0; transform-origin: 0 0; will-change: transform; }
 
 #table > *, .seat > *, .pboard > *, .marea > * { position: absolute; }
+#viewport img, #viewport svg { -webkit-user-drag: none; user-drag: none; }
 .mainboard { border-radius: 2mm; box-shadow: 0 0.6mm 0 #cfc6b4, 0 1.2mm 0 #b9ae98, 0 3mm 8mm rgba(0,0,0,.55); background: #fff; }
 .slot > .card { width: 100%; height: 100%; border-radius: 1.8mm; box-shadow: 0 1.2mm 3mm rgba(0,0,0,.45); }
 .stack > .card { box-shadow:
@@ -335,13 +336,14 @@ PANZOOM_JS = r'''
     ns = Math.min(MAX, Math.max(MIN, ns));
     x = cx - (cx - x) * ns / s; y = cy - (cy - y) * ns / s; s = ns; apply();
   };
+  // Scroll (wheel, trackpad, Magic Mouse) always zooms toward the pointer; drag pans.
   vp.addEventListener('wheel', e => {
     e.preventDefault();
-    if (e.ctrlKey) zoomAt(s * Math.exp(-e.deltaY * 0.01), e.clientX, e.clientY);              // trackpad pinch
-    else if (e.deltaMode === 1 || (Math.abs(e.deltaY) >= 40 && e.deltaX === 0))
-      zoomAt(s * Math.exp(-e.deltaY * 0.0015), e.clientX, e.clientY);                        // mouse wheel
-    else { x -= e.deltaX; y -= e.deltaY / TILT; apply(); }                                      // two-finger scroll pans
+    const dy = e.deltaMode === 1 ? e.deltaY * 40 : e.deltaMode === 2 ? e.deltaY * 800 : e.deltaY;
+    const k = e.ctrlKey ? 0.01 : 0.002;                                                        // ctrl = trackpad pinch
+    zoomAt(s * Math.exp(-Math.max(-150, Math.min(150, dy)) * k), e.clientX, e.clientY);
   }, { passive: false });
+  vp.addEventListener('dragstart', e => e.preventDefault());
   slider.addEventListener('input', () => zoomAt(fromSlider(+slider.value), innerWidth / 2, innerHeight / 2));
   document.getElementById('zin').onclick = () => zoomAt(s * 1.3, innerWidth / 2, innerHeight / 2);
   document.getElementById('zout').onclick = () => zoomAt(s / 1.3, innerWidth / 2, innerHeight / 2);
@@ -370,6 +372,8 @@ PANZOOM_JS = r'''
   // ---- pointers: drag pans, pinch zooms, a still tap clicks ----------------
   const pts = new Map(); let pinch = null, moved = false, downAt = null;
   vp.addEventListener('pointerdown', e => {
+    if (e.button > 0) return;
+    e.preventDefault();                                   // no native image drag / text selection
     pts.set(e.pointerId, e); moved = false; downAt = { x: e.clientX, y: e.clientY, t: e.target }; pinch = null;
   });
   vp.addEventListener('pointermove', e => {
