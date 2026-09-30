@@ -248,6 +248,11 @@ def main():
         "spaces": {sp["id"]: {"x": round(sp["x"] / 1000 * BOARD_W, 2), "y": round(sp["y"] / 707 * BOARD_H, 2),
                               "stop": sp["stop"], "label": sp.get("label", "")} for sp in BOARD["spaces"]},
         "links": [[l["a"], l["b"]] for l in BOARD["links"]],
+        "board": [BOARD_X, BOARD_Y],
+        # camera targets (table mm): your Space Center + hand + discard, and the whole board
+        "focusYou": [PLAYERS[0][4][0] - SEAT_W / 2 - 10, PLAYERS[0][4][1] - SEAT_H / 2 - 70,
+                     PLAYERS[0][4][0] + SEAT_W / 2 + 60, PLAYERS[0][4][1] + SEAT_H / 2 + 5],
+        "focusBoard": [BOARD_X - 10, BOARD_Y - 10, BOARD_X + BOARD_W + 10, BOARD_Y + BOARD_H + 10],
     }
     game_json = json.dumps(game).replace("</", "<\\/")
 
@@ -452,14 +457,33 @@ PANZOOM_JS = r'''
     x = cx - (cx - x) * ns / s; y = cy - (cy - y) * ns / s; s = ns; apply();
   };
   // Scroll (wheel, trackpad, Magic Mouse) always zooms toward the pointer; drag pans.
+  // Camera: glide to a table-mm rectangle (used by the game to follow the action).
+  // Any wheel/drag by the player stops a glide in progress.
+  let anim = null;
+  const stopAnim = () => { if (anim) cancelAnimationFrame(anim); anim = null; };
+  const focus = ([x0, y0, x1, y1], maxZoom = 1.6) => {
+    stopAnim();
+    const ts = Math.min(MAX, maxZoom, innerWidth / ((x1 - x0) * MM), innerHeight / ((y1 - y0) * MM * TILT)) * 0.88;
+    const tc = [(x0 + x1) / 2, (y0 + y1) / 2];
+    const c0 = [(innerWidth / 2 - x) / (MM * s), (innerHeight * 0.55 - y) / (MM * s)], s0 = s, t0 = performance.now();
+    const step = now => {
+      const k = Math.min(1, (now - t0) / 650), e = k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+      s = s0 * Math.pow(ts / s0, e);
+      const cx = c0[0] + (tc[0] - c0[0]) * e, cy = c0[1] + (tc[1] - c0[1]) * e;
+      x = innerWidth / 2 - cx * MM * s; y = innerHeight * 0.55 - cy * MM * s; apply();
+      anim = k < 1 ? requestAnimationFrame(step) : null;
+    };
+    anim = requestAnimationFrame(step);
+  };
+  window.view = { focus };
   vp.addEventListener('wheel', e => {
-    e.preventDefault();
+    e.preventDefault(); stopAnim();
     const dy = e.deltaMode === 1 ? e.deltaY * 40 : e.deltaMode === 2 ? e.deltaY * 800 : e.deltaY;
     const k = e.ctrlKey ? 0.01 : 0.002;                                                        // ctrl = trackpad pinch
     zoomAt(s * Math.exp(-Math.max(-150, Math.min(150, dy)) * k), e.clientX, e.clientY);
   }, { passive: false });
   vp.addEventListener('dragstart', e => e.preventDefault());
-  slider.addEventListener('input', () => zoomAt(fromSlider(+slider.value), innerWidth / 2, innerHeight / 2));
+  slider.addEventListener('input', () => stopAnim() || zoomAt(fromSlider(+slider.value), innerWidth / 2, innerHeight / 2));
   document.getElementById('zin').onclick = () => zoomAt(s * 1.3, innerWidth / 2, innerHeight / 2);
   document.getElementById('zout').onclick = () => zoomAt(s / 1.3, innerWidth / 2, innerHeight / 2);
   document.getElementById('zfit').onclick = fit;
@@ -491,6 +515,7 @@ PANZOOM_JS = r'''
   const pts = new Map(); let pinch = null, moved = false, downAt = null;
   vp.addEventListener('pointerdown', e => {
     if (e.button > 0) return;
+    stopAnim();
     e.preventDefault();                                   // no native image drag / text selection
     pts.set(e.pointerId, e); moved = false; downAt = { x: e.clientX, y: e.clientY, t: e.target }; pinch = null;
   });
@@ -568,6 +593,15 @@ GAME_JS = r'''
   }
   const pendingCard = () => st.pending == null ? null : G.cards[st.hand[st.pending]];
   const lightsOnEarth = c => ['earth', 'both'].includes(c.ign);
+  const cam = r => window.view && window.view.focus(r);
+  const camYou = () => cam(G.focusYou);
+  function camReach(d) {                                      // frame every reachable space, with margin
+    const pts = Object.keys(d).map(k => G.spaces[k]);
+    const xs = pts.map(p => p.x + G.board[0]), ys = pts.map(p => p.y + G.board[1]);
+    let x0 = Math.min(...xs) - 30, x1 = Math.max(...xs) + 30, y0 = Math.min(...ys) - 30, y1 = Math.max(...ys) + 30;
+    const w = Math.max(x1 - x0, 180), h = Math.max(y1 - y0, 120), cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+    cam([cx - w / 2, cy - h / 2, cx + w / 2, cy + h / 2]);
+  }
   const eligible = m => { const c = pendingCard(); return !!c && m.active && mass(m.tokens) >= c.T - 1e-9 && (m.space !== 'earth' || lightsOnEarth(c)); };
   const reason = m => { const c = pendingCard(); if (!m.active) return 'That mission slot is empty. Launch first.';
     if (mass(m.tokens) < c.T) return `Mission ${ROMAN[m.i]} has ${mass(m.tokens)}t of cargo; ${c.name} costs ${c.T}t.`;
@@ -626,7 +660,7 @@ GAME_JS = r'''
   function research() {
     st.used.research = true;
     const id = st.deck.pop();
-    render();
+    render(); camYou();
     fly(BACK, $('deck-rockets'), hand, () => {
       st.hand.push(id); buildHand(); st.handOpen = true; st.sel = st.hand.length - 1; syncHand(); render();
       toast(`Research: ${G.cards[id].name} joins your hand.`); prompt();
@@ -640,7 +674,7 @@ GAME_JS = r'''
     startMC();
   }
   function startMC() {
-    st.mode = 'mc-pick'; st.handOpen = true; st.sel = null; syncHand(); render();
+    st.mode = 'mc-pick'; st.handOpen = true; st.sel = null; syncHand(); render(); camYou();
     prompt(`Mission Control${st.freeMC ? ' (free)' : ''}: pick a rocket from your hand, then click it again to confirm. Click the table to cancel.`);
   }
   function handClick(k) {
@@ -652,6 +686,7 @@ GAME_JS = r'''
       st.pending = k;
       const ok = st.missions.filter(eligible);
       if (!ok.length) { const m = st.missions.find(m => m.active) || st.missions[0]; toast(reason(m)); st.pending = null; return; }
+      if (ok.length === 1) return place(ok[0]);               // only one mission can take it: no need to ask
       st.mode = 'mc-target'; st.handOpen = false; syncHand(); render();
       return prompt(`Choose the glowing mission for ${c.name} (costs ${c.T}t).`);
     }
@@ -663,7 +698,7 @@ GAME_JS = r'''
   function place(m) {
     const k = st.pending, id = st.hand[k], c = G.cards[id], old = m.card;
     if (st.freeMC > 0) st.freeMC--; else st.used.mc = true;
-    st.hand.splice(k, 1); st.pending = null; st.sel = null; st.mode = 'idle';
+    st.hand.splice(k, 1); st.pending = null; st.sel = null; st.mode = 'idle'; st.handOpen = false;
     buildHand(); syncHand();
     const from = hand; render();
     fly(c.html, from, $('mslot-' + m.i), () => {
@@ -688,7 +723,7 @@ GAME_JS = r'''
     closeup.hidden = true;
     m.tokens = row.eq ? [] : tokensFor(row.cargo); m.eq = row.eq || 0; m.paid = false; m.fired = true;
     st.mode = 'move'; st.move = { m, reach: reach(m.space, row.dv) };
-    render(); showReach();
+    render(); showReach(); camReach(st.move.reach);
     toast(`Paid ${c.T}t${spare > 0 ? `, ${spare}t discarded` : ''}. ${row.eq ? row.eq + ' equipment' : row.cargo + 't'} aboard.`);
     prompt(`Move Mission ${ROMAN[m.i]} up to ${row.dv} space${row.dv > 1 ? 's' : ''}: click a glowing space. Dashed = you can't end your turn there.`);
   }
@@ -706,6 +741,7 @@ GAME_JS = r'''
   function moveTo(sid) {
     const m = st.move.m; m.space = sid; clearReach(); st.mode = 'idle'; st.move = null; render();
     const sp = G.spaces[sid];
+    setTimeout(camYou, 1100);                                  // after the token lands, back to your Space Center
     if (sp.stop === 'none') toast(`Mission ${ROMAN[m.i]} can't stop here. Fire another stage before you end your turn, or it fails.`);
     else toast(`Mission ${ROMAN[m.i]} reached ${sp.label || 'its new position'}.`);
     prompt();
@@ -729,7 +765,9 @@ GAME_JS = r'''
   const why = k => ({
     research: st.used.research ? 'You already researched this turn.' : 'The deck is empty.',
     launch: st.used.launch ? 'You already launched this turn.' : 'All four mission tokens are in use.',
-    mc: st.used.mc && !st.freeMC ? 'Mission Control is used for this turn.' : 'No mission has cargo to spend. Launch first.',
+    mc: st.used.mc && !st.freeMC ? 'Mission Control is used for this turn.'
+      : st.missions.some(m => m.active) ? 'Your missions have no cargo tokens left to spend on a rocket.'
+      : 'Mission Control spends a mission\'s cargo, and you have no mission in flight. Launch one first (Launch includes a free Mission Control).',
   })[k];
 
   // ---- input (called from the table's pointer handler) -------------------------
