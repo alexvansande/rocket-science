@@ -11,3 +11,6 @@ files/board art/
 # Python bytecode cache
 __pycache__/
 *.pyc
+
+# Local preview server config
+.claude/

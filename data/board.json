@@ -1,7 +1,7 @@
 {
   "board": "Earth to Mars (dual loop)",
   "image": "board.webp",
-  "source": "Transcribed from Alex's 'earth to mars.pdf' (Jun 2026). Space x/y are the space's centre on the board image, in a 1000x707 frame (the 4000x2828 site/board.webp at 1/4 scale). Orbit spaces are whole rings; 'ring' names the body they circle.",
+  "source": "Transcribed from Alex's 'earth to mars.pdf' (Jun 2026). Space x/y are the space's centre on the board image, in a 1000x707 frame (the 4000x2828 site/board.webp at 1/4 scale). Orbit spaces are whole rings; 'ring' names the body they circle. Symbol meanings (circle/square/triangle) come from build_kit.py's board_symbols.",
   "crossing_types": {
     "burn": "Burn 1 dv to cross, either direction (grey bar).",
     "aero": "Burn 1 dv to go up; free going down if the mission carries Atmospheric Return (blue dashed).",
@@ -17,63 +17,72 @@
       "kind": "surface",
       "park": true,
       "x": 725,
-      "y": 329
+      "y": 329,
+      "stop": "park"
     },
     {
       "id": "a1",
       "kind": "ascent",
       "park": false,
       "x": 750,
-      "y": 331
+      "y": 331,
+      "stop": "none"
     },
     {
       "id": "a2",
       "kind": "ascent",
       "park": false,
       "x": 776,
-      "y": 317
+      "y": 317,
+      "stop": "none"
     },
     {
       "id": "a3",
       "kind": "ascent",
       "park": false,
       "x": 800,
-      "y": 297
+      "y": 297,
+      "stop": "none"
     },
     {
       "id": "a4",
       "kind": "ascent",
       "park": false,
       "x": 816,
-      "y": 272
+      "y": 272,
+      "stop": "none"
     },
     {
       "id": "a5",
       "kind": "ascent",
       "park": false,
       "x": 822,
-      "y": 239
+      "y": 239,
+      "stop": "none"
     },
     {
       "id": "a6",
       "kind": "ascent",
       "park": false,
       "x": 817,
-      "y": 200
+      "y": 200,
+      "stop": "none"
     },
     {
       "id": "a7",
       "kind": "ascent",
       "park": false,
       "x": 802,
-      "y": 160
+      "y": 160,
+      "stop": "none"
     },
     {
       "id": "a8",
       "kind": "ascent",
       "park": false,
       "x": 770,
-      "y": 125
+      "y": 125,
+      "stop": "none"
     },
     {
       "id": "leo",
@@ -82,7 +91,8 @@
       "park": true,
       "x": 560,
       "y": 160,
-      "ring": "earth"
+      "ring": "earth",
+      "stop": "park"
     },
     {
       "id": "t1",
@@ -90,7 +100,8 @@
       "park": false,
       "icon": "rocket",
       "x": 617,
-      "y": 90
+      "y": 90,
+      "stop": "none"
     },
     {
       "id": "t2",
@@ -98,7 +109,8 @@
       "park": false,
       "icon": "rocket",
       "x": 530,
-      "y": 120
+      "y": 120,
+      "stop": "none"
     },
     {
       "id": "geo",
@@ -106,7 +118,8 @@
       "kind": "orbit",
       "park": true,
       "x": 705,
-      "y": 38
+      "y": 38,
+      "stop": "park"
     },
     {
       "id": "escape",
@@ -115,7 +128,8 @@
       "park": true,
       "icon": "diamond",
       "x": 415,
-      "y": 290
+      "y": 290,
+      "stop": "waypoint"
     },
     {
       "id": "lunar_orbit",
@@ -124,7 +138,8 @@
       "park": true,
       "x": 378,
       "y": 159,
-      "ring": "moon"
+      "ring": "moon",
+      "stop": "park"
     },
     {
       "id": "lunar_descent",
@@ -132,7 +147,8 @@
       "park": false,
       "icon": "triangle",
       "x": 439,
-      "y": 145
+      "y": 145,
+      "stop": "none"
     },
     {
       "id": "moon",
@@ -141,7 +157,8 @@
       "park": true,
       "airless": true,
       "x": 419,
-      "y": 125
+      "y": 125,
+      "stop": "park"
     },
     {
       "id": "ds1",
@@ -149,7 +166,8 @@
       "kind": "deep",
       "park": true,
       "x": 410,
-      "y": 413
+      "y": 413,
+      "stop": "park"
     },
     {
       "id": "ds2",
@@ -157,7 +175,8 @@
       "kind": "deep",
       "park": true,
       "x": 410,
-      "y": 442
+      "y": 442,
+      "stop": "park"
     },
     {
       "id": "ds3",
@@ -165,7 +184,8 @@
       "kind": "deep",
       "park": true,
       "x": 410,
-      "y": 470
+      "y": 470,
+      "stop": "park"
     },
     {
       "id": "ds4",
@@ -173,7 +193,8 @@
       "kind": "deep",
       "park": true,
       "x": 410,
-      "y": 497
+      "y": 497,
+      "stop": "park"
     },
     {
       "id": "ds5",
@@ -181,7 +202,8 @@
       "kind": "deep",
       "park": true,
       "x": 410,
-      "y": 524
+      "y": 524,
+      "stop": "park"
     },
     {
       "id": "ds6",
@@ -189,7 +211,8 @@
       "kind": "deep",
       "park": true,
       "x": 410,
-      "y": 551
+      "y": 551,
+      "stop": "park"
     },
     {
       "id": "ds7",
@@ -197,7 +220,8 @@
       "kind": "deep",
       "park": true,
       "x": 410,
-      "y": 578
+      "y": 578,
+      "stop": "park"
     },
     {
       "id": "ds8",
@@ -205,7 +229,8 @@
       "kind": "deep",
       "park": true,
       "x": 410,
-      "y": 605
+      "y": 605,
+      "stop": "park"
     },
     {
       "id": "ds9",
@@ -213,7 +238,8 @@
       "kind": "deep",
       "park": true,
       "x": 410,
-      "y": 632
+      "y": 632,
+      "stop": "park"
     },
     {
       "id": "ds10",
@@ -221,7 +247,8 @@
       "kind": "deep",
       "park": true,
       "x": 410,
-      "y": 660
+      "y": 660,
+      "stop": "park"
     },
     {
       "id": "ds11",
@@ -229,28 +256,32 @@
       "kind": "deep",
       "park": true,
       "x": 410,
-      "y": 687
+      "y": 687,
+      "stop": "park"
     },
     {
       "id": "m2",
       "kind": "deep",
       "park": true,
       "x": 235,
-      "y": 515
+      "y": 515,
+      "stop": "park"
     },
     {
       "id": "m3",
       "kind": "deep",
       "park": true,
       "x": 115,
-      "y": 495
+      "y": 495,
+      "stop": "park"
     },
     {
       "id": "m4",
       "kind": "deep",
       "park": true,
       "x": 72,
-      "y": 422
+      "y": 422,
+      "stop": "park"
     },
     {
       "id": "mars_orbit",
@@ -259,7 +290,8 @@
       "park": true,
       "x": 89,
       "y": 262,
-      "ring": "mars"
+      "ring": "mars",
+      "stop": "park"
     },
     {
       "id": "phobos",
@@ -268,7 +300,8 @@
       "park": true,
       "airless": true,
       "x": 42,
-      "y": 286
+      "y": 286,
+      "stop": "park"
     },
     {
       "id": "deimos",
@@ -277,28 +310,32 @@
       "park": true,
       "airless": true,
       "x": 278,
-      "y": 246
+      "y": 246,
+      "stop": "park"
     },
     {
       "id": "md1",
       "kind": "descent",
       "park": false,
       "x": 98,
-      "y": 342
+      "y": 342,
+      "stop": "none"
     },
     {
       "id": "md2",
       "kind": "descent",
       "park": false,
       "x": 120,
-      "y": 325
+      "y": 325,
+      "stop": "none"
     },
     {
       "id": "md3",
       "kind": "descent",
       "park": false,
       "x": 143,
-      "y": 319
+      "y": 319,
+      "stop": "none"
     },
     {
       "id": "mars",
@@ -306,7 +343,8 @@
       "kind": "surface",
       "park": true,
       "x": 171,
-      "y": 320
+      "y": 320,
+      "stop": "park"
     }
   ],
   "links": [
@@ -503,12 +541,16 @@
   "open_questions": [
     "The two spaces between LEO and Earth Escape carry a small red rocket icon. What does it mean?",
     "Hatched grey bars (LEO to Escape) are not in the legend. Plain burn, or something else?",
-    "Earth Escape is marked with a diamond, not a dot. Can you park there?",
     "GEO forks off the second rocket-icon space, so LEO to GEO = 3 dv, the same as Escape (real: ~3.9 vs ~3.2 km/s). Intended?",
     "Mars descent has 4 crossings (so ascent = 4, matching docs/04), but docs/04 says descent = 3 propulsive / 1 with heatshield. Transcribed as: first crossing a burn, the 3 red-hatched ones free with Atmospheric Return (= 1 dv aerobraked, 4 propulsive). Docs call the red hatch 'purely aesthetic'. Which is right?",
     "Parking assumed on every deep-space and Mars-route space (coasting counts as parked). The board has no markers there.",
     "LEO has no dot but is surely a parking orbit.",
     "Stray marks on the PDF: a pale blue disc left of Earth, a lone green dashed bar under the Mars route, a small empty square bottom-right. Leftovers?",
     "Board routes check out against docs/04 except the Mars descent (4 crossings vs 3 in the docs). Lunar orbit -> Mars orbit is 6 dv fast / 4 slow; docs/04's '4' is the slow route."
-  ]
+  ],
+  "stop_types": {
+    "park": "Circle: a mission may end any number of turns here.",
+    "waypoint": "Square/diamond: a mission may end a turn here but must move on next turn.",
+    "none": "Triangle / unmarked ascent: a mission may not end a turn here."
+  }
 }

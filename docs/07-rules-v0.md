@@ -81,7 +81,8 @@ Three burns, as decided below. The launch mass is 2 × 640 = 1,280t, so the Shut
 
 If a mission does not **end your turn at a parking spot**, it fails.
 
-- *Proposal:* parking spots are every orbit and surface space, plus the deep-space ladder (coasting counts as parked). The climb from Earth to LEO is never a parking spot.
+- Board symbols (from the kit's `board_symbols`): **● circle** = park any number of turns; **■/◆ square** = waypoint, may end a turn but must move next turn (Earth Escape); **▲ triangle** = may not end a turn. Per space in `data/board.json` → `stop`.
+- *Proposal:* the unmarked deep-space and Mars-route spaces count as parking (coasting). The climb from Earth to LEO is never a parking spot.
 - A basic turn (1 Launch + 1 Move) is two burns: enough for K2 alone, Falcon 9, K1+H1, Saturn V to LEO on the S-II, Starship, Sea Dragon, and SLS.
 - **The Shuttle needs 3 burns to reach orbit (SRBs → tank → orbital manoeuvring engines). That's fine, DECIDED.** Extra-action cards will allow it. So the Shuttle is a mid-game rocket in practice.
 
