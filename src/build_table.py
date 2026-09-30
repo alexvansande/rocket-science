@@ -4,15 +4,16 @@ Tabletop layout: the game as it sits on a real table, at real size (millimetres)
     data/*.json + site/board.webp ──> build_table.py ──> build/table.html
 
 Static setup view: the printed board in the middle, a Space Center board at each of
-the four seats, the shared decks / market rows / token bowls between them. Pan and
-zoom only; no game logic. Cards are the real kit cards (build_kit renderer).
+the four seats, the shared decks / market rows / token bowls between them. No game
+logic yet: pan, zoom (wheel / pinch / slider), a soft CSS tilt, and hands you can
+flip and pull a card from. Cards are the real kit cards (build_kit renderer).
 Run from src/:  python3 build_table.py
 """
 import json
 import shutil
 
 from build_kit import (load_cards, engine_card_html, equipment_card_html,
-                       objective_card_html, CSS as KIT_CSS)
+                       objective_card_html, bundle_card_html, CSS as KIT_CSS)
 
 DATA, _ = load_cards()
 OBJS = json.load(open("../data/objectives.json"))
@@ -35,6 +36,26 @@ PLAYERS = [  # seat, colour, rotation, centre
     ("top",    "Purple", "#7a4bb0", 180, (BOARD_X + BOARD_W / 2, 152)),
     ("right",  "White",  "#e9e6df", 270, (BOARD_X + BOARD_W + 20 + SEAT_H / 2, BOARD_Y + BOARD_H / 2)),
 ]
+
+def bundle(token, mult):
+    return bundle_card_html(next(b for b in DATA["bundles"] if b["token"] == token and b["mult"] == mult))
+
+
+# Sample hands (layout demo only): each seat holds a plausible set for its program
+HANDS = {
+    "bottom": [engine_card_html(ENG["HEAVY KEROLOX BOOSTER"]), engine_card_html(ENG["HEAVY HYDROLOX CORE"]),
+               engine_card_html(ENG["HEAVY HYDROLOX UPPER"]), engine_card_html(ENG["HYPERGOLIC TRANSFER STAGE"]),
+               equipment_card_html(EQ["ATMOSPHERIC RETURN"])],
+    "left": [engine_card_html(ENG["KEROLOX BOOSTER"]), engine_card_html(ENG["KEROLOX UPPER"]),
+             engine_card_html(ENG["HYDROLOX UPPER"]), equipment_card_html(EQ["CREW CAPSULE"]),
+             equipment_card_html(EQ["SCIENCE PACKAGE"])],
+    "top": [engine_card_html(ENG["SUPER HEAVY"]), engine_card_html(ENG["STARSHIP"]),
+            engine_card_html(ENG["METHALOX BOOSTER"]), equipment_card_html(EQ["SOLAR ARRAY"]),
+            equipment_card_html(EQ["ROVER"])],
+    "right": [engine_card_html(ENG["HEAVY SOLID BOOSTER"]), bundle("K", 2),
+              engine_card_html(ENG["HYDROLOX DROP TANK"]), engine_card_html(ENG["ORBITER"]),
+              equipment_card_html(EQ["LANDING GEAR"])],
+}
 
 TOKEN_COLORS = {"K": "#1c1c1c", "R": "#b3261e", "O": "#e07b00", "Y": "#f0b400"}
 
@@ -123,9 +144,17 @@ def space_center(name, color, flying=None):
 def seat(seat_name, pname, color, rot, center, flying=None):
     cx, cy = center
     x, y = cx - SEAT_W / 2, cy - SEAT_H / 2
-    fan = "".join(
-        f'<div class="slot handcard" {at(SEAT_W / 2 - CARD_W / 2 + (k - 2) * 22, PB_H + 14 + abs(k - 2) * 3, CARD_W, CARD_H, f"transform:rotate({(k - 2) * 7}deg);")}>'
-        f'<div class="card cback rockets"><span>ROCKETS</span></div></div>' for k in range(5))
+    cards = HANDS[seat_name]
+    n = len(cards)
+    fan = ""
+    for k, front in enumerate(cards):
+        o = k - (n - 1) / 2
+        vars_ = (f"--cx:{o * 22:.1f};--cy:{abs(o) * 3:.1f};--cr:{o * 7:.1f};"
+                 f"--ox:{o * 44:.1f};--oy:{abs(o) * 2:.1f};--or:{o * 2.5:.1f};z-index:{k + 1};")
+        fan += (f'<div class="hc" style="{vars_}"><div class="flip">'
+                f'<div class="face back"><div class="card cback rockets"><span>ROCKETS</span></div></div>'
+                f'<div class="face front">{front}</div></div></div>')
+    fan = f'<div class="hand" {at(SEAT_W / 2 - CARD_W / 2, PB_H + 14, CARD_W, CARD_H)}>{fan}</div>'
     discard = (f'<div class="dslot" {at(SEAT_W + 8, 50, CARD_W, CARD_H)}><span>DISCARD</span></div>')
     return (f'<div class="seat" {at(x, y, SEAT_W, SEAT_H, f"transform:rotate({rot}deg);")}>'
             f'{space_center(pname, color, flying)}{discard}{fan}'
@@ -189,14 +218,20 @@ def main():
 </head>
 <body>
 <div id="viewport">
-  <div id="table" style="width:{TABLE_W}mm;height:{TABLE_H}mm;">
-    {"".join(parts)}
+  <div id="tilt">
+    <div id="table" style="width:{TABLE_W}mm;height:{TABLE_H}mm;" data-lamp="{BOARD_X + BOARD_W / 2},{BOARD_Y + BOARD_H / 2},2600">
+      {"".join(parts)}
+    </div>
   </div>
 </div>
 <div class="hud">
   <span class="ttl">Rocket Science · table layout</span>
-  <button id="zout" aria-label="Zoom out">&minus;</button><button id="zfit">Fit</button><button id="zin" aria-label="Zoom in">+</button>
+  <button id="zout" aria-label="Zoom out">&minus;</button>
+  <input id="zslider" type="range" min="0" max="1000" value="300" aria-label="Zoom">
+  <button id="zin" aria-label="Zoom in">+</button>
+  <button id="zfit">Fit</button>
 </div>
+<div id="toast" role="status"></div>
 <script>{PANZOOM_JS}</script>
 </body>
 </html>'''
@@ -207,18 +242,12 @@ def main():
 
 
 TABLE_CSS = r'''
-html, body { margin: 0; height: 100%; overflow: hidden; background: #2a1c12; font-size: 9px; }
-#viewport { position: fixed; inset: 0; overflow: hidden; cursor: grab; touch-action: none; }
+html, body { margin: 0; height: 100%; overflow: hidden; background: #332d29; font-size: 9px; }
+#viewport { position: fixed; inset: 0; overflow: hidden; cursor: grab; touch-action: none; perspective: 1900px; perspective-origin: 50% 35%; }
 #viewport.drag { cursor: grabbing; }
-#table {
-  position: absolute; left: 0; top: 0; transform-origin: 0 0; will-change: transform;
-  border-radius: 14mm;
-  background:
-    radial-gradient(ellipse at 50% 45%, rgba(255,220,170,.10), rgba(0,0,0,.28) 75%),
-    repeating-linear-gradient(90deg, rgba(0,0,0,.05) 0 2mm, rgba(255,255,255,.025) 2mm 3.5mm, rgba(0,0,0,.035) 3.5mm 7mm),
-    repeating-linear-gradient(90deg, #6b4428 0 41mm, #714a2c 41mm 83mm, #65402a 83mm 128mm);
-  box-shadow: inset 0 0 0 4mm #4a2e1b, inset 0 0 18mm rgba(0,0,0,.45), 0 10px 40px rgba(0,0,0,.6);
-}
+#tilt { position: absolute; inset: 0; transform: rotateX(18deg); transform-origin: 50% 55%; }
+#table { position: absolute; left: 0; top: 0; transform-origin: 0 0; will-change: transform; }
+
 #table > *, .seat > *, .pboard > *, .marea > * { position: absolute; }
 .mainboard { border-radius: 2mm; box-shadow: 0 0.6mm 0 #cfc6b4, 0 1.2mm 0 #b9ae98, 0 3mm 8mm rgba(0,0,0,.55); background: #fff; }
 .slot > .card { width: 100%; height: 100%; border-radius: 1.8mm; box-shadow: 0 1.2mm 3mm rgba(0,0,0,.45); }
@@ -249,59 +278,123 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #2a1c12; fon
 .inflight { left: 3mm; bottom: 3mm; font-size: 2.6mm; color: #8a7e66; font-style: italic; }
 .dslot { border: 0.5mm dashed rgba(255,236,200,.45); border-radius: 1.8mm; display: flex; align-items: center; justify-content: center; }
 .dslot span { color: rgba(255,236,200,.55); font: 700 3mm Helvetica, Arial, sans-serif; letter-spacing: 0.5mm; transform: rotate(-90deg); }
-.handcard { transform-origin: 50% 120%; }
+.hand { overflow: visible; }
+.hc { position: absolute; inset: 0; cursor: pointer; perspective: 600mm; transform-origin: 50% 130%;
+  --x: var(--cx); --y: var(--cy); --r: var(--cr); --s: 1;
+  transform: translate(calc(var(--x) * 1mm), calc(var(--y) * 1mm)) rotate(calc(var(--r) * 1deg)) scale(var(--s));
+  transition: transform .45s cubic-bezier(.2,.8,.2,1); }
+.hand.open .hc { --x: var(--ox); --y: var(--oy); --r: var(--or); }
+.hand.open .hc.sel { --y: -62; --r: 0; --s: 1.7; z-index: 20 !important; }
+.flip { position: absolute; inset: 0; transform-style: preserve-3d; transition: transform .55s cubic-bezier(.3,.7,.2,1); }
+.hand.open .flip { transform: rotateY(180deg); }
+.face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.face.front { transform: rotateY(180deg); }
+.face > .card { width: 100%; height: 100%; border-radius: 1.8mm; box-shadow: 0 1.2mm 3mm rgba(0,0,0,.45); }
+.hc.sel .face > .card { box-shadow: 0 4mm 10mm rgba(0,0,0,.55); }
+.hc.nudge .flip { animation: nudge .35s; }
+@keyframes nudge { 25% { transform: rotateY(180deg) rotate(-3deg); } 75% { transform: rotateY(180deg) rotate(3deg); } }
+#toast { position: fixed; left: 50%; bottom: 70px; transform: translateX(-50%); background: rgba(25,20,16,.92); color: #f3e6cf;
+  font: 600 13px Helvetica, Arial, sans-serif; padding: 10px 16px; border-radius: 8px; opacity: 0; transition: opacity .25s; pointer-events: none; }
+#toast.on { opacity: 1; }
 .handlabel { font-size: 2.8mm; }
 
-.hud { position: fixed; right: 16px; bottom: 16px; display: flex; align-items: center; gap: 6px; font: 600 12px Helvetica, Arial, sans-serif; }
+.hud { position: fixed; right: 16px; bottom: 16px; display: flex; align-items: center; gap: 6px; font: 600 12px Helvetica, Arial, sans-serif;
+  background: rgba(25,20,16,.55); padding: 6px 8px; border-radius: 22px; }
+.hud input[type=range] { width: 140px; accent-color: #d9a441; }
 .hud .ttl { color: rgba(255,236,200,.7); margin-right: 8px; }
 .hud button { font: 700 14px Helvetica, Arial, sans-serif; min-width: 34px; height: 34px; border-radius: 17px; border: 1px solid rgba(255,236,200,.35);
   background: rgba(30,20,12,.75); color: #f3e6cf; cursor: pointer; padding: 0 12px; }
 .hud button:hover { background: rgba(60,40,24,.9); }
-@media (max-width: 600px) { .hud .ttl { display: none; } }
+@media (max-width: 600px) { .hud .ttl { display: none; } .hud input[type=range] { width: 90px; } }
 '''
 
 PANZOOM_JS = r'''
 (() => {
   const vp = document.getElementById('viewport'), tb = document.getElementById('table');
-  const MM = 96 / 25.4;
+  const slider = document.getElementById('zslider'), toast = document.getElementById('toast');
   const W = tb.offsetWidth, H = tb.offsetHeight;
+  const MIN = 0.1, MAX = 4, TILT = Math.cos(18 * Math.PI / 180);
   let s = 1, x = 0, y = 0;
-  const MIN = 0.08, MAX = 4;
-  const apply = () => { tb.style.transform = `translate(${x}px,${y}px) scale(${s})`; };
+
+  // ---- view --------------------------------------------------------------
+  const toSlider = v => Math.round(1000 * Math.log(v / MIN) / Math.log(MAX / MIN));
+  const fromSlider = v => MIN * Math.pow(MAX / MIN, v / 1000);
+  // Lamp: a warm pool of light over the board, painted on the viewport background (a giant
+  // element would get clipped by the GPU's max layer size), following pan and zoom.
+  const MM = 96 / 25.4, [lcx, lcy, lr] = tb.dataset.lamp.split(',').map(Number);
+  const lamp = () => {
+    const px = x + lcx * MM * s, py = innerHeight * 0.55 + (y + lcy * MM * s - innerHeight * 0.55) * TILT, r = lr * MM * s;
+    vp.style.background = `radial-gradient(circle ${r}px at ${px}px ${py}px, #8a7c70 0%, #75685d 12%, #5e534a 26%, #4a413b 42%, #3b3430 62%, #332d29 80%) #332d29`;
+  };
+  const apply = () => { tb.style.transform = `translate(${x}px,${y}px) scale(${s})`; slider.value = toSlider(s); lamp(); };
   const fit = () => {
-    s = Math.min(innerWidth / W, innerHeight / H) * 0.96;
+    s = Math.min(innerWidth / W, innerHeight / (H * TILT)) * 0.9;
     x = (innerWidth - W * s) / 2; y = (innerHeight - H * s) / 2; apply();
   };
-  const zoomAt = (f, cx, cy) => {
-    const ns = Math.min(MAX, Math.max(MIN, s * f));
+  const zoomAt = (ns, cx, cy) => {
+    ns = Math.min(MAX, Math.max(MIN, ns));
     x = cx - (cx - x) * ns / s; y = cy - (cy - y) * ns / s; s = ns; apply();
   };
   vp.addEventListener('wheel', e => {
     e.preventDefault();
-    if (e.ctrlKey || e.deltaMode === 1 || Math.abs(e.deltaY) >= 40 && e.deltaX === 0) {
-      zoomAt(Math.exp(-e.deltaY * (e.ctrlKey ? 0.01 : 0.0015)), e.clientX, e.clientY);
-    } else { x -= e.deltaX; y -= e.deltaY; apply(); }
+    if (e.ctrlKey) zoomAt(s * Math.exp(-e.deltaY * 0.01), e.clientX, e.clientY);              // trackpad pinch
+    else if (e.deltaMode === 1 || (Math.abs(e.deltaY) >= 40 && e.deltaX === 0))
+      zoomAt(s * Math.exp(-e.deltaY * 0.0015), e.clientX, e.clientY);                        // mouse wheel
+    else { x -= e.deltaX; y -= e.deltaY / TILT; apply(); }                                      // two-finger scroll pans
   }, { passive: false });
-  const pts = new Map(); let last = null;
-  vp.addEventListener('pointerdown', e => { vp.setPointerCapture(e.pointerId); pts.set(e.pointerId, e); vp.classList.add('drag'); last = null; });
+  slider.addEventListener('input', () => zoomAt(fromSlider(+slider.value), innerWidth / 2, innerHeight / 2));
+  document.getElementById('zin').onclick = () => zoomAt(s * 1.3, innerWidth / 2, innerHeight / 2);
+  document.getElementById('zout').onclick = () => zoomAt(s / 1.3, innerWidth / 2, innerHeight / 2);
+  document.getElementById('zfit').onclick = fit;
+  addEventListener('resize', fit);
+
+  // ---- hands ---------------------------------------------------------------
+  let toastTimer;
+  const say = msg => { toast.textContent = msg; toast.classList.add('on'); clearTimeout(toastTimer); toastTimer = setTimeout(() => toast.classList.remove('on'), 2200); };
+  const closeAll = except => document.querySelectorAll('.hand.open').forEach(h => {
+    if (h === except) return; h.classList.remove('open'); h.querySelectorAll('.hc.sel').forEach(c => c.classList.remove('sel'));
+  });
+  const tap = target => {
+    const card = target.closest && target.closest('.hc');
+    if (!card) { closeAll(); return; }                        // anything else flips hands back
+    const hand = card.parentElement;
+    if (!hand.classList.contains('open')) { closeAll(hand); hand.classList.add('open'); return; }   // flip the whole hand
+    if (card.classList.contains('sel')) {                     // second click: activate (needs the engine)
+      card.classList.remove('nudge'); void card.offsetWidth; card.classList.add('nudge');
+      say('Playing a card needs the game engine. Coming next.'); return;
+    }
+    hand.querySelectorAll('.hc.sel').forEach(c => c.classList.remove('sel'));
+    card.classList.add('sel');                                // first click: pull it forward
+  };
+
+  // ---- pointers: drag pans, pinch zooms, a still tap clicks ----------------
+  const pts = new Map(); let pinch = null, moved = false, downAt = null;
+  vp.addEventListener('pointerdown', e => {
+    pts.set(e.pointerId, e); moved = false; downAt = { x: e.clientX, y: e.clientY, t: e.target }; pinch = null;
+  });
   vp.addEventListener('pointermove', e => {
     if (!pts.has(e.pointerId)) return;
     const prev = pts.get(e.pointerId); pts.set(e.pointerId, e);
-    if (pts.size === 1) { x += e.clientX - prev.clientX; y += e.clientY - prev.clientY; apply(); }
+    if (!moved && downAt && Math.hypot(e.clientX - downAt.x, e.clientY - downAt.y) < 5 && pts.size === 1) return;
+    if (!moved) { moved = true; vp.setPointerCapture(e.pointerId); vp.classList.add('drag'); }
+    if (pts.size === 1) { x += e.clientX - prev.clientX; y += (e.clientY - prev.clientY) / TILT; apply(); }
     else if (pts.size === 2) {
       const [a, b] = [...pts.values()];
       const d = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
       const mx = (a.clientX + b.clientX) / 2, my = (a.clientY + b.clientY) / 2;
-      if (last) { x += mx - last.mx; y += my - last.my; zoomAt(d / last.d, mx, my); }
-      last = { d, mx, my };
+      if (pinch) { x += mx - pinch.mx; y += my - pinch.my; zoomAt(s * d / pinch.d, mx, my); }
+      pinch = { d, mx, my };
     }
   });
-  const up = e => { pts.delete(e.pointerId); last = null; if (!pts.size) vp.classList.remove('drag'); };
+  const up = e => {
+    if (!pts.has(e.pointerId)) return;
+    pts.delete(e.pointerId);
+    if (!moved && downAt && !pts.size && e.type === 'pointerup') tap(downAt.t);
+    if (!pts.size) { vp.classList.remove('drag'); pinch = null; downAt = null; }
+  };
   vp.addEventListener('pointerup', up); vp.addEventListener('pointercancel', up);
-  document.getElementById('zin').onclick = () => zoomAt(1.3, innerWidth / 2, innerHeight / 2);
-  document.getElementById('zout').onclick = () => zoomAt(1 / 1.3, innerWidth / 2, innerHeight / 2);
-  document.getElementById('zfit').onclick = fit;
-  addEventListener('resize', fit);
+  addEventListener('keydown', e => { if (e.key === 'Escape') closeAll(); });
+
   fit();
 })();
 '''
