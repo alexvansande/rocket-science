@@ -108,12 +108,16 @@ Follow-ups this creates (not yet decided):
 - Refineries and the Greenhouse say "rotate once per turn", but docs/04 says "1 step per month". Per turn is the simple reading.
 - ENDURANCE goals ("station up X months") need rewording in turns.
 
-## Aerobraking — *proposal*
+## Aerobraking — DECIDED (Sep 2026, in the prototype)
 
 - Descending through a **blue dashed** crossing with Atmospheric Return aboard **costs no tap** and can happen any time during your turn. It ends at the surface.
 - Earth: from LEO to the ground is free. This is how crewed missions come home.
 - Mars: the atmosphere saves 2 of the 3 Δv. The final 1 Δv is still a real burn (a Move).
 - Free-return trajectories need no rule. They are the same free descent.
+- A mission that lands back on Earth is **recovered**: return goals are checked first, then its cards go to your discard pile (you can Research them back), its tokens to the bowls, and its badge home.
+- **Falling home:** a mission left at a no-stop space at End turn is lost, *unless* it carries Atmospheric Return and sits above blue crossings: then it falls home under its heat shield (a crewed suborbital hop, Shepard-style).
+
+**Prototype start (Sep 2026):** the basic pad is set to **1 red (160t)**, not 4, so play opens with single-stage suborbital flights (Kerolox Sustainer, Light Solid Booster). Orbit has to be earned by researching a small upper stage: K1 + Solid Kick Motor puts one equipment card in orbit (Explorer 1 / Juno). *Open:* how the pad grows (goal rewards?).
 
 ## Launch pads = tokens at launch — DECIDED (upgrade tiers are a proposal)
 

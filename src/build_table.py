@@ -67,25 +67,25 @@ def cid(name):
 
 # Sample hands. Blue ("bottom") is you: a hand that can reach orbit on the basic pad.
 HAND_IDS = {
-    "bottom": [cid("KEROLOX SUSTAINER"), cid("KEROLOX BOOSTER"), cid("KEROLOX UPPER"),
-               cid("HYDROLOX UPPER"), cid("CREW CAPSULE")],
+    "bottom": [cid("KEROLOX SUSTAINER"), cid("LIGHT SOLID BOOSTER"), cid("CREW CAPSULE"),
+               cid("ATMOSPHERIC RETURN"), cid("SCIENCE PACKAGE")],
     "left": [cid("HEAVY KEROLOX BOOSTER"), cid("HEAVY HYDROLOX CORE"), cid("HEAVY HYDROLOX UPPER"),
-             cid("SCIENCE PACKAGE"), cid("ATMOSPHERIC RETURN")],
+             cid("LARGE ANTENNA"), cid("RTG")],
     "top": [cid("SUPER HEAVY"), cid("STARSHIP"), cid("METHALOX BOOSTER"), cid("SOLAR ARRAY"), cid("ROVER")],
     "right": [cid("HEAVY SOLID BOOSTER"), cid("x2 K BUNDLE"), cid("HYDROLOX DROP TANK"), cid("ORBITER"),
               cid("LANDING GEAR")],
 }
 HANDS = {k: [CARDS[c]["html"] for c in v] for k, v in HAND_IDS.items()}
-MARKET_IDS = [cid("LIGHT SOLID BOOSTER"), cid("HYPERGOLIC UPPER"), cid("SOLID KICK MOTOR"), cid("CONSUMABLES")]
+MARKET_IDS = [cid("SOLID KICK MOTOR"), cid("HYDROLOX UPPER"), cid("KEROLOX BOOSTER"), cid("CONSUMABLES")]
 DECK_IDS = [c for c in CARDS if c not in MARKET_IDS and not any(c in h for h in HAND_IDS.values())]
-LAUNCH_TOKENS = "RRRR"      # the basic pad's lift (docs/07). One place to change it.
+LAUNCH_TOKENS = "R"         # the basic pad's lift: 1 red = 160t, single-stage suborbital start (docs/07)
 
 # Goals: FIRSTs always open; a 5-card market; the rest shuffle into the missions deck.
 GOALS = {o["id"]: {"name": o["name"], "type": o["type"], "vp": o["vp"], "check": o.get("check"),
                    "html": objective_card_html(o)} for o in OBJS}
 GOAL_FIRSTS = [o["id"] for o in OBJS if o["type"] == "FIRST"]
 GOAL_MARKET = [o["id"] for o in OBJS if o["name"] in
-               ("LARGEST SPACE STATION", "VENERA", "COMSAT", "WEATHER WATCH", "INTERCONTINENTAL EXPRESS")]
+               ("SPECIAL DELIVERY", "UNNAMED PAYLOAD", "INTERCONTINENTAL EXPRESS", "COMSAT", "WEATHER WATCH")]
 GOAL_DECK = [g for g in GOALS if g not in GOAL_FIRSTS and g not in GOAL_MARKET]
 
 TOKEN_COLORS = {"K": "#1c1c1c", "R": "#b3261e", "O": "#e07b00", "Y": "#f0b400"}
@@ -178,7 +178,7 @@ def bowl(color, label, cx, cy, r=30):
 # ---- Space Center (player board) -----------------------------------------
 ACTIONS = [
     ("RESEARCH", "Buy one card: from the deck, the open market, or your own discard pile."),
-    ("LAUNCH", "Put a mission token on Earth. Place <b>4 red</b> cargo tokens in its mission area. Then take a <b>free Mission Control</b>."),
+    ("LAUNCH", "Put a mission token on Earth. Place <b>1 red</b> cargo token (your pad's 160t) in its mission area. Then take a <b>free Mission Control</b>."),
     ("MISSION CONTROL", "Spend a mission's cargo tokens to place a rocket card on it. Discard the rest, or pass them to another mission (separation)."),
 ]
 TAP = ('<svg viewBox="0 0 20 20" class="tap"><path d="M15 6 A7 7 0 1 0 17 11" fill="none" stroke="currentColor" '
@@ -268,9 +268,8 @@ def main():
     ry = BOARD_Y + BOARD_H + 22
     parts.append(zone_label("ROCKETS &amp; TECH · deck + open market", BOARD_X, ry - 13))
     parts.append(stack("rockets", "ROCKETS", BOARD_X, ry, len(DECK_IDS), "deck-rockets"))
-    market = [CARDS[c]["html"] for c in MARKET_IDS]
-    for i, h in enumerate(market):
-        parts.append(card(h, BOARD_X + (i + 1) * (CARD_W + GAP), ry))
+    for i, c in enumerate(MARKET_IDS):
+        parts.append(f'<div class="slot mkslot" id="mk-{i}" {at(BOARD_X + (i + 1) * (CARD_W + GAP), ry, CARD_W, CARD_H)}>{CARDS[c]["html"]}</div>')
 
     # Cargo token bowls
     bx = BOARD_X + 5 * (CARD_W + GAP) + 45
@@ -282,10 +281,11 @@ def main():
         parts.append(seat(s_, pname, color, rot, center))
 
     game = {
-        "cards": CARDS, "deck": DECK_IDS, "hand": HAND_IDS["bottom"], "launch": LAUNCH_TOKENS,
+        "cards": CARDS, "deck": DECK_IDS, "hand": HAND_IDS["bottom"], "launch": LAUNCH_TOKENS, "market": MARKET_IDS,
         "you": PLAYERS[0][2], "tokenColors": TOKEN_COLORS,
         "spaces": {sp["id"]: {"x": round(sp["x"] / 1000 * BOARD_W, 2), "y": round(sp["y"] / 707 * BOARD_H, 2),
-                              "stop": sp["stop"], "label": sp.get("label", "")} for sp in BOARD["spaces"]},
+                              "stop": sp["stop"], "label": sp.get("label", ""), "kind": sp["kind"]} for sp in BOARD["spaces"]},
+        "aero": [[l["a"], l["b"]] for l in BOARD["links"] if l["type"] in ("aero", "mars_aero")],
         "links": [[l["a"], l["b"]] for l in BOARD["links"]],
         "board": [BOARD_X, BOARD_Y],
         # camera targets (table mm): your Space Center + hand + discard, and the whole board
@@ -445,6 +445,9 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #332d29; fon
 .eqchip { font-size: 2.6mm; font-weight: 700; color: #1b3a6b; background: #e6ecf5; border-radius: 1mm; padding: 0.6mm 1.2mm; }
 .rest .tok { position: absolute; left: 1.5mm; top: 3mm; width: 13mm; height: 14mm; }
 .mname .mini-badge { position: static; width: 4.2mm; height: 4.5mm; vertical-align: -1.3mm; margin-right: 1.2mm; filter: none; }
+.mkslot.can > .card, #deck-rockets.can .dtop > .card, #discard-you.can > .slot > .card { animation: glow 1.4s ease-in-out infinite; }
+.mkslot.can, #deck-rockets.can, #discard-you.can { cursor: pointer; }
+.btok.can { pointer-events: auto; cursor: pointer; border-radius: 50%; animation: glow 1.3s ease-in-out infinite; }
 .gslot.claim > .card { animation: glow 1.2s ease-in-out infinite; }
 .gslot.claim { cursor: pointer; }
 .improve .cg { position: absolute; width: 47mm; height: 66mm; }
@@ -623,21 +626,22 @@ GAME_JS = r'''
   const tri = (c, cls = '') => G.tri[c].replace('class="tok ', `class="tok ${cls} `);
   const BACK = '<div class="card cback rockets"><span>ROCKETS</span></div>';
   const adj = {}; for (const [a, b] of G.links) { (adj[a] = adj[a] || []).push(b); (adj[b] = adj[b] || []).push(a); }
+  const aadj = {}; for (const [a, b] of G.aero) { (aadj[a] = aadj[a] || []).push(b); (aadj[b] = aadj[b] || []).push(a); }
 
   const st = {
-    turn: 1, deck: shuffle(G.deck.slice()), hand: G.hand.slice(), discard: [],
+    turn: 1, deck: shuffle(G.deck.slice()), hand: G.hand.slice(), discard: [], market: G.market.slice(),
     used: { research: false, launch: false, mc: false }, freeMC: 0,
     missions: [0, 1, 2, 3].map(i => ({ i, active: false, space: null, tokens: [], paid: false, eq: 0, equip: [], card: null, fired: false })),
     mode: 'idle', handOpen: false, sel: null, pending: null, firing: null, move: null, load: null,
     goals: { firsts: G.goalFirsts.slice(), market: G.goalMarket.slice(), deck: shuffle(G.goalDeck.slice()), mine: [] },
-    vp: 0, claimable: [],
+    vp: 0, claimable: [], afterClaim: null,
   };
   const hand = $('hand-you'), toastEl = $('toast'), promptEl = $('prompt'), closeup = $('closeup');
 
   // ---- helpers --------------------------------------------------------------
   let tt; const toast = msg => { toastEl.textContent = msg; toastEl.classList.add('on'); clearTimeout(tt); tt = setTimeout(() => toastEl.classList.remove('on'), 2800); };
   const prompt = msg => { promptEl.textContent = msg || idlePrompt(); promptEl.classList.add('on'); };
-  const idlePrompt = () => `Turn ${st.turn} · Research, Launch or Mission Control (glowing), or click a glowing rocket to fire it. Then End turn.`;
+  const idlePrompt = () => `Turn ${st.turn} · Research, Launch or Mission Control (glowing), click a glowing rocket to fire it, or a glowing badge to aerobrake home. Then End turn.`;
   const posOf = el => { let x = 0, y = 0; while (el && el.id !== 'table') { x += el.offsetLeft; y += el.offsetTop; el = el.offsetParent; } return { x: x / MM, y: y / MM }; };
   const centerOf = el => { const p = posOf(el); return { x: p.x + el.offsetWidth / MM / 2, y: p.y + el.offsetHeight / MM / 2 }; };
   function flyTokens(list, fromOf, toOf, done) {               // wooden deltas hop one by one, lifted off the table
@@ -703,7 +707,7 @@ GAME_JS = r'''
   function can() {
     const idle = st.mode === 'idle';
     return {
-      research: idle && !st.used.research && st.deck.length > 0,
+      research: idle && !st.used.research && (st.deck.length > 0 || st.market.some(Boolean) || st.discard.length > 0),
       launch: idle && !st.used.launch && st.missions.some(m => !m.active),
       mc: idle && (!st.used.mc || st.freeMC > 0) && st.missions.some(spendable),
     };
@@ -739,20 +743,36 @@ GAME_JS = r'''
     const deck = $('deck-rockets');
     deck.style.setProperty('--t', (st.deck.length * 0.3).toFixed(2) + 'mm'); deck.style.visibility = st.deck.length ? '' : 'hidden';
     renderGoals();
+    st.market.forEach((id, i) => { const el = $('mk-' + i);
+      if (el.dataset.id !== (id || '')) { el.innerHTML = id ? G.cards[id].html : ''; el.dataset.id = id || ''; }
+      el.classList.toggle('can', st.mode === 'research' && !!id); });
+    $('deck-rockets').classList.toggle('can', st.mode === 'research' && st.deck.length > 0);
+    $('discard-you').classList.toggle('can', st.mode === 'research' && st.discard.length > 0);
+    for (const m of st.missions) { const bt = $('btok-' + m.i); if (bt) bt.classList.toggle('can', st.mode === 'idle' && !!aeroPath(m)); }
     const top = st.discard[st.discard.length - 1], ds = $('discard-you');
     ds.innerHTML = top ? `<div class="slot" style="inset:0">${G.cards[top].html}</div><em>${st.discard.length}</em>` : '<span>DISCARD</span>';
   }
 
   // ---- actions --------------------------------------------------------------
-  function research() {
-    st.used.research = true;
-    const id = st.deck.pop();
-    render(); camYou();
-    fly(BACK, $('deck-rockets'), hand, () => {
-      st.hand.push(id); buildHand(); st.handOpen = true; st.sel = st.hand.length - 1; syncHand(); render();
+  function research() {                                        // choose: top of the deck, an open market card, or your discard
+    st.mode = 'research'; render();
+    cam([G.board[0] - 10, G.board[1] + 400, G.board[0] + 360, G.board[1] + 520]);
+    prompt(`Research: take the top card of the deck${st.market.some(Boolean) ? ', one of the open market cards' : ''}${st.discard.length ? ', or the top of your discard pile' : ''}.`);
+  }
+  function takeCard(id, fromEl, faceUp, after) {
+    st.used.research = true; st.mode = 'anim'; render();
+    fly(faceUp ? G.cards[id].html : BACK, fromEl, hand, () => {
+      after && after();
+      st.hand.push(id); buildHand(); st.mode = 'idle'; st.handOpen = true; st.sel = st.hand.length - 1; syncHand(); render(); camYou();
       toast(`Research: ${G.cards[id].name} joins your hand.`); prompt();
     });
   }
+  const researchDeck = () => takeCard(st.deck.pop(), $('deck-rockets'), false);
+  function researchMarket(i) {
+    const id = st.market[i]; st.market[i] = null; render();
+    takeCard(id, $('mk-' + i), true, () => { st.market[i] = st.deck.pop() || null; });
+  }
+  const researchDiscard = () => takeCard(st.discard.pop(), $('discard-you'), true);
   function launch() {
     const m = st.missions.find(m => !m.active), toks = G.launch.split('');
     Object.assign(m, { active: true, space: 'earth', tokens: [], paid: false, eq: 0, equip: [], card: null, fired: false, visited: ['earth'], arrived: st.turn });
@@ -882,16 +902,45 @@ GAME_JS = r'''
   }
   const clearReach = () => $('boardlayer').querySelectorAll('.hl').forEach(h => h.remove());
   function moveTo(sid) {
-    const m = st.move.m, par = st.move.reach.par, path = [];
+    const m = st.move.m, par = st.move.reach.par, path = [], from = m.space;
     for (let s = sid; s && s !== m.space; s = par[s]) path.push(s);
     for (const s of path) if (!m.visited.includes(s)) m.visited.push(s);
     if (sid !== m.space) m.arrived = st.turn;
     m.space = sid; clearReach(); st.mode = 'idle'; st.move = null; render();
     const sp = G.spaces[sid];
-    setTimeout(() => { if (!checkGoals()) camYou(); }, 1600);  // after the badge lands: a goal? else back to you
+    setTimeout(() => { if (sid === 'earth' && from !== 'earth') landed(m); else if (!checkGoals()) camYou(); }, 1600);  // landed home? a goal? else back to you
     if (sp.stop === 'none') toast(`Mission ${ROMAN[m.i]} can't stop here. Fire another stage before you end your turn, or it fails.`);
     else toast(`Mission ${ROMAN[m.i]} reached ${sp.label || 'its new position'}.`);
     prompt();
+  }
+  // ---- aerobraking: with Atmospheric Return aboard, blue (and Mars red) crossings are free going down ----
+  const hasHeatShield = m => m.equip.some(e => G.cards[e].name === 'ATMOSPHERIC RETURN');
+  function aeroPath(m) {                                        // path down to a surface using only aero crossings, or null
+    if (!m.active || !hasHeatShield(m) || G.spaces[m.space].kind === 'surface') return null;
+    const par = { [m.space]: null }, q = [m.space];
+    while (q.length) { const s = q.shift();
+      if (G.spaces[s].kind === 'surface') { const path = []; for (let t = s; t; t = par[t]) path.unshift(t); return path; }
+      for (const t of aadj[s] || []) if (!(t in par)) { par[t] = s; q.push(t); } }
+    return null;
+  }
+  function aerobrake(m, then) {
+    const path = aeroPath(m); if (!path) return;
+    for (const s of path) if (!m.visited.includes(s)) m.visited.push(s);
+    m.space = path[path.length - 1]; m.arrived = st.turn; st.mode = 'anim'; render();
+    toast(`Mission ${ROMAN[m.i]} aerobrakes: heat shield, then parachutes…`);
+    setTimeout(() => { st.mode = 'idle'; landed(m, then); }, 1600);
+  }
+  function landed(m, then) {                                    // goals first, then the mission is recovered
+    const done = () => { recover(m); then && then(); };
+    if (!checkGoals(done)) done();
+  }
+  function recover(m) {
+    if (m.card) st.discard.push(m.card);
+    st.discard.push(...m.equip);
+    const toks = m.tokens.slice();
+    Object.assign(m, { active: false, space: null, tokens: [], paid: false, eq: 0, equip: [], card: null, fired: false, visited: [] });
+    render(); flyTokens(toks, () => $('mrest-' + m.i), t => $('bowl-' + t), null);
+    toast(`Mission ${ROMAN[m.i]} is home and recovered. Its cards go to your discard pile.`); camYou(); prompt();
   }
   function cancel() {
     if (st.mode === 'move') { clearReach(); toast('Stayed in place.'); }
@@ -900,6 +949,11 @@ GAME_JS = r'''
   }
   function endTurn() {
     if (st.mode !== 'idle') cancel();
+    const falling = st.missions.filter(m => m.active && G.spaces[m.space].stop === 'none' && aeroPath(m));
+    if (falling.length) {                                       // a mid-climb crew with a heat shield falls home safely
+      const m = falling[0]; toast(`Mission ${ROMAN[m.i]} can't stay up there; it falls back under its heat shield.`);
+      return setTimeout(() => aerobrake(m, endTurn), 900);
+    }
     const lost = [];
     for (const m of st.missions) if (m.active && G.spaces[m.space].stop === 'none') {
       lost.push(ROMAN[m.i]); if (m.card) st.discard.push(m.card);
@@ -913,21 +967,21 @@ GAME_JS = r'''
 
   // ---- goals ------------------------------------------------------------------
   const deepN = sid => { const r = /^ds(\d+)$/.exec(sid); return r ? +r[1] : 0; };
-  function meets(m, g) {
+  function meets(m, g) {                                      // equipCount ignores the Crew Capsule: crew isn't a satellite
     const c = g.check; if (!c || !m.active) return false;
     const names = m.equip.map(e => G.cards[e].name);
     return (!c.at || c.at.includes(m.space)) && (!c.deep || deepN(m.space) >= c.deep)
       && (!c.visited || c.visited.every(v => m.visited.includes(v)))
       && (!c.equip || c.equip.every(n => names.includes(n))) && (!c.without || !c.without.some(n => names.includes(n)))
-      && (!c.equipCount || names.filter(n => n !== 'CREW CAPSULE').length >= c.equipCount)   // crew isn't a satellite && (!c.cargo || mass(m.tokens) >= c.cargo)
+      && (!c.equipCount || names.filter(n => n !== 'CREW CAPSULE').length >= c.equipCount) && (!c.cargo || mass(m.tokens) >= c.cargo)
       && (!c.turns || st.turn - m.arrived >= c.turns);
   }
   const openGoals = () => [...st.goals.firsts, ...st.goals.market].filter(Boolean);
-  function checkGoals() {                                       // true if we switched to claiming
+  function checkGoals(then) {                                   // true if we switched to claiming
     const hits = [];
     for (const gid of openGoals()) { const m = st.missions.find(m => meets(m, G.goals[gid])); if (m) hits.push({ gid, m }); }
     if (!hits.length || st.mode !== 'idle') return false;
-    st.claimable = hits; st.mode = 'claim'; render(); cam(G.focusGoals);
+    st.claimable = hits; st.afterClaim = then || null; st.mode = 'claim'; render(); cam(G.focusGoals);
     const h = hits[0], g = G.goals[h.gid];
     prompt(`Mission ${ROMAN[h.m.i]} achieved ${g.name}! Click the glowing goal card to claim it (+${g.vp}★).`);
     return true;
@@ -943,8 +997,12 @@ GAME_JS = r'''
     fly(g.html, from, $('cgoals-you'), () => {
       st.goals.mine.push(gid); st.vp += g.vp; if (st.mode === 'anim') st.mode = 'idle'; render();
       toast(`${g.name} claimed! +${g.vp}★`);
-      if (st.mode === 'idle') { prompt(); setTimeout(camYou, 700); }
+      if (st.mode === 'idle') claimDone();
     });
+  }
+  function claimDone() {
+    const then = st.afterClaim; st.afterClaim = null; st.claimable = []; st.mode = 'idle'; render();
+    if (then) then(); else { prompt(); setTimeout(camYou, 700); }
   }
   function renderGoals() {
     const fill = (el, gid) => { if (!el) return;
@@ -971,14 +1029,23 @@ GAME_JS = r'''
 
   // ---- input (called from the table's pointer handler) -------------------------
   window.game = {
+    _st: st,                                                   // read-only peek for debugging/tests
     tap(target) {
       const t = target.closest ? target : target.parentElement;
       if (st.mode === 'anim') return true;
       if (st.mode === 'claim') {
         const gs = t.closest('.gslot.claim');
         if (gs) { const gid = gs.dataset.gid; claim(gid); return true; }
-        st.mode = 'idle'; st.claimable = []; render(); prompt(); camYou(); return true;
+        claimDone();                                            // skipping a claim doesn't swallow the click
       }
+      if (st.mode === 'research') {
+        if (t.closest('#deck-rockets') && st.deck.length) { researchDeck(); return true; }
+        const mk = t.closest('.mkslot'); if (mk && mk.dataset.id) { researchMarket(+mk.id.slice(3)); return true; }
+        if (t.closest('#discard-you') && st.discard.length) { researchDiscard(); return true; }
+        st.mode = 'idle'; render(); prompt(); camYou(); return true;
+      }
+      const bt = t.closest('.btok.can');
+      if (bt && st.mode === 'idle') { aerobrake(st.missions[+bt.id.slice(5)]); return true; }
       const act = t.closest('[data-act]');
       if (act) { const k = act.dataset.act; if (st.mode !== 'idle') cancel(); if (can()[k]) ({ research, launch, mc: startMC })[k](); else toast(why(k)); return true; }
       const hc = t.closest('#hand-you .hc');
