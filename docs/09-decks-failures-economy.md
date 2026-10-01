@@ -209,6 +209,7 @@ The 5 fixes are market cards. *Proposal:* once bought, a fix sits on your Space 
 | Press Leak | Put an opponent's top card on the bottom of their deck. |
 | Budget Cut | An opponent loses 1 money. |
 | Overtime | Draw 2 cards. |
+| Self Audit (Alex, Oct 2026) | Look at the top 3 cards of your deck. You may shuffle your deck. |
 | Extra Shift | One more Mission Control this turn. (The Shuttle's third burn, docs/07.) |
 
 ### Goal rewards (existing 28 goals)
@@ -234,7 +235,7 @@ The reward amount = the goal's current `vp` value, so nothing needs re-balancing
 Placeholders chosen for the prototype (all to playtest, none decided):
 - **Starting deck:** 2× Kerolox Sustainer, 2× Light Solid Booster, Solid Kick Motor, Atmospheric Return, 2× Science Package, Backup Systems, Overtime + the 10 disasters (20 cards).
 - **Prices:** by tech tier as in section 7; actions $1–2; improvements as in section 4b.
-- **Main deck copies:** Backup Systems ×3, Overtime ×2, Extra Shift ×2, other actions ×1. The Crew Capsule card is out of the decks.
+- **Main deck copies:** Backup Systems ×3, Overtime ×2, Self Audit ×2 ($1), Extra Shift ×2, other actions ×1. The Crew Capsule card is out of the decks.
 - **Opponent actions** (Paperclip, Espionage, Press Leak, Budget Cut) do nothing yet: no opponents are simulated.
 - **"Completed" mission** = it claimed a goal this turn, or it's back on Earth. A disaster costs only the prizes of the mission it hits.
 - **Goals with no Δv to raise** (orbit, GEO, return trips) get no surcharge.

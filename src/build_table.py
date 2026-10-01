@@ -511,6 +511,9 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #332d29; fon
 .card.rwd.vp { background: #b8860b; color: #fff; } .card.rwd.money { background: #2f6b3a; color: #fff; } .card.rwd.science { background: #46237a; color: #fff; }
 .card.rwd b { font-size: 16mm; line-height: 1; } .card.rwd span { font-size: 3mm; font-weight: 700; padding: 0 3mm; margin-top: 2mm; }
 .card.rwd.spent { opacity: .3; }
+.peekrow { display: flex; gap: 3mm; justify-content: center; margin-top: 3mm; }
+.peek { width: 28.2mm; height: 39.6mm; position: relative; }
+.peek > .card { position: absolute; left: 0; top: 0; width: 47mm; height: 66mm; transform: scale(.6); transform-origin: 0 0; border-radius: 2mm; }
 .card.rwd.side { transform: rotate(90deg) scale(.8); background: #4d7a55; }
 .ptag { color: #ffd98a; font: 800 3.4mm Helvetica, Arial, sans-serif; text-align: center; white-space: nowrap; }
 .ptag.dv { color: #9fd4ff; }
@@ -1154,6 +1157,13 @@ GAME_JS = r'''
     if (a.effect === 'backup') return toast('Keep Backup Systems: you\'ll be offered it when you draw a disaster.');
     st.hand.splice(k, 1); st.deck.push(id); st.sel = null; st.handOpen = false; buildHand(); syncHand();
     if (a.effect === 'draw2') { toast('Overtime: drawing 2 cards.'); st.mode = 'anim'; render(); return drawCards(2, () => { st.mode = 'idle'; render(); prompt(); }); }
+    if (a.effect === 'audit') {                                   // look at your top 3, then keep the order or shuffle
+      const top = st.deck.slice(0, 3); render();
+      const dis = top.filter(t => C(t).kind === 'disaster').length;
+      return choice('', `<b>Self Audit:</b> your next ${top.length} card${top.length === 1 ? '' : 's'}${dis ? ` (${dis} disaster${dis > 1 ? 's' : ''}!)` : ''}.<div class="peekrow">${top.map(t => `<div class="peek">${C(t).html}</div>`).join('')}</div>`,
+        [{ label: 'Shuffle my deck', main: dis > 0, fn: () => { shuffle(st.deck); render(); toast('Deck shuffled.'); } },
+         { label: 'Keep this order', main: !dis, fn: () => toast('Deck order kept.') }]);
+    }
     if (a.effect === 'extra_mc') { st.extraMC++; render(); return toast('Extra Shift: one more Mission Control this turn.'); }
     render(); toast(`${a.name}: there are no opponents in this prototype yet, so it has no effect. It goes to the bottom of your deck.`);
   }
