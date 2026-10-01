@@ -14,8 +14,8 @@ Status: **draft, Sep 2026.** Items marked **DECIDED** are Alex's calls. Items ma
 
 ## Goals setup — DECIDED
 
-- **All FIRST goals are face-up from the start** and stay available until claimed.
-- **Other missions:** a row of 5 face-up cards, with the rest of the goals deck beside it. Refill the row as cards are taken.
+- **All permanent goals (FIRST, MOST, RESCUE, ENDURANCE) are face-up from the start** and stay available until claimed (Oct 2026: MOST, RESCUE and ENDURANCE are permanent, not row cards).
+- **Transient contracts** (commercial, military, science): a row of 5 face-up cards, with the rest of the goals deck beside it. Refill the row as cards are taken.
 
 ## Turn: tap each action once — DECIDED
 

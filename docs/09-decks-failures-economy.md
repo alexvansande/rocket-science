@@ -130,7 +130,7 @@ FIRST goals aren't in the row (they're all face-up from the start), so no surcha
 **Instead of your Launch this turn, take the rightmost card of either row.** A player without a good rocket still does something useful, and it clears the cards nobody wants.
 - **Market card:** free, to the bottom of your deck like any bought card.
 - **Goal card — DECIDED:** flip it and keep it as its reward, exactly as if you'd completed it. Goal backs *are* the resources, however you got the card. (Cheap on purpose: a stale goal is a cancelled contract that pays anyway, and it costs you your Launch.)
-- **OPEN, free VP:** if a VP goal sits rightmost, a player gets VP for skipping a launch. *Proposal:* goals in the temporary row pay only money or science; the VP goals (MOST, RESCUE, ENDURANCE) move out of the row and sit face-up beside the FIRSTs.
+- **No free VP — DECIDED.** FIRST, MOST, RESCUE and ENDURANCE are **permanent goals**, all face-up from the start, never in the temporary row. The row holds only transient contracts (commercial, military, science), which pay money or science. **OPEN:** the 4 FLYBY goals (Venera, Cassini, Voyager, New Horizons): permanent or transient?
 
 ### Money is goal cards, no tokens — DECIDED
 
