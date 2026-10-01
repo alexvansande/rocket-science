@@ -256,7 +256,7 @@ Top row = the **price**: what you must get where, in tokens/chips and board name
 
 Placeholders chosen for the prototype (all to playtest, none decided):
 - **Starting deck:** 2× Kerolox Sustainer, 2× Light Solid Booster, Solid Kick Motor, Atmospheric Return, 2× Science Package, Backup Systems, Overtime + the 10 disasters (20 cards).
-- **Prices:** by tech tier as in section 7; actions $1–2; improvements as in section 4b.
+- **Prices:** by tech tier as in section 7; actions $1–2; improvements as in section 4b. Exception: **Hydrolox Upper costs $2 + ⚛2** (tier 2), not $1 — DECIDED (Alex), so K1 + Hydrolox Upper can't reach orbit from the basic pad early. Hydrolox upper stages came after the first orbits.
 - **Main deck copies:** Backup Systems ×3, Overtime ×2, Self Audit ×2 ($1), Extra Shift ×2, other actions ×1. The Crew Capsule card is out of the decks.
 - **Opponent actions** (Paperclip, Espionage, Press Leak, Budget Cut) do nothing yet: no opponents are simulated.
 - **"Completed" mission** = it claimed a goal this turn, or it's back on Earth. A disaster costs only the prizes of the mission it hits.
