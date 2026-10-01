@@ -169,7 +169,7 @@ FIRST goals aren't in the row (they're all face-up from the start), so no surcha
 
 **Instead of your Launch this turn, take the rightmost card of either row.** A player without a good rocket still does something useful, and it clears the cards nobody wants.
 - **Market card:** free, to the bottom of your deck like any bought card.
-- **Goal card — DECIDED:** flip it and keep it as its reward, exactly as if you'd completed it. Goal backs *are* the resources, however you got the card. (Cheap on purpose: a stale goal is a cancelled contract that pays anyway, and it costs you your Launch.)
+- **Goal card — DECIDED (revised Oct 2026):** you get a plain **$1**, not the goal's reward. No token needed: keep the card **sideways** with your won goals. *Any sideways goal card is worth $1*, whatever is printed on it; spend it like any money card. (Earlier version: flip it and keep its printed reward. Dropped: a $2 or ⚛3 contract for skipping a launch was too much.)
 - **No free VP — DECIDED.** FIRST, MOST, RESCUE and ENDURANCE are **permanent goals**, all face-up from the start, never in the temporary row. The row holds only transient contracts (commercial, military, science), which pay money or science. 
 
 ### Money is goal cards, no tokens — DECIDED

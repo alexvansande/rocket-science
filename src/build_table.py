@@ -511,6 +511,7 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #332d29; fon
 .card.rwd.vp { background: #b8860b; color: #fff; } .card.rwd.money { background: #2f6b3a; color: #fff; } .card.rwd.science { background: #46237a; color: #fff; }
 .card.rwd b { font-size: 16mm; line-height: 1; } .card.rwd span { font-size: 3mm; font-weight: 700; padding: 0 3mm; margin-top: 2mm; }
 .card.rwd.spent { opacity: .3; }
+.card.rwd.side { transform: rotate(90deg) scale(.8); background: #4d7a55; }
 .ptag { color: #ffd98a; font: 800 3.4mm Helvetica, Arial, sans-serif; text-align: center; white-space: nowrap; }
 .ptag.dv { color: #9fd4ff; }
 .ptag .sur { color: #ff9a7a; }
@@ -734,7 +735,7 @@ GAME_JS = r'''
     missions: [0, 1, 2, 3].map(blank), upgrades: [], removed: [],
     mode: 'idle', handOpen: false, sel: null, pending: null, firing: null, move: null, load: null,
     goals: { perm: G.goalPerm.slice(), row: [], deck: shuffle(G.goalDeck.slice()) },
-    won: [], spent: new Set(), penalty: 0,
+    won: [], spent: new Set(), scrapped: new Set(), penalty: 0,
   };
   for (let i = 0; i < G.marketN; i++) st.market.push(st.main.pop() || null);
   for (let i = 0; i < G.goalRowN; i++) st.goals.row.push(st.goals.deck.pop() || null);
@@ -746,7 +747,8 @@ GAME_JS = r'''
   const hand = $('hand-you'), toastEl = $('toast'), promptEl = $('prompt'), closeup = $('closeup'), choiceEl = $('choice');
 
   // ---- resources ------------------------------------------------------------------
-  const reward = gid => G.goals[gid].reward;
+  // A scrapped contract (taken instead of launching) is kept SIDEWAYS: any sideways goal card = $1, whatever it says.
+  const reward = gid => st.scrapped.has(gid) ? { kind: 'money', n: 1 } : G.goals[gid].reward;
   const moneyCards = () => st.won.filter(g => reward(g).kind === 'money' && !st.spent.has(g));
   const money = () => moneyCards().reduce((n, g) => n + reward(g).n, 0);
   const science = () => st.won.filter(g => reward(g).kind === 'science').reduce((n, g) => n + reward(g).n, 0);
@@ -764,8 +766,8 @@ GAME_JS = r'''
     return best.sum - n;                                       // overpaid (lost)
   }
   const ICON = { vp: '★', money: '$', science: '⚛' };
-  const rewardHtml = gid => { const g = G.goals[gid], r = g.reward;
-    return `<div class="card rwd ${r.kind}${st.spent.has(gid) ? ' spent' : ''}"><b>${ICON[r.kind]}${r.n}</b><span>${g.name}</span></div>`; };
+  const rewardHtml = gid => { const g = G.goals[gid], r = reward(gid), side = st.scrapped.has(gid);
+    return `<div class="card rwd ${r.kind}${side ? ' side' : ''}${st.spent.has(gid) ? ' spent' : ''}"><b>${ICON[r.kind]}${r.n}</b><span>${side ? 'sideways = $1' : g.name}</span></div>`; };
 
   // ---- helpers ------------------------------------------------------------------------
   let tt; const toast = msg => { toastEl.textContent = msg; toastEl.classList.add('on'); clearTimeout(tt); tt = setTimeout(() => toastEl.classList.remove('on'), 3200); };
@@ -915,7 +917,7 @@ GAME_JS = r'''
     st.goals.perm.forEach((gid, i) => fill($('goal-f' + i), gid));
     st.goals.row.forEach((gid, i) => { fill($('goal-m' + i), gid); $('goal-m' + i).classList.toggle('take', !!takeOK && i === gr); });
     const gd = $('deck-missions'); gd.style.setProperty('--t', (st.goals.deck.length * 0.3).toFixed(2) + 'mm'); gd.style.visibility = st.goals.deck.length ? '' : 'hidden';
-    const cg = $('cgoals-you'), key = st.won.join() + '|' + [...st.spent].join();
+    const cg = $('cgoals-you'), key = st.won.join() + '|' + [...st.spent].join() + '|' + [...st.scrapped].join();
     if (cg.dataset.k !== key) {
       cg.dataset.k = key;
       cg.innerHTML = st.won.length ? st.won.map((gid, k) => `<div class="slot cg" style="left:${3 + k * Math.min(15, 100 / st.won.length)}mm;top:7mm">${rewardHtml(gid)}</div>`).join('')
@@ -1135,15 +1137,15 @@ GAME_JS = r'''
     if (launchesLeft() <= 0 || i !== rightmost(st.goals.row))
       return toast(`Goals are claimed at the end of your turn, after the draw, by a mission that meets them.${i < G.goalDvSurcharge ? ' This one is new: its destination is 1 Δv farther.' : ''}`);
     const g = G.goals[gid];
-    choice(g.html, `Take ${g.name} now, instead of launching? You flip it and keep its reward: ${ICON[g.reward.kind]}${g.reward.n}.`,
-      [{ label: `Take it (${ICON[g.reward.kind]}${g.reward.n})`, main: true, fn: () => takeGoal(i) }, { label: 'Cancel' }]);
+    choice(g.html, `Scrap ${g.name} instead of launching? You keep the card sideways as <b>$1</b> (not its printed reward).`,
+      [{ label: 'Scrap it for $1', main: true, fn: () => takeGoal(i) }, { label: 'Cancel' }]);
   }
   function takeGoal(i) {
     const gid = st.goals.row[i], from = $('goal-m' + i);
     st.used.launch++; st.goals.row.splice(i, 1); st.goals.row.unshift(st.goals.deck.pop() || null);
-    st.mode = 'anim'; render();
+    st.scrapped.add(gid); st.mode = 'anim'; render();
     fly(rewardHtml(gid), from, $('cgoals-you'), () => { st.won.push(gid); st.mode = 'idle'; render(); prompt();
-      toast(`${G.goals[gid].name} taken: +${ICON[reward(gid).kind]}${reward(gid).n}.`); });
+      toast(`${G.goals[gid].name} scrapped: +$1 (kept sideways).`); });
   }
 
   // ---- action cards ---------------------------------------------------------------------
