@@ -67,12 +67,11 @@ def price_html(p):
 
 
 def xcard_html(kind, head, name, sub, text, foot):
-    """Disaster / action / upgrade cards (docs/09): a simple text card, no silhouette yet."""
+    """Disaster / action / Space Center improvement cards (docs/09): a simple text card, no silhouette yet."""
     return (f'<div class="card xcard {kind}"><div class="xhead">{head}</div><div class="xname">{name}</div>'
             f'<div class="xsub">{sub}</div><div class="xtext">{text}</div><div class="xfoot">{foot}</div></div>')
 
 
-FIXED_BY = {u["fixes"]: u["name"] for u in DATA["upgrades"] if u.get("fixes")}
 for i, x in enumerate(DATA["disasters"]):
     foot = "one-shot: gone after use" if x["kind"] == "one-shot" else f"recurring · fixed by {x['fix'].title()}"
     CARDS[f"d{i}"] = {"kind": "disaster", "name": x["name"], "id": x["id"], "effect": x["effect"], "also": x.get("also"),
@@ -82,10 +81,11 @@ for i, x in enumerate(DATA["disasters"]):
 for i, a in enumerate(DATA["actions"]):
     CARDS[f"a{i}"] = {"kind": "action", "name": a["name"], "effect": a["effect"], "price": a["price"], "copies": a["copies"],
                       "html": xcard_html("action", "ACTION", a["name"], "play for free", a["text"], price_html(a["price"]))}
-for i, u in enumerate(DATA["upgrades"]):
-    CARDS[f"u{i}"] = {"kind": "upgrade", "name": u["name"], "sub": u["kind"], "fixes": u.get("fixes"), "tokens": u.get("tokens"),
-                      "draw": u.get("draw", 0), "price": u["price"], "copies": u.get("copies", 1),
-                      "html": xcard_html("upgrade", "UPGRADE", u["name"], "stays on your Space Center", u["text"], price_html(u["price"]))}
+for i, u in enumerate(DATA["improvements"]):   # Space Center improvements: bought, then they stay in front of you
+    CARDS[f"u{i}"] = {"kind": "improvement", "name": u["name"], "sub": u["kind"], "fixes": u.get("fixes"), "tokens": u.get("tokens"),
+                      "draw": u.get("draw", 0), "launch": u.get("launch", 0), "mc": u.get("mc", 0),
+                      "price": u["price"], "copies": u.get("copies", 1),
+                      "html": xcard_html("improvement", "SPACE CENTER IMPROVEMENT", u["name"], "stays in front of you", u["text"], price_html(u["price"]))}
 BY_NAME = {c["name"]: cid for cid, c in CARDS.items()}
 
 
@@ -105,10 +105,10 @@ HAND_IDS = {
 HANDS = {k: [CARDS[c]["html"] for c in v] for k, v in HAND_IDS.items()}
 # Your own deck (docs/09): the starting cards + every disaster. Draw from the top, used cards to the bottom.
 START_DECK = [cid(n) for n in DATA["starting_deck"]] + [c for c in CARDS if CARDS[c]["kind"] == "disaster"]
-# The shared main deck: every rocket, equipment, bundle, action and upgrade (with copies). The Crew Capsule
+# The shared main deck: every rocket, equipment, bundle, action and Space Center improvement (with copies). The Crew Capsule
 # is retired: a crewed slot's first equipment slot is the crew (docs/09).
 MAIN_DECK = [c for c, v in CARDS.items() if v["kind"] in ("engine", "equipment", "bundle") and v["name"] != "CREW CAPSULE"] \
-    + [c for c, v in CARDS.items() if v["kind"] in ("action", "upgrade") for _ in range(v["copies"])]
+    + [c for c, v in CARDS.items() if v["kind"] in ("action", "improvement") for _ in range(v["copies"])]
 MARKET_N = 4
 MARKET_SURCHARGE = [2, 1, 0, 0]   # newest (left) market cards cost extra money (docs/09)
 GOAL_ROW_N = 5
@@ -234,7 +234,7 @@ def space_center(name, color, you=False):
         f'<div class="ahead">{TAP}<span>{t}</span></div><div class="atext">{txt}</div></div>'
         for i, (t, txt) in enumerate(ACTIONS))
     acts += (f'<div class="upgrades"{' id="upg-you"' if you else ""} {at(8 + 2 * (CARD_W + 5), 20, CARD_W, CARD_H)}>'
-             f'<div class="ahead"><span>UPGRADES</span></div><div class="upg-list"></div></div>')
+             f'<div class="ahead"><span>IMPROVEMENTS</span></div><div class="upg-list"></div></div>')
     missions = ""
     for i in range(4):
         mx = MCOL_X + i * (MCOL_W + MCOL_GAP)
@@ -497,12 +497,12 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #332d29; fon
 .mkslot.take > .card, .gslot.take > .card { animation: glow 1.4s ease-in-out infinite; outline: 0.8mm dashed #7fd3ff; outline-offset: 0.8mm; }
 .mkslot.take, .gslot.take { cursor: pointer; }
 
-/* ---- docs/09: disaster / action / upgrade cards, prices, rows, resources, choice dialog ---- */
+/* ---- docs/09: disaster / action / improvement cards, prices, rows, resources, choice dialog ---- */
 .card.xcard { flex-direction: column; font-family: Helvetica, Arial, sans-serif; color: #1d1d1d; }
 .xcard .xhead { padding: 1.6mm 2.4mm; color: #fff; font: 800 3.2mm Helvetica, Arial, sans-serif; letter-spacing: 0.6mm; }
 .xcard.disaster { background: #fbe9e4; } .xcard.disaster .xhead { background: #8a1c12; }
 .xcard.action { background: #eef3fb; } .xcard.action .xhead { background: #1b3a6b; }
-.xcard.upgrade { background: #eef7ef; } .xcard.upgrade .xhead { background: #2f6b3a; }
+.xcard.improvement { background: #eef7ef; } .xcard.improvement .xhead { background: #2f6b3a; font-size: 2.6mm; letter-spacing: 0.3mm; }
 .xcard .xname { padding: 2.5mm 2.4mm 0.6mm; font-weight: 800; font-size: 4.1mm; line-height: 1.1; }
 .xcard .xsub { padding: 0 2.4mm; font-size: 2.6mm; color: #6b6356; font-style: italic; }
 .xcard .xtext { padding: 2.4mm; font-size: 3.1mm; line-height: 1.35; flex: 1; }
@@ -730,7 +730,7 @@ GAME_JS = r'''
     fired: false, visited: [], crew: false, home: false, launchedTurn: null, arrived: null, done: false });
   const st = {
     turn: 1, deck: shuffle(G.startDeck.slice()), hand: [], main: shuffle(G.mainDeck.slice()), market: [],
-    used: { launch: false, mc: false }, freeMC: 0, extraMC: 0, noLaunch: false, noLaunchNext: false,
+    used: { launch: 0, mc: 0 }, freeMC: 0, extraMC: 0, noLaunch: false, noLaunchNext: false,
     missions: [0, 1, 2, 3].map(blank), upgrades: [], removed: [],
     mode: 'idle', handOpen: false, sel: null, pending: null, firing: null, move: null, load: null,
     goals: { perm: G.goalPerm.slice(), row: [], deck: shuffle(G.goalDeck.slice()) },
@@ -835,9 +835,11 @@ GAME_JS = r'''
     return `${c.name} can't light on Earth. It's an upper stage.`; };
   const padTokens = () => { const pads = st.upgrades.map(C).filter(u => u.sub === 'pad');
     return pads.length ? pads.reduce((a, b) => mass(b.tokens.split('')) > mass(a.tokens.split('')) ? b : a).tokens : G.launch; };
-  const drawSize = () => 1 + st.upgrades.map(C).reduce((n, u) => n + (u.draw || 0), 0);
+  const bonus = k => st.upgrades.map(C).reduce((n, u) => n + (u[k] || 0), 0);
+  const drawSize = () => 1 + bonus('draw');
+  const launchesLeft = () => 1 + bonus('launch') - st.used.launch, mcLeft = () => 1 + bonus('mc') - st.used.mc;
   const owns = name => st.upgrades.some(u => C(u).name === name);
-  const fixFor = d => Object.values(G.cards).find(u => u.kind === 'upgrade' && u.fixes === d.id);
+  const fixFor = d => Object.values(G.cards).find(u => u.kind === 'improvement' && u.fixes === d.id);
   const rightmost = arr => { for (let i = arr.length - 1; i >= 0; i--) if (arr[i]) return i; return -1; };
   const priceAt = (id, i) => ({ money: (C(id).price.money || 0) + (G.marketSurcharge[i] || 0), science: C(id).price.science || 0 });
 
@@ -855,15 +857,15 @@ GAME_JS = r'''
   function can() {
     const idle = st.mode === 'idle';
     return {
-      launch: idle && !st.used.launch && !st.noLaunch && st.missions.some(m => !m.active),
-      mc: idle && (!st.used.mc || st.freeMC > 0 || st.extraMC > 0) && st.missions.some(spendable),
+      launch: idle && launchesLeft() > 0 && !st.noLaunch && st.missions.some(m => !m.active),
+      mc: idle && (mcLeft() > 0 || st.freeMC > 0 || st.extraMC > 0) && st.missions.some(spendable),
     };
   }
   function render() {
     const c = can(), idle = st.mode === 'idle';
     for (const k of ['launch', 'mc']) {
       const el = $('act-' + k), more = k === 'mc' && (st.freeMC > 0 || st.extraMC > 0);
-      el.classList.toggle('used', (st.used[k] && !more) || (k === 'launch' && st.noLaunch));
+      el.classList.toggle('used', (k === 'launch' ? launchesLeft() <= 0 || st.noLaunch : mcLeft() <= 0 && !more));
       el.classList.toggle('can', c[k]);
       el.classList.toggle('free', k === 'mc' && st.freeMC > 0);
     }
@@ -892,7 +894,7 @@ GAME_JS = r'''
     $('donebtn').hidden = st.mode !== 'load';
     const md = $('deck-rockets');
     md.style.setProperty('--t', (st.main.length * 0.3).toFixed(2) + 'mm'); md.style.visibility = st.main.length ? '' : 'hidden';
-    const takeOK = idle && !st.used.launch, mr = rightmost(st.market), gr = rightmost(st.goals.row);
+    const takeOK = idle && launchesLeft() > 0, mr = rightmost(st.market), gr = rightmost(st.goals.row);
     st.market.forEach((id, i) => { const el = $('mk-' + i);
       if (el.dataset.id !== (id || '')) { el.innerHTML = id ? C(id).html : ''; el.dataset.id = id || ''; }
       const p = id && priceAt(id, i), afford = p && money() >= p.money && science() >= p.science;
@@ -933,7 +935,7 @@ GAME_JS = r'''
   function launch(m) {
     const toks = padTokens().split('');
     Object.assign(m, blank(m.i), { active: true, space: 'earth', visited: ['earth'], arrived: st.turn, launchedTurn: st.turn });
-    st.used.launch = true; st.freeMC++; st.mode = 'anim';
+    st.used.launch++; st.freeMC++; st.mode = 'anim';
     render(); camYou();
     setTimeout(() => flyTokens(toks, c => $('bowl-' + c), () => $('mcargo-' + m.i), () => {
       m.tokens = toks; st.mode = 'idle'; render();
@@ -971,7 +973,7 @@ GAME_JS = r'''
     if (st.sel === k) return C(st.hand[k]).kind === 'action' ? playAction(k) : toast('Play rockets and equipment with Mission Control.');
     st.sel = k; syncHand();
   }
-  function useMC() { if (st.freeMC > 0) st.freeMC--; else if (!st.used.mc) st.used.mc = true; else st.extraMC--; }
+  function useMC() { if (st.freeMC > 0) st.freeMC--; else if (mcLeft() > 0) st.used.mc++; else st.extraMC--; }
   function place(m) {
     const k = st.pending, id = st.hand[k], c = C(id);
     useMC();
@@ -1106,31 +1108,31 @@ GAME_JS = r'''
   function marketClick(i) {
     const id = st.market[i]; if (!id) return;
     const c = C(id), p = priceAt(id, i), afford = money() >= p.money && science() >= p.science;
-    const canTake = !st.used.launch && i === rightmost(st.market);
+    const canTake = launchesLeft() > 0 && i === rightmost(st.market);
     const lack = science() < p.science ? `It needs ⚛${p.science} science (you have ${science()}).` : `It costs $${p.money} (you have $${money()}).`;
     const btns = [];
     if (afford) btns.push({ label: `Buy for ${p.money ? '$' + p.money : 'free'}${p.science ? ` (needs ⚛${p.science})` : ''}`, main: true, fn: () => buy(i, true) });
     if (canTake) btns.push({ label: 'Take it free instead of launching', main: !afford, fn: () => buy(i, false) });
-    if (!btns.length) return toast(`${c.name}: ${lack}${!st.used.launch ? ' Only the rightmost card can be taken instead of launching.' : ''}`);
+    if (!btns.length) return toast(`${c.name}: ${lack}${launchesLeft() > 0 ? ' Only the rightmost card can be taken instead of launching.' : ''}`);
     btns.push({ label: 'Cancel' });
-    choice(c.html, `${c.name}${afford ? '' : ` · ${lack}`}<br><small>${c.kind === 'upgrade' ? 'Upgrades stay on your Space Center.' : 'Bought cards go to the bottom of your deck.'}</small>`, btns);
+    choice(c.html, `${c.name}${afford ? '' : ` · ${lack}`}<br><small>${c.kind === 'improvement' ? 'Improvements stay in front of you, on your Space Center.' : 'Bought cards go to the bottom of your deck.'}</small>`, btns);
   }
   function buy(i, paid) {
     const id = st.market[i], c = C(id), p = priceAt(id, i);
     let lost = 0;
-    if (paid) lost = pay(p.money); else st.used.launch = true;
+    if (paid) lost = pay(p.money); else st.used.launch++;
     st.market.splice(i, 1); st.market.unshift(st.main.pop() || null);
     st.mode = 'anim'; render();
-    const to = c.kind === 'upgrade' ? $('upg-you') : $('deck-you');
+    const to = c.kind === 'improvement' ? $('upg-you') : $('deck-you');
     fly(c.html, $('mk-' + i), to, () => {
-      if (c.kind === 'upgrade') st.upgrades.push(id); else st.deck.push(id);
+      if (c.kind === 'improvement') st.upgrades.push(id); else st.deck.push(id);
       st.mode = 'idle'; render(); prompt();
-      toast(`${c.name} ${c.kind === 'upgrade' ? 'is on your Space Center' : 'goes to the bottom of your deck'}${paid ? (lost ? ` ($${lost} overpaid)` : '') : ' (instead of launching)'}.`);
+      toast(`${c.name} ${c.kind === 'improvement' ? 'is on your Space Center' : 'goes to the bottom of your deck'}${paid ? (lost ? ` ($${lost} overpaid)` : '') : ' (instead of launching)'}.`);
     });
   }
   function goalClick(i) {
     const gid = st.goals.row[i]; if (!gid) return;
-    if (st.used.launch || i !== rightmost(st.goals.row))
+    if (launchesLeft() <= 0 || i !== rightmost(st.goals.row))
       return toast(`Goals are claimed at the end of your turn, after the draw, by a mission that meets them.${i < G.goalDvSurcharge ? ' This one is new: its destination is 1 Δv farther.' : ''}`);
     const g = G.goals[gid];
     choice(g.html, `Take ${g.name} now, instead of launching? You flip it and keep its reward: ${ICON[g.reward.kind]}${g.reward.n}.`,
@@ -1138,7 +1140,7 @@ GAME_JS = r'''
   }
   function takeGoal(i) {
     const gid = st.goals.row[i], from = $('goal-m' + i);
-    st.used.launch = true; st.goals.row.splice(i, 1); st.goals.row.unshift(st.goals.deck.pop() || null);
+    st.used.launch++; st.goals.row.splice(i, 1); st.goals.row.unshift(st.goals.deck.pop() || null);
     st.mode = 'anim'; render();
     fly(rewardHtml(gid), from, $('cgoals-you'), () => { st.won.push(gid); st.mode = 'idle'; render(); prompt();
       toast(`${G.goals[gid].name} taken: +${ICON[reward(gid).kind]}${reward(gid).n}.`); });
@@ -1270,7 +1272,7 @@ GAME_JS = r'''
     prompt(`End of turn ${st.turn}: drawing ${drawSize()} card${drawSize() > 1 ? 's' : ''}…`);
     setTimeout(() => drawCards(drawSize(), () => prizes(() => {
       const msgs = clearMissions();
-      st.used = { launch: false, mc: false }; st.freeMC = 0; st.extraMC = 0; st.turn++;
+      st.used = { launch: 0, mc: 0 }; st.freeMC = 0; st.extraMC = 0; st.turn++;
       st.noLaunch = st.noLaunchNext; st.noLaunchNext = false;
       st.missions.forEach(m => { m.claimed = false; });
       st.mode = 'idle'; render(); camYou(); prompt();
@@ -1279,8 +1281,8 @@ GAME_JS = r'''
   }
 
   const why = k => ({
-    launch: st.noLaunch ? 'A disaster grounded your pad: no Launch this turn.' : st.used.launch ? 'You already launched (or took a rightmost card) this turn.' : 'All four mission slots are in use.',
-    mc: (st.used.mc && !st.freeMC && !st.extraMC) ? 'Mission Control is used for this turn.'
+    launch: st.noLaunch ? 'A disaster grounded your pad: no Launch this turn.' : launchesLeft() <= 0 ? 'You already launched (or took a rightmost card) this turn.' : 'All four mission slots are in use.',
+    mc: (mcLeft() <= 0 && !st.freeMC && !st.extraMC) ? 'Mission Control is used for this turn.'
       : st.missions.some(m => m.active) ? 'Your missions have no cargo tokens left to spend.'
       : 'Mission Control spends a mission\'s cargo, and you have no mission in flight. Launch one first (Launch includes a free Mission Control).',
   })[k];

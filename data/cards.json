@@ -1733,7 +1733,7 @@
       }
     }
   ],
-  "upgrades": [
+  "improvements": [
     {
       "name": "POGO SUPPRESSOR",
       "kind": "fix",
@@ -1822,6 +1822,26 @@
       "text": "Draw 1 more card at the end of each turn.",
       "price": {
         "money": 3,
+        "science": 2
+      }
+    },
+    {
+      "name": "SECOND LAUNCH COMPLEX",
+      "kind": "launch",
+      "launch": 1,
+      "text": "You may Launch one more time each turn (each with its free Mission Control).",
+      "price": {
+        "money": 3,
+        "science": 2
+      }
+    },
+    {
+      "name": "EXPANDED MISSION CONTROL",
+      "kind": "mc",
+      "mc": 1,
+      "text": "One more Mission Control each turn.",
+      "price": {
+        "money": 2,
         "science": 2
       }
     }

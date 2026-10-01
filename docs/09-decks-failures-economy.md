@@ -10,7 +10,7 @@ Status: **draft, Oct 2026**, from Alex's playtest notes. **DECIDED** = Alex's ca
 - **Bought cards go to the bottom of your deck.** You wait for them to come round.
 - **The Research action is gone.** You **draw 1 card** automatically at the **end** of your turn (see Turn order). Cards you buy later can raise your draw size.
 - That leaves two tapped actions: **Launch** and **Mission Control**. **Buy as much as you can afford** each turn (for now).
-- *Proposal:* draw-size upgrades sit **on your Space Center** once bought, not in your deck. A "+1 draw" card buried in your deck would only work on the turn you draw it.
+- Draw-size upgrades are **Space Center improvements** (section 4b): once bought they stay in front of you, not in your deck.
 
 ## 2. Mission slots: 2 crewed, 2 uncrewed — DECIDED
 
@@ -92,6 +92,44 @@ The main deck holds **actions** as well as rockets and equipment. Played actions
 *Proposal, flavour names from history* (no real engine names, per CLAUDE.md, but historical events are fine): Backup Systems (Redundancy), Operation Paperclip (take a card from an opponent's hand), Espionage (look at an opponent's top 3, reorder them), Budget Cut (an opponent loses 1 money).
 
 Playing an action is **free** (for now) — DECIDED.
+
+## 4b. Space Center improvements — DECIDED (Alex, Oct 2026)
+
+A card type in the rocket deck. Buy it, **put it down in front of you**, and it changes your rules for the rest of the game (the Fluxx idea from docs/07). Never in your deck, so never drawn or lost.
+
+Prototype set (names and prices are placeholders):
+
+| Improvement | Effect | Price |
+|---|---|---|
+| Flight Operations Team (×2) | Draw 1 more card at the end of each turn. | $3 + ⚛2 |
+| Second Launch Complex | One more Launch each turn (each with its free Mission Control). | $3 + ⚛2 |
+| Expanded Mission Control | One more Mission Control each turn. | $2 + ⚛2 |
+| Orbital / Heavy / Super Pad | Launch places 4 red / 4 black / 6 black. | $2+⚛1 / $3+⚛3 / $4+⚛6 |
+| The 5 disaster fixes | Remove that disaster for good, the next time it's drawn. | $1 each |
+
+*Proposal for more:* Tracking Network (keep 1 equipment slot instead of losing it), Astronaut Corps (a crewed mission lost costs −1★, not −2), Propellant Depot (park spare cargo tokens in LEO).
+
+## 4c. Space infrastructure goals — DIRECTION (Alex, Oct 2026), details OPEN
+
+A new kind of goal card: **infrastructure** (space stations, Moon bases, satellite networks…). One alone is worth little; **sets pay escalating rewards**, e.g. one = nothing, two = 3★, three = 8★. Some sets pay science or money instead of VP.
+
+*Proposal, families* (each card = one delivery, kept like any won goal):
+
+| Family | One card's delivery | Set pays | 1 / 2 / 3 / 4 |
+|---|---|---|---|
+| Space Station | a module (≥ 10t + 1 eq) to LEO | ★ VP | 0 / 3 / 8 / 15 |
+| Moon Base | Crew Habitat or 20t to the Moon's surface | ★ VP | 0 / 3 / 8 / 15 |
+| Mars Base | Crew Habitat or 20t to Mars' surface | ★ VP | 1 / 4 / 10 / 18 |
+| Satellite Network | 1 eq to LEO or GEO | $ income | 0 / 1 / 2 / 4 money **each turn** |
+| Deep Space Network | Large Antenna at escape or beyond | ⚛ science | 1 / 3 / 6 / 10 |
+
+The 0/3/8 curve is Alex's; the others are filler to tune. A Satellite Network paying money every turn is the real thing (a comsat constellation is a business), and it gives the economy a growth engine.
+
+**OPEN:**
+1. Where do they live: in the transient contract row (they come and go, so you grab them when they show up), or their own face-up row?
+2. Do they replace the four MOST goals (Largest Space Station / Lunar Base / Martian Base, International Station)? They cover the same ground, and sets are simpler than "most at the end".
+3. Money sets: a one-off payout when the set grows, or income every turn (as proposed)?
+4. Can a disaster destroy infrastructure (a station fire takes a card back)? Thematic, but it's a second kind of loss to track.
 
 ## 5. Goals pay out; market cards have a price — DECIDED
 
@@ -191,11 +229,11 @@ The reward amount = the goal's current `vp` value, so nothing needs re-balancing
 
 ## In the web prototype (Oct 2026)
 
-`build/table.html` (Blue's seat) now plays these rules: your own deck with draw at end of turn, the 5-step turn order, disasters (all 10) with Backup Systems, crewed/uncrewed slots, buying with money/science and the price gradient, +1 Δv on new contracts, taking the rightmost card instead of launching, permanent goals (VP) face-up and the ×3 transient deck, upgrades on the Space Center (fixes, pads, +1 draw). Data: `data/cards.json` → `disasters`, `actions`, `upgrades`, `starting_deck`, and a `price` on every card.
+`build/table.html` (Blue's seat) now plays these rules: your own deck with draw at end of turn, the 5-step turn order, disasters (all 10) with Backup Systems, crewed/uncrewed slots, buying with money/science and the price gradient, +1 Δv on new contracts, taking the rightmost card instead of launching, permanent goals (VP) face-up and the ×3 transient deck, Space Center improvements (fixes, pads, +1 draw, second Launch, extra Mission Control). Data: `data/cards.json` → `disasters`, `actions`, `improvements`, `starting_deck`, and a `price` on every card.
 
 Placeholders chosen for the prototype (all to playtest, none decided):
 - **Starting deck:** 2× Kerolox Sustainer, 2× Light Solid Booster, Solid Kick Motor, Atmospheric Return, 2× Science Package, Backup Systems, Overtime + the 10 disasters (20 cards).
-- **Prices:** by tech tier as in section 7; actions $1–2; fixes $1; pads Orbital (4 red) $2+⚛1, Heavy $3+⚛3, Super $4+⚛6; Flight Operations Team (+1 draw, 2 copies) $3+⚛2.
+- **Prices:** by tech tier as in section 7; actions $1–2; improvements as in section 4b.
 - **Main deck copies:** Backup Systems ×3, Overtime ×2, Extra Shift ×2, other actions ×1. The Crew Capsule card is out of the decks.
 - **Opponent actions** (Paperclip, Espionage, Press Leak, Budget Cut) do nothing yet: no opponents are simulated.
 - **"Completed" mission** = it claimed a goal this turn, or it's back on Earth. A disaster costs only the prizes of the mission it hits.
