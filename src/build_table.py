@@ -419,7 +419,7 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #332d29; fon
 .hud button { font: 700 14px Helvetica, Arial, sans-serif; min-width: 34px; height: 34px; border-radius: 17px; border: 1px solid rgba(255,236,200,.35);
   background: rgba(30,20,12,.75); color: #f3e6cf; cursor: pointer; padding: 0 12px; }
 .hud button:hover { background: rgba(60,40,24,.9); }
-@media (max-width: 600px) { .hud .ttl { display: none; } .hud input[type=range] { width: 90px; } }
+
 
 /* ---- game: clickable glow, used/free markers, mission columns, board highlights ---- */
 @keyframes glow { 0%,100% { box-shadow: 0 0 0 0.5mm rgba(255,196,64,.95), 0 0 2.5mm 0.6mm rgba(255,196,64,.55); }
@@ -490,6 +490,15 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #332d29; fon
 #closeup tr.pick:hover td { background: #ffe29a; }
 .hud .endturn { background: #d9a441; color: #1d1d1d; border-color: #d9a441; }
 .hud .endturn:hover { background: #e9b451; }
+
+/* phones: last, so these win over the base rules above */
+@media (max-width: 600px) {
+  .hud .ttl { display: none; } .hud input[type=range] { width: 80px; }
+  .hud { right: 8px; left: 8px; bottom: 8px; justify-content: space-between; }
+  #prompt { top: 8px; font-size: 12px; line-height: 1.35; padding: 6px 12px; border-radius: 12px; max-width: 94vw; }
+  #toast { bottom: 76px; font-size: 12px; max-width: 90vw; text-align: center; }
+  #donebtn { top: auto; bottom: 120px; }
+}
 '''
 
 PANZOOM_JS = r'''
@@ -641,7 +650,8 @@ GAME_JS = r'''
   // ---- helpers --------------------------------------------------------------
   let tt; const toast = msg => { toastEl.textContent = msg; toastEl.classList.add('on'); clearTimeout(tt); tt = setTimeout(() => toastEl.classList.remove('on'), 2800); };
   const prompt = msg => { promptEl.textContent = msg || idlePrompt(); promptEl.classList.add('on'); };
-  const idlePrompt = () => `Turn ${st.turn} · Research, Launch or Mission Control (glowing), click a glowing rocket to fire it, or a glowing badge to aerobrake home. Then End turn.`;
+  const idlePrompt = () => innerWidth < 600 ? `Turn ${st.turn} · tap anything glowing, then End turn.`
+    : `Turn ${st.turn} · Research, Launch or Mission Control (glowing), click a glowing rocket to fire it, or a glowing badge to aerobrake home. Then End turn.`;
   const posOf = el => { let x = 0, y = 0; while (el && el.id !== 'table') { x += el.offsetLeft; y += el.offsetTop; el = el.offsetParent; } return { x: x / MM, y: y / MM }; };
   const centerOf = el => { const p = posOf(el); return { x: p.x + el.offsetWidth / MM / 2, y: p.y + el.offsetHeight / MM / 2 }; };
   function flyTokens(list, fromOf, toOf, done) {               // wooden deltas hop one by one, lifted off the table
@@ -988,7 +998,11 @@ GAME_JS = r'''
   }
   const slotOfGoal = gid => { let i = st.goals.firsts.indexOf(gid); if (i >= 0) return $('goal-f' + i); i = st.goals.market.indexOf(gid); return i >= 0 ? $('goal-m' + i) : null; };
   function claim(gid) {
-    const g = G.goals[gid], from = slotOfGoal(gid);
+    const g = G.goals[gid], from = slotOfGoal(gid), hit = st.claimable.find(h => h.gid === gid);
+    if (g.check && g.check.cargo && hit) {                       // "N t at …": the payload is delivered, so it leaves the mission
+      const m = hit.m, toks = m.tokens.slice(); m.tokens = [];
+      flyTokens(toks, () => $('mcargo-' + m.i), t => $('bowl-' + t), null);
+    }
     let i = st.goals.firsts.indexOf(gid);
     if (i >= 0) st.goals.firsts[i] = null;
     else { i = st.goals.market.indexOf(gid); st.goals.market[i] = st.goals.deck.pop() || null; }
@@ -996,7 +1010,7 @@ GAME_JS = r'''
     from.innerHTML = ''; render();
     fly(g.html, from, $('cgoals-you'), () => {
       st.goals.mine.push(gid); st.vp += g.vp; if (st.mode === 'anim') st.mode = 'idle'; render();
-      toast(`${g.name} claimed! +${g.vp}★`);
+      toast(`${g.name} claimed! +${g.vp}★${g.check && g.check.cargo ? ' The payload is delivered.' : ''}`);
       if (st.mode === 'idle') claimDone();
     });
   }
@@ -1072,6 +1086,7 @@ GAME_JS = r'''
   $('donebtn').addEventListener('click', finishLoad);
 
   buildHand(); syncHand(); render(); prompt();
+  if (innerWidth < 700 && !location.hash) setTimeout(camYou, 300);   // phones: start on your Space Center
 })();
 '''
 
