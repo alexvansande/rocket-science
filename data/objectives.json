@@ -148,7 +148,9 @@
     "check": {
       "deep": 1,
       "cargo": 10
-    }
+    },
+    "transient": true,
+    "copies": 3
   },
   {
     "id": "obj11",
@@ -171,7 +173,9 @@
     "check": {
       "deep": 4,
       "cargo": 10
-    }
+    },
+    "transient": true,
+    "copies": 3
   },
   {
     "id": "obj13",
@@ -184,7 +188,9 @@
     "check": {
       "deep": 5,
       "cargo": 10
-    }
+    },
+    "transient": true,
+    "copies": 3
   },
   {
     "id": "obj14",
@@ -197,7 +203,9 @@
     "check": {
       "deep": 8,
       "cargo": 10
-    }
+    },
+    "transient": true,
+    "copies": 3
   },
   {
     "id": "obj15",
@@ -232,13 +240,14 @@
     "requires": "1 equipment at LEO",
     "type": "COMMERCIAL",
     "vp": 1,
-    "filler": true,
     "check": {
       "at": [
         "leo"
       ],
       "equipCount": 1
-    }
+    },
+    "transient": true,
+    "copies": 3
   },
   {
     "id": "fil02",
@@ -249,13 +258,14 @@
     "type": "COMMERCIAL",
     "vp": 2,
     "note": "An Equipment Bundle x3 does it in one action",
-    "filler": true,
     "check": {
       "at": [
         "leo"
       ],
       "equipCount": 3
-    }
+    },
+    "transient": true,
+    "copies": 3
   },
   {
     "id": "fil03",
@@ -265,13 +275,14 @@
     "requires": "1 equipment at GEO",
     "type": "COMMERCIAL",
     "vp": 2,
-    "filler": true,
     "check": {
       "at": [
         "geo"
       ],
       "equipCount": 1
-    }
+    },
+    "transient": true,
+    "copies": 3
   },
   {
     "id": "fil04",
@@ -281,7 +292,6 @@
     "requires": "Crew Capsule to LEO + Atmospheric Return home",
     "type": "COMMERCIAL",
     "vp": 1,
-    "filler": true,
     "check": {
       "visited": [
         "leo"
@@ -293,7 +303,9 @@
         "CREW CAPSULE",
         "ATMOSPHERIC RETURN"
       ]
-    }
+    },
+    "transient": true,
+    "copies": 3
   },
   {
     "id": "fil05",
@@ -303,13 +315,14 @@
     "requires": "10t at DV5 \u00b7 pays on delivery",
     "type": "MILITARY",
     "vp": 1,
-    "filler": true,
     "check": {
       "at": [
         "a5"
       ],
       "cargo": 10
-    }
+    },
+    "transient": true,
+    "copies": 3
   },
   {
     "id": "fil06",
@@ -319,13 +332,14 @@
     "requires": "20t at DV6 \u00b7 pays on delivery",
     "type": "MILITARY",
     "vp": 1,
-    "filler": true,
     "check": {
       "at": [
         "a6"
       ],
       "cargo": 20
-    }
+    },
+    "transient": true,
+    "copies": 3
   },
   {
     "id": "fil07",
@@ -335,13 +349,14 @@
     "requires": "10t at DV7 \u00b7 pays on delivery",
     "type": "MILITARY",
     "vp": 1,
-    "filler": true,
     "check": {
       "at": [
         "a7"
       ],
       "cargo": 10
-    }
+    },
+    "transient": true,
+    "copies": 3
   },
   {
     "id": "fil08",
@@ -351,13 +366,14 @@
     "requires": "40t at DV8 \u00b7 pays on delivery",
     "type": "MILITARY",
     "vp": 2,
-    "filler": true,
     "check": {
       "at": [
         "a8"
       ],
       "cargo": 40
-    }
+    },
+    "transient": true,
+    "copies": 3
   },
   {
     "id": "fil09",
@@ -367,7 +383,6 @@
     "requires": "Science Package at LEO, 4 turns",
     "type": "SCIENCE",
     "vp": 1,
-    "filler": true,
     "check": {
       "at": [
         "leo"
@@ -376,7 +391,9 @@
         "SCIENCE PACKAGE"
       ],
       "turns": 4
-    }
+    },
+    "transient": true,
+    "copies": 3
   },
   {
     "id": "fil10",
@@ -386,13 +403,14 @@
     "requires": "Science Package at escape +2 Dv",
     "type": "SCIENCE",
     "vp": 2,
-    "filler": true,
     "check": {
       "deep": 2,
       "equip": [
         "SCIENCE PACKAGE"
       ]
-    }
+    },
+    "transient": true,
+    "copies": 3
   },
   {
     "id": "fil11",
@@ -402,14 +420,15 @@
     "requires": "Science Package + Atmospheric Return at escape +4 Dv",
     "type": "SCIENCE",
     "vp": 2,
-    "filler": true,
     "check": {
       "deep": 4,
       "equip": [
         "SCIENCE PACKAGE",
         "ATMOSPHERIC RETURN"
       ]
-    }
+    },
+    "transient": true,
+    "copies": 3
   },
   {
     "id": "fil12",
@@ -419,13 +438,14 @@
     "requires": "Science Package + RTG at escape +6 Dv",
     "type": "SCIENCE",
     "vp": 3,
-    "filler": true,
     "check": {
       "deep": 6,
       "equip": [
         "SCIENCE PACKAGE",
         "RTG"
       ]
-    }
+    },
+    "transient": true,
+    "copies": 3
   }
 ]

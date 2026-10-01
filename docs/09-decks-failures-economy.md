@@ -183,7 +183,7 @@ The reward amount = the goal's current `vp` value, so nothing needs re-balancing
 | SCIENCE (4) + FLYBY (4) — transient | science |
 | COMMERCIAL (4) + MILITARY (4) — transient | money (mostly 1 bag; Maximum Throw, GPS, TV = 2) |
 
-**The transient deck should be big — DECIDED (Alex): many flybys and contracts**, cycling through the row. Today it has 16 (4 each of commercial, military, science, flyby), and the 12 contracts are still marked `filler` ("cut these first") in `objectives.json`. That flag no longer fits: they're the whole economy. Next: drop the flag and write more transient cards (more flyby targets, parameter variants of the military/commercial throws).
+**The transient deck is multiplied — DECIDED (Alex, Oct 2026).** The 16 transient goals (4 each commercial, military, science, flyby) are printed **3 times each = 48 cards**, so money and science keep coming. `objectives.json`: `"transient": true, "copies": 3`; the old `filler` flag is gone. The kit prints them on their own MISSIONS sheets (12 permanent + 48 transient = 60 goal cards, 4 sheets); the table prototype gives each copy its own id.
 
 ### Prices
 

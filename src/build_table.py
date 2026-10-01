@@ -81,8 +81,10 @@ DECK_IDS = [c for c in CARDS if c not in MARKET_IDS and not any(c in h for h in 
 LAUNCH_TOKENS = "R"         # the basic pad's lift: 1 red = 160t, single-stage suborbital start (docs/07)
 
 # Goals: FIRSTs always open; a 5-card market; the rest shuffle into the missions deck.
-GOALS = {o["id"]: {"name": o["name"], "type": o["type"], "vp": o["vp"], "check": o.get("check"),
-                   "html": objective_card_html(o)} for o in OBJS}
+# Transient contracts come in "copies" (docs/09); each copy gets its own id (obj17, obj17b, obj17c).
+GOALS = {o["id"] + ("" if k == 0 else "bcdefgh"[k - 1]):
+         {"name": o["name"], "type": o["type"], "vp": o["vp"], "check": o.get("check"),
+          "html": objective_card_html(o)} for o in OBJS for k in range(o.get("copies", 1))}
 GOAL_FIRSTS = [o["id"] for o in OBJS if o["type"] == "FIRST"]
 GOAL_MARKET = [o["id"] for o in OBJS if o["name"] in
                ("SPECIAL DELIVERY", "UNNAMED PAYLOAD", "INTERCONTINENTAL EXPRESS", "COMSAT", "WEATHER WATCH")]

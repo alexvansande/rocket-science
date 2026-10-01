@@ -279,33 +279,13 @@ def back_page(label, cls):
 </section>'''
 
 
-BACK_KIND = {"rockets": ("ROCKETS", "rockets"), "missions": ("MISSIONS", "missions")}
-
-def mixed_back_page(kinds):
-    """Backs for a MIXED front sheet (e.g. equipment + filler missions on one page).
-    kinds = per-slot back kind in FRONT order ('rockets' | 'missions'). Each row of 4
-    is horizontally REVERSED so the backs land behind their fronts under a long-edge
-    duplex flip (uniform sheets never needed this; mixed ones do)."""
-    kinds = list(kinds) + ["rockets"] * (PER_PAGE - len(kinds))
-    cells = []
-    for r in range(0, PER_PAGE, 4):
-        for k in kinds[r:r + 4][::-1]:
-            label, cls = BACK_KIND[k]
-            cells.append(f'<div class="card cback {cls}"><span>{label}</span></div>')
-    return f'''
-<section class="page back-page">
-  <header><span class="ph-title">CARD BACKS (mixed)</span><span class="ph-num">TRISKELION | card backs</span></header>
-  <div class="grid">{"".join(cells)}</div>
-</section>'''
-
-
 OBJ_TYPE_COLOR = {
     "FIRST":      "#b8860b",
     "FLYBY":      "#5d2a91",
     "MOST":       "#1b3a6b",
     "RESCUE":     "#a83232",
     "ENDURANCE":  "#1b4332",
-    # filler contract types (the 12 expendable space-fillers on the equipment sheet)
+    # transient contract types (commercial, military, science)
     "COMMERCIAL": "#0e7490",
     "MILITARY":   "#556b2f",
     "SCIENCE":    "#46237a",
@@ -547,10 +527,9 @@ def main():
     engine_cards = [engine_card_html(e) for e in page1_engines] + [bundle_card_html(b) for b in rocket_bundles]
     equip_cards = [equipment_card_html(q) for q in data["equipment"]] + [bundle_card_html(b) for b in equip_bundles]
 
-    # FILLER objectives (marked "filler": true — expendable space-fillers) ride in the
-    # spare slots of the last equipment sheet instead of the main objectives page.
-    filler_objs = [o for o in objectives if o.get("filler")]
-    main_objs = [o for o in objectives if not o.get("filler")]
+    # Permanent goals print once; transient contracts print "copies" times (docs/09:
+    # a big transient deck keeps money and science coming).
+    main_objs = [o for o in objectives for _ in range(o.get("copies", 1))]
 
     n_engine_pages = _npages(len(engine_cards))
     n_equip_pages = _npages(len(equip_cards))
@@ -567,21 +546,12 @@ def main():
         title = "ENGINE & BUNDLE CARDS" if n_engine_pages == 1 else f"ENGINE & BUNDLE CARDS (page {pi+1})"
         pages.append(card_page(title, pgnum, TOTAL_PAGES, engine_cards[i:i+PER_PAGE]))
         pages.append(back_page("ROCKETS", "rockets"))
-    # Equipment (+ the blue equipment-bundle multipliers). The LAST sheet's spare
-    # slots take the filler contract cards (gold MISSIONS backs -> mixed back sheet).
-    equip_chunks = [equip_cards[i:i + PER_PAGE] for i in range(0, len(equip_cards), PER_PAGE)]
-    for ci, chunk in enumerate(equip_chunks):
+    # Equipment (+ the blue equipment-bundle multipliers)
+    for i in range(0, len(equip_cards), PER_PAGE):
         pgnum += 1
-        kinds = ["rockets"] * len(chunk)
-        title = "EQUIPMENT CARDS"
-        if ci == len(equip_chunks) - 1 and filler_objs:
-            fill = [objective_card_html(o) for o in filler_objs][: PER_PAGE - len(chunk)]
-            chunk = chunk + fill
-            kinds += ["missions"] * len(fill)
-            title = "EQUIPMENT + FILLER CONTRACTS"
-        pages.append(card_page(title, pgnum, TOTAL_PAGES, chunk))
-        pages.append(mixed_back_page(kinds) if "missions" in kinds else back_page("ROCKETS", "rockets"))
-    # Objectives (the 16 main cards; fillers already placed above)
+        pages.append(card_page("EQUIPMENT CARDS", pgnum, TOTAL_PAGES, equip_cards[i:i + PER_PAGE]))
+        pages.append(back_page("ROCKETS", "rockets"))
+    # Objectives: permanent goals, then the transient contracts (with their copies)
     for i in range(0, len(main_objs), PER_PAGE):
         pgnum += 1
         pages.append(objective_page(pgnum, TOTAL_PAGES, main_objs[i:i + PER_PAGE]))

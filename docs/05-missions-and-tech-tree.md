@@ -81,7 +81,9 @@ How players draw, claim, and score remains open. Sketched:
 
 Recommend hybrid, with the transient contract row as the shared open market and the constant FIRSTs as the racing spine.
 
-## Filler contract cards (12, June 2026 — expendable)
+## Filler contract cards (12, June 2026 — now the transient deck)
+
+> **Oct 2026:** no longer expendable. These 12 plus the 4 FLYBYs are the transient deck, printed 3× each (48 cards) on their own sheets. The `filler` flag is replaced by `transient` + `copies`. See `docs/09`.
 
 The first batch of TRANSIENT contracts exists as 12 carded fillers occupying the spare slots of the second equipment sheet (gold MISSIONS backs via a mixed back sheet, so they shuffle into the mission deck when cut). Marked **`"filler": true`** in `data/objectives.json` — that flag is the "this is expendable" ink: **if a future layout needs the space, cut these first.** Three flavors, 4 each:
 
