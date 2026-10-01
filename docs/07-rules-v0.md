@@ -67,7 +67,11 @@ Like rockets, equipment is **not precommitted** (except the Crew Capsule, which 
 - A stage's `+ N equipment cards` slots.
 - A strip row whose cargo is `N eq`, below one yellow. *Proposal:* there are no tokens that small, so **choosing an `N eq` row means placing those equipment cards from your hand right then.** This is the same exception as the Crew Capsule, and it needs no new components. It's usually the capsule riding those rows anyway (K2 + capsule = First Orbit).
 
-**Equipment in play (prototype, Sep 2026).** Mission Control works on any mission in flight that has cargo tokens *or* free equipment slots. Equipment uses a free slot first; otherwise the smallest token is broken into slots by mass (Y = 4), and **unused slots stay aboard** (unlike a rocket, which absorbs all the cargo). Stages with `+ N equipment cards` add N slots when they fire. *Open:* the Crew Capsule was decided to be declared at launch; the prototype currently lets you add it later like any equipment — keep the exception or drop it?
+**Equipment slots are used immediately — DECIDED (Sep 2026).** There are no blue/equipment tokens, so equipment capacity never sits on the table: whenever slots appear you fill them from your hand right away, and unfilled slots are lost. Slots appear when:
+- a rocket fires on an `N eq` row (N slots), plus any `+ N equipment cards` carried by that stage;
+- you play an equipment card with Mission Control on a mission with cargo tokens: the smallest token breaks into slots by mass (Y = 4, O = 16 …), that card takes one, and you may load more right then.
+
+(Emergent: keep small tokens around if you plan to add equipment later; breaking an orange for one capsule wastes 15 slots.) *Open:* the Crew Capsule was decided to be declared at launch; the prototype currently lets you add it later like any equipment. Keep the exception or drop it?
 
 ## Splitting a mission — DECIDED
 

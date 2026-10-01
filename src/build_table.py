@@ -286,6 +286,7 @@ def main():
 </div>
 <div id="toast" role="status"></div>
 <div id="prompt" role="status"></div>
+<button id="donebtn" hidden>Done loading</button>
 <div id="closeup" hidden><div class="cu-inner"><div class="cu-card"></div></div></div>
 <script type="application/json" id="game-data">{game_json}</script>
 <script>{PANZOOM_JS}</script>
@@ -395,6 +396,10 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #332d29; fon
 .mini { width: 16.9mm; height: 23.8mm; flex: none; position: relative; }
 .mini > .card { position: absolute; left: 0; top: 0; width: 47mm; height: 66mm; transform: scale(.36); transform-origin: 0 0; border-radius: 3mm;
   box-shadow: 0 1mm 2.5mm rgba(0,0,0,.4); }
+.hand.loading .hc:not(.eqc) .face.front > .card { animation: none; filter: grayscale(.8) brightness(.8); }
+#donebtn { position: fixed; top: 62px; left: 50%; transform: translateX(-50%); font: 700 14px Helvetica, Arial, sans-serif;
+  background: #d9a441; color: #1d1d1d; border: 0; border-radius: 18px; padding: 8px 18px; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,.4); }
+#donebtn[hidden] { display: none; }
 .eqchip { font-size: 2.6mm; font-weight: 700; color: #1b3a6b; background: #e6ecf5; border-radius: 1mm; padding: 0.6mm 1.2mm; }
 .rest .tok { position: absolute; left: 3mm; top: 2mm; width: 10mm; height: 16mm; }
 .mslot.fired > .card { filter: saturate(.35) brightness(.92); }
@@ -574,7 +579,7 @@ GAME_JS = r'''
     turn: 1, deck: shuffle(G.deck.slice()), hand: G.hand.slice(), discard: [],
     used: { research: false, launch: false, mc: false }, freeMC: 0,
     missions: [0, 1, 2, 3].map(i => ({ i, active: false, space: null, tokens: [], paid: false, eq: 0, equip: [], card: null, fired: false })),
-    mode: 'idle', handOpen: false, sel: null, pending: null, firing: null, move: null,
+    mode: 'idle', handOpen: false, sel: null, pending: null, firing: null, move: null, load: null,
   };
   const hand = $('hand-you'), toastEl = $('toast'), promptEl = $('prompt'), closeup = $('closeup');
 
@@ -607,12 +612,12 @@ GAME_JS = r'''
     const w = Math.max(x1 - x0, 180), h = Math.max(y1 - y0, 120), cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
     cam([cx - w / 2, cy - h / 2, cx + w / 2, cy + h / 2]);
   }
-  const spendable = m => m.active && (m.tokens.length > 0 || m.eq > 0);
+  const spendable = m => m.active && m.tokens.length > 0;
   const eligible = m => { const c = pendingCard(); if (!c || !m.active) return false;
     if (c.kind === 'equipment') return spendable(m);
     return !m.paid && mass(m.tokens) >= c.T - 1e-9 && (m.space !== 'earth' || lightsOnEarth(c)); };
   const reason = m => { const c = pendingCard(); if (!m.active) return 'That mission slot is empty. Launch first.';
-    if (c.kind === 'equipment') return `Mission ${ROMAN[m.i]} has no cargo tokens or equipment slots left.`;
+    if (c.kind === 'equipment') return `Mission ${ROMAN[m.i]} has no cargo tokens left to turn into equipment.`;
     if (m.paid) return `Mission ${ROMAN[m.i]} already has a rocket waiting to fire.`;
     if (mass(m.tokens) < c.T) return `Mission ${ROMAN[m.i]} has ${mass(m.tokens)}t of cargo; ${c.name} costs ${c.T}t.`;
     return `${c.name} can't light on Earth. It's an upper stage.`; };
@@ -621,7 +626,7 @@ GAME_JS = r'''
   function buildHand() {
     const n = st.hand.length, squeeze = Math.min(1, 5 / Math.max(n, 1)), spread = n > 6 ? 264 / n : 44;
     hand.innerHTML = st.hand.map((id, k) => { const o = k - (n - 1) / 2;
-      return `<div class="hc" data-k="${k}" style="--cx:${(o * 22 * squeeze).toFixed(1)};--cy:${(Math.abs(o) * 3).toFixed(1)};--cr:${(o * 7 * squeeze).toFixed(1)};--ox:${(o * spread).toFixed(1)};--oy:${(Math.abs(o) * 2).toFixed(1)};--or:${(o * 2.5).toFixed(1)};z-index:${k + 1}"><div class="flip"><div class="face back">${BACK}</div><div class="face front">${G.cards[id].html}</div></div></div>`; }).join('');
+      return `<div class="hc${G.cards[id].kind === 'equipment' ? ' eqc' : ''}" data-k="${k}" style="--cx:${(o * 22 * squeeze).toFixed(1)};--cy:${(Math.abs(o) * 3).toFixed(1)};--cr:${(o * 7 * squeeze).toFixed(1)};--ox:${(o * spread).toFixed(1)};--oy:${(Math.abs(o) * 2).toFixed(1)};--or:${(o * 2.5).toFixed(1)};z-index:${k + 1}"><div class="flip"><div class="face back">${BACK}</div><div class="face front">${G.cards[id].html}</div></div></div>`; }).join('');
   }
   function syncHand() {
     void hand.offsetWidth;                                     // let a freshly built hand flip, not jump
@@ -650,7 +655,7 @@ GAME_JS = r'''
       slot.classList.toggle('fired', !!m.card && m.fired);
       slot.classList.toggle('can', st.mode === 'idle' && !!m.card && !m.fired);
       $('mcargo-' + m.i).innerHTML = m.tokens.map(t => tri(t, m.paid ? 'spent' : '')).join('')
-        + (m.eq ? `<span class="eqchip">${m.eq} equipment slot${m.eq > 1 ? 's' : ''}</span>` : '')
+        + (st.load && st.load.m === m ? `<span class="eqchip">${st.load.n} slot${st.load.n > 1 ? 's' : ''} to fill</span>` : '')
         + (m.equip.length ? `<div class="minis">${m.equip.map(e => `<div class="mini" title="${G.cards[e].name}">${G.cards[e].html}</div>`).join('')}</div>` : '');
       $('mrest-' + m.i).innerHTML = m.active ? '' : MEEPLE;
       $('mcol-' + m.i).classList.toggle('target', st.mode === 'mc-target' && eligible(m));
@@ -661,7 +666,9 @@ GAME_JS = r'''
         bt.style.left = (p.x + off * 5) + 'mm'; bt.style.top = p.y + 'mm';
       } else if (bt) bt.remove();
     }
-    hand.classList.toggle('can', st.mode === 'mc-pick');
+    hand.classList.toggle('can', st.mode === 'mc-pick' || st.mode === 'load');
+    hand.classList.toggle('loading', st.mode === 'load');
+    $('donebtn').hidden = st.mode !== 'load';
     const deck = $('deck-rockets');
     deck.style.setProperty('--t', (st.deck.length * 0.3).toFixed(2) + 'mm'); deck.style.visibility = st.deck.length ? '' : 'hidden';
     const top = st.discard[st.discard.length - 1], ds = $('discard-you');
@@ -702,6 +709,11 @@ GAME_JS = r'''
       st.mode = 'mc-target'; st.handOpen = false; syncHand(); render();
       return prompt(`Choose the glowing mission for ${c.name}${c.kind === 'equipment' ? ' (uses 1 equipment slot)' : ` (costs ${c.T}t)`}.`);
     }
+    if (st.mode === 'load') {
+      if (G.cards[st.hand[k]].kind !== 'equipment') return toast('Only equipment cards can fill these slots.');
+      if (st.sel !== k) { st.sel = k; return syncHand(); }
+      return loadCard(k);
+    }
     if (st.mode !== 'idle') return;
     if (!st.handOpen) { st.handOpen = true; st.sel = null; return syncHand(); }
     if (st.sel === k) return toast('Play cards with Mission Control.');
@@ -712,15 +724,15 @@ GAME_JS = r'''
     if (st.freeMC > 0) st.freeMC--; else st.used.mc = true;
     st.hand.splice(k, 1); st.pending = null; st.sel = null; st.mode = 'idle'; st.handOpen = false;
     buildHand(); syncHand();
-    if (c.kind === 'equipment') {                               // a free slot, else break the smallest token into slots
-      let note = '';
-      if (m.eq > 0) m.eq--;
-      else { const t = [...m.tokens].sort((a, b) => VAL[a] - VAL[b])[0]; m.tokens.splice(m.tokens.indexOf(t), 1);
-             m.eq += VAL[t] / 2.5 - 1; note = ` (one ${t} token became ${VAL[t] / 2.5} slots)`; }
+    if (c.kind === 'equipment') {          // break the smallest token into slots; this card takes one,
+      const t = [...m.tokens].sort((a, b) => VAL[a] - VAL[b])[0];   // the rest must be filled now or are lost
+      m.tokens.splice(m.tokens.indexOf(t), 1);
+      const slots = VAL[t] / 2.5;
       render();
       return fly(c.html, hand, $('mcargo-' + m.i), () => {
-        m.equip.push(id); render(); prompt();
-        toast(`${c.name} is aboard Mission ${ROMAN[m.i]}${note}.`);
+        m.equip.push(id); render();
+        toast(`${c.name} is aboard Mission ${ROMAN[m.i]}. Your ${t} token made ${slots} equipment slots.`);
+        startLoad(m, slots - 1, null);
       });
     }
     const from = hand; render();
@@ -744,11 +756,42 @@ GAME_JS = r'''
     const m = st.firing, c = G.cards[m.card], row = c.rows[r];
     const had = mass(m.tokens), spare = had - c.T;
     closeup.hidden = true;
-    m.tokens = row.eq ? [] : tokensFor(row.cargo); m.eq = (row.eq || 0) + (c.carry || 0); m.paid = false; m.fired = true;
-    st.mode = 'move'; st.move = { m, reach: reach(m.space, row.dv) };
+    m.tokens = row.eq ? [] : tokensFor(row.cargo); m.paid = false; m.fired = true;
+    const slots = (row.eq || 0) + (c.carry || 0);
+    st.mode = 'idle'; render();
+    toast(`Paid ${c.T}t${spare > 0 ? `, ${spare}t discarded` : ''}.${row.eq ? '' : ` ${row.cargo}t aboard.`}${slots ? ` ${slots} equipment slot${slots > 1 ? 's' : ''} to fill now.` : ''}`);
+    const go = () => startMove(m, row.dv);
+    slots ? startLoad(m, slots, go) : go();
+  }
+  function startMove(m, dv) {
+    st.mode = 'move'; st.move = { m, reach: reach(m.space, dv) };
     render(); showReach(); camReach(st.move.reach);
-    toast(`Paid ${c.T}t${spare > 0 ? `, ${spare}t discarded` : ''}. ${row.eq ? row.eq + ' equipment' : row.cargo + 't'} aboard.`);
-    prompt(`Move Mission ${ROMAN[m.i]} up to ${row.dv} space${row.dv > 1 ? 's' : ''}: click a glowing space. Dashed = you can't end your turn there.`);
+    prompt(`Move Mission ${ROMAN[m.i]} up to ${dv} space${dv > 1 ? 's' : ''}: click a glowing space. Dashed = you can't end your turn there.`);
+  }
+  // Equipment slots are never kept (there's no token for them): fill them from your hand now, or lose them.
+  const equipInHand = () => st.hand.some(id => G.cards[id].kind === 'equipment');
+  function startLoad(m, n, then) {
+    if (n <= 0) return then && then();
+    if (!equipInHand()) { toast(`No equipment in your hand: ${n} slot${n > 1 ? 's' : ''} lost.`); return then && then(); }
+    st.mode = 'load'; st.load = { m, n, then }; st.handOpen = true; st.sel = null;
+    syncHand(); render(); camYou();
+    prompt(`Load up to ${n} equipment card${n > 1 ? 's' : ''} onto Mission ${ROMAN[m.i]}: click one, then again to load it. Done when finished; unfilled slots are lost.`);
+  }
+  function loadCard(k) {
+    const L = st.load, id = st.hand[k], c = G.cards[id];
+    st.hand.splice(k, 1); st.sel = null; L.n--;
+    buildHand(); syncHand(); render();
+    fly(c.html, hand, $('mcargo-' + L.m.i), () => {
+      L.m.equip.push(id); render();
+      if (L.n <= 0 || !equipInHand()) finishLoad();
+      else prompt(`Load up to ${L.n} more equipment card${L.n > 1 ? 's' : ''}, or Done.`);
+    });
+  }
+  function finishLoad() {
+    const L = st.load; if (!L) return;
+    st.load = null; st.mode = 'idle'; st.handOpen = false; st.sel = null; syncHand(); render();
+    if (L.n > 0) toast(`${L.n} equipment slot${L.n > 1 ? 's' : ''} left empty and lost.`);
+    if (L.then) L.then(); else prompt();
   }
   function showReach() {
     const layer = $('boardlayer'), { m, reach: d } = st.move;
@@ -811,6 +854,7 @@ GAME_JS = r'''
         return true;
       }
       if (st.mode === 'move') { toast('Click a glowing space to move, or press Esc to stay put.'); return true; }
+      if (st.mode === 'load') { finishLoad(); return true; }
       if (st.mode !== 'idle') cancel();
       else if (st.handOpen) { st.handOpen = false; st.sel = null; syncHand(); }
       return false;
@@ -818,7 +862,8 @@ GAME_JS = r'''
   };
   closeup.addEventListener('click', e => { const tr = e.target.closest('tr.pick'); if (tr) pickRow(+tr.dataset.r); else cancel(); });
   $('endturn').addEventListener('click', endTurn);
-  addEventListener('keydown', e => { if (e.key === 'Escape' && st.mode !== 'idle') cancel(); });
+  addEventListener('keydown', e => { if (e.key !== 'Escape') return; if (st.mode === 'load') finishLoad(); else if (st.mode !== 'idle') cancel(); });
+  $('donebtn').addEventListener('click', finishLoad);
 
   buildHand(); syncHand(); render(); prompt();
 })();
