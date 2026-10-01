@@ -190,6 +190,12 @@ Replaces the earlier "take the rightmost card of either row instead of launching
 
 - **No free VP — DECIDED.** FIRST, MOST, RESCUE and ENDURANCE are **permanent goals**, all face-up from the start, never in the temporary row. The row holds only transient contracts (commercial, military, science), which pay money or science. 
 
+### Card backs and frames — DECIDED (Alex, Oct 2026)
+
+- **Mission cards** have their own frame (a thick dark rounded border) and a **resource back**: 💰 (money, green), ⚛ (science, purple) or 🛰 (infrastructure, brown, with the set table), plus the amount. Win a mission, flip it, and it *is* that resource. The top of the mission deck shows its back, so everyone knows what kind of mission comes next. (Permanent goals get a ★ back.) The 💰1 bank cards use the same money back.
+- **Tech, action, improvement and disaster cards** share the red rocket back. Disasters must: a different back would let you see them coming in your deck.
+- Kit: `build_kit.py` `mission_back_html()` / `mission_back_page()` print each sheet's backs slot by slot, rows mirrored for duplex.
+
 ### Money: mission cards + 💰1 cards — DECIDED (Alex, Oct 2026)
 
 **The objectives deck is now called the mission deck.** Money comes from money mission cards you've won (spent by discarding them) and from **💰1 cards**, a bank supply used for the launch consolation. Pay with any mix; overpaying loses the extra. Budget overrun / Budget Cut take a 💰1 card first.

@@ -371,6 +371,51 @@ def objective_card_html(o):
 </div>'''
 
 
+# Mission card backs (docs/09): the back IS the resource. Win a mission, flip it, and it's money,
+# science or a piece of infrastructure; and the top of the mission deck shows what kind comes next.
+BACK_ICON = {
+    "money": '<svg viewBox="0 0 40 40"><path d="M15 9 L25 9 L22 14 Q34 19 33 29 Q32 36 20 36 Q8 36 7 29 Q6 19 18 14 Z" fill="#fff"/>'
+             '<path d="M16 9 Q20 5 24 9" fill="none" stroke="#fff" stroke-width="2"/>'
+             '<text x="20" y="31" font-size="13" font-weight="bold" text-anchor="middle" fill="#2f6b3a">$</text></svg>',
+    "science": '<svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="3.5" fill="#fff"/>'
+               + "".join(f'<ellipse cx="20" cy="20" rx="16" ry="6" fill="none" stroke="#fff" stroke-width="2.2" transform="rotate({a} 20 20)"/>' for a in (0, 60, 120))
+               + '</svg>',
+    "infra": '<svg viewBox="0 0 40 40"><rect x="15" y="14" width="10" height="12" rx="1.5" fill="#fff"/>'
+             '<rect x="2" y="16" width="11" height="8" fill="none" stroke="#fff" stroke-width="2"/><line x1="7.5" y1="16" x2="7.5" y2="24" stroke="#fff" stroke-width="1.2"/>'
+             '<rect x="27" y="16" width="11" height="8" fill="none" stroke="#fff" stroke-width="2"/><line x1="32.5" y1="16" x2="32.5" y2="24" stroke="#fff" stroke-width="1.2"/>'
+             '<line x1="13" y1="20" x2="15" y2="20" stroke="#fff" stroke-width="2"/><line x1="25" y1="20" x2="27" y2="20" stroke="#fff" stroke-width="2"/>'
+             '<line x1="20" y1="14" x2="20" y2="8" stroke="#fff" stroke-width="1.5"/><circle cx="20" cy="7" r="2" fill="#fff"/></svg>',
+    "vp": '<svg viewBox="0 0 40 40"><polygon points="20,3 24.5,15 37,15 27,23 31,36 20,28 9,36 13,23 3,15 15.5,15" fill="#fff"/></svg>',
+}
+
+
+def mission_back_html(o=None, amount=None):
+    """Back of a mission card: its resource. o=None + amount gives a plain 💰N money card (the bank's 💰1)."""
+    r = (o or {}).get("reward") or {"kind": "money", "n": amount or 1}
+    kind = "infra" if r.get("set") else r["kind"]
+    if r.get("set"):
+        big = f'<div class="mb-name">{esc(o["family"])}</div>'
+        icon = REWARD_ICON[r["kind"]]
+        amt = ('<table class="setp"><tr><td>cards</td>' + "".join(f"<td>{i + 1}</td>" for i in range(len(r["set"])))
+               + f'</tr><tr><td>{icon}</td>' + "".join(f"<td><b>{v}</b></td>" for v in r["set"]) + "</tr></table>")
+    else:
+        big = f'<div class="mb-amt">{r["n"]}</div>'
+        amt = ""
+    return f'<div class="card mback {kind}"><div class="mb-icon">{BACK_ICON[kind]}</div>{big}{amt}</div>'
+
+
+def mission_back_page(objs):
+    """Backs for a sheet of mission cards, slot by slot. Each row of 4 is mirrored so every back
+    lands behind its own front under a long-edge duplex flip."""
+    backs = [mission_back_html(o) for o in objs] + ['<div class="card blank"></div>'] * (PER_PAGE - len(objs))
+    cells = [b for r in range(0, PER_PAGE, 4) for b in backs[r:r + 4][::-1]]
+    return f'''
+<section class="page back-page">
+  <header><span class="ph-title">MISSION BACKS</span><span class="ph-num">TRISKELION | card backs</span></header>
+  <div class="grid">{"".join(cells)}</div>
+</section>'''
+
+
 def objective_page(num, total, objs):
     cards = _grid_cards([objective_card_html(o) for o in objs])
     return f'''
@@ -537,9 +582,18 @@ table.strip td { padding: 0.1mm 1mm 0.1mm 0; vertical-align: middle; }
 
 /* Objective cards (page 4) */
 .card.obj {
-  background: white; border: 0.4pt solid #2a2a2a; border-top: 3pt solid var(--accent);
-  padding: 1.8mm 2mm; overflow: hidden; position: relative; display: flex; flex-direction: column;
+  background: white; border: 1.6mm solid #1c2541; border-radius: 2.5mm; box-shadow: inset 0 1.2mm 0 var(--accent);
+  padding: 2.2mm 2mm 1.8mm; overflow: hidden; position: relative; display: flex; flex-direction: column;
 }
+/* Mission card backs: the resource you get when you flip a won mission */
+.card.mback { flex-direction: column; align-items: center; justify-content: center; text-align: center; color: #fff;
+  border: 1.6mm solid #1c2541; border-radius: 2.5mm; gap: 1mm; }
+.card.mback.money { background: #2f6b3a; } .card.mback.science { background: #46237a; }
+.card.mback.infra { background: #7a4b1b; } .card.mback.vp { background: #b8860b; }
+.mb-icon { width: 22mm; height: 22mm; } .mb-icon svg { width: 100%; height: 100%; display: block; }
+.mb-amt { font-size: 30pt; font-weight: 800; line-height: 1; }
+.mb-name { font-size: 9pt; font-weight: 800; letter-spacing: 0.5pt; padding: 0 2mm; }
+.card.mback .setp { color: #fff; }
 .obj-head { display: flex; align-items: center; gap: 1mm; margin-bottom: 1mm; }
 .obj-icon { width: 5mm; height: 5mm; }
 .obj-icon svg { width: 100%; height: 100%; display: block; }
@@ -614,7 +668,7 @@ def main():
     for i in range(0, len(main_objs), PER_PAGE):
         pgnum += 1
         pages.append(objective_page(pgnum, TOTAL_PAGES, main_objs[i:i + PER_PAGE]))
-        pages.append(back_page("MISSIONS", "missions"))
+        pages.append(mission_back_page(main_objs[i:i + PER_PAGE]))
 
     pages_html = "\n".join(pages)
     data_json = json.dumps(data, indent=2)

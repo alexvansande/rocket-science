@@ -13,7 +13,7 @@ import json
 import shutil
 
 from build_kit import (load_cards, engine_card_html, equipment_card_html,
-                       objective_card_html, bundle_card_html, CSS as KIT_CSS)
+                       objective_card_html, mission_back_html, bundle_card_html, CSS as KIT_CSS)
 
 DATA, _ = load_cards()
 OBJS = json.load(open("../data/objectives.json"))
@@ -124,7 +124,7 @@ PERMANENT_TYPES = ("FIRST", "MOST", "RESCUE", "ENDURANCE")
 GOALS = {o["id"] + ("" if k == 0 else "bcdefgh"[k - 1]):
          {"name": o["name"], "type": o["type"], "vp": o["vp"], "check": o.get("check"),
           "reward": o["reward"], "family": o.get("family"), "king": o.get("king"),
-          "html": objective_card_html(o)} for o in OBJS for k in range(o.get("copies", 1))}
+          "html": objective_card_html(o), "back": mission_back_html(o)} for o in OBJS for k in range(o.get("copies", 1))}
 GOAL_PERM = [o["id"] for o in OBJS if o["type"] in PERMANENT_TYPES]
 GOAL_DECK = [g for g, v in GOALS.items() if v["type"] not in PERMANENT_TYPES]
 
@@ -345,7 +345,7 @@ def main():
         "focusGoals": [GOALS_X - 10, 296, GOALS_X + (len(GOAL_PERM) + GOAL_ROW_N + 1) * (CARD_W + GAP) + 40, 396],
         "focusMarket": [BOARD_X - 10, BOARD_Y + BOARD_H + 5, BOARD_X + 5 * (CARD_W + GAP) + 10, BOARD_Y + BOARD_H + 100],
         "fpMiddle": FP_MIDDLE, "fpYou": (PLAYERS[0][4][0] - SEAT_W / 2 - 22, PLAYERS[0][4][1] - SEAT_H / 2 + 8),
-        "goals": GOALS, "goalPerm": GOAL_PERM, "goalDeck": GOAL_DECK,
+        "goals": GOALS, "goalPerm": GOAL_PERM, "cashHtml": mission_back_html(amount=1), "goalDeck": GOAL_DECK,
         "tri": {c: tri_svg(c) for c in TOKEN_COLORS},
         "badges": [badge_svg(PLAYERS[0][2], i) for i in range(4)], "badgeNames": BADGE_NAMES,
     }
@@ -516,7 +516,8 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #332d29; fon
 .card.rwd { flex-direction: column; align-items: center; justify-content: center; text-align: center; font-family: Helvetica, Arial, sans-serif; }
 .card.rwd.vp { background: #b8860b; color: #fff; } .card.rwd.money { background: #2f6b3a; color: #fff; } .card.rwd.science { background: #46237a; color: #fff; }
 .card.rwd b { font-size: 16mm; line-height: 1; } .card.rwd span { font-size: 3mm; font-weight: 700; padding: 0 3mm; margin-top: 2mm; }
-.card.rwd.spent { opacity: .3; }
+.card.rwd.spent, .card.mback.spent { opacity: .3; }
+.dtop > .card.mback { border-width: 1.6mm; }
 .fptoken { border-radius: 50%; background: radial-gradient(circle at 40% 35%, #ffe08a, #d9a441 60%, #a8741f); color: #3a2608;
   font: 800 4.6mm/16mm Helvetica, Arial, sans-serif; text-align: center; box-shadow: 0 1mm 0 #7a5214, 0 2mm 4mm rgba(0,0,0,.5);
   transition: left 1.2s cubic-bezier(.3,.7,.2,1), top 1.2s cubic-bezier(.3,.7,.2,1); }
@@ -784,10 +785,9 @@ GAME_JS = r'''
     return best.sum - n;                                       // overpaid (lost)
   }
   const ICON = { vp: '★', money: '$', science: '⚛' };
-  const CASH_HTML = n => `<div class="card rwd money"><b>💰1</b><span>${n > 1 ? `× ${n} money cards` : 'money card'}</span></div>`;
+  const CASH_HTML = n => G.cashHtml.replace('</div></div>', `</div>${n > 1 ? `<div class="mb-name">× ${n}</div>` : ''}</div>`);
   const rewardHtml = gid => { const g = G.goals[gid], r = reward(gid);
-    if (r.set) return `<div class="card rwd ${r.kind}"><b>${ICON[r.kind]}</b><span>${g.name}<br>set of ${famCount(g.family) || 1}: ${r.set.join(' / ')}</span></div>`;
-    return `<div class="card rwd ${r.kind}${st.spent.has(gid) ? ' spent' : ''}"><b>${ICON[r.kind]}${r.n}</b><span>${g.name}</span></div>`; };
+    return st.spent.has(gid) ? g.back.replace('card mback', 'card mback spent') : g.back; };   // won missions are flipped: the back is the resource
 
   // ---- helpers ------------------------------------------------------------------------
   let tt; const toast = msg => { toastEl.textContent = msg; toastEl.classList.add('on'); clearTimeout(tt); tt = setTimeout(() => toastEl.classList.remove('on'), 3200); };
@@ -939,6 +939,8 @@ GAME_JS = r'''
     st.goals.perm.forEach((gid, i) => fill($('goal-f' + i), gid));
     st.goals.row.forEach((gid, i) => fill($('goal-m' + i), gid));
     const gd = $('deck-missions'); gd.style.setProperty('--t', (st.goals.deck.length * 0.3).toFixed(2) + 'mm'); gd.style.visibility = st.goals.deck.length ? '' : 'hidden';
+    const next = st.goals.deck[st.goals.deck.length - 1], top = gd.querySelector('.dtop');   // the top card's back shows what kind of mission comes next
+    if (next && top.dataset.gid !== next) { top.innerHTML = G.goals[next].back; top.dataset.gid = next; }
     const cg = $('cgoals-you'), key = st.won.join() + '|' + [...st.spent].join() + '|' + st.cash;
     if (cg.dataset.k !== key) {
       cg.dataset.k = key;
@@ -1343,6 +1345,7 @@ GAME_JS = r'''
   // ---- input (called from the table's pointer handler) -------------------------
   window.game = {
     _st: st,                                                   // read-only peek for debugging/tests
+    _render: () => render(),                                   // tests: redraw after poking _st
     tap(target) {
       const t = target.closest ? target : target.parentElement;
       if (st.mode === 'anim' || !choiceEl.hidden) return true;
