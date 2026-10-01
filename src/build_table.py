@@ -217,7 +217,7 @@ def bowl(color, label, cx, cy, r=30):
 
 # ---- Space Center (player board) -----------------------------------------
 ACTIONS = [
-    ("LAUNCH", "Put a mission token on Earth in a free slot (I–II crewed, III–IV uncrewed) with your pad's cargo tokens, then a <b>free Mission Control</b>. <b>Or instead:</b> remove the rightmost contract and take $1."),
+    ("LAUNCH", "Put a mission token on Earth in a free slot (I–II crewed, III–IV uncrewed) with your pad's cargo tokens, then a <b>free Mission Control</b>. Launched but met no goal this turn? Discard the rightmost mission card and take a 💰1 card."),
     ("MISSION CONTROL", "Spend a mission's cargo to place a rocket from your hand on it. Spent stages stay on the slot until the mission is done."),
 ]
 TAP = ('<svg viewBox="0 0 20 20" class="tap"><path d="M15 6 A7 7 0 1 0 17 11" fill="none" stroke="currentColor" '
@@ -300,7 +300,7 @@ def main():
     for i, gid in enumerate(GOAL_PERM):
         parts.append(f'<div class="slot gslot" id="goal-f{i}" {at(fx + i * (CARD_W + GAP), 318, CARD_W, CARD_H)}>{GOALS[gid]["html"]}</div>')
     mx = fx + len(GOAL_PERM) * (CARD_W + GAP) + 24
-    parts.append(zone_label("CONTRACTS · resources · newest on the left", mx, 305))
+    parts.append(zone_label("MISSIONS · money & science · newest on the left", mx, 305))
     parts.append(stack("missions", "MISSIONS", mx, 318, len(GOAL_DECK), "deck-missions"))
     for i in range(GOAL_ROW_N):
         gx = mx + (i + 1) * (CARD_W + GAP) - 2
@@ -523,7 +523,6 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #332d29; fon
 .peekrow { display: flex; gap: 3mm; justify-content: center; margin-top: 3mm; }
 .peek { width: 28.2mm; height: 39.6mm; position: relative; }
 .peek > .card { position: absolute; left: 0; top: 0; width: 47mm; height: 66mm; transform: scale(.6); transform-origin: 0 0; border-radius: 2mm; }
-.card.rwd.side { transform: rotate(90deg) scale(.8); background: #4d7a55; }
 .ptag { color: #ffd98a; font: 800 3.4mm Helvetica, Arial, sans-serif; text-align: center; white-space: nowrap; }
 .ptag.dv { color: #9fd4ff; }
 .ptag .sur { color: #ff9a7a; }
@@ -747,7 +746,7 @@ GAME_JS = r'''
     missions: [0, 1, 2, 3].map(blank), upgrades: [], removed: [],
     mode: 'idle', handOpen: false, sel: null, pending: null, firing: null, move: null, load: null,
     goals: { perm: G.goalPerm.slice(), row: [], deck: shuffle(G.goalDeck.slice()) },
-    won: [], spent: new Set(), scrapped: new Set(), penalty: 0, firstPlayer: false,
+    won: [], spent: new Set(), cash: 0, penalty: 0, firstPlayer: false,
   };
   for (let i = 0; i < G.marketN; i++) st.market.push(st.main.pop() || null);
   for (let i = 0; i < G.goalRowN; i++) st.goals.row.push(st.goals.deck.pop() || null);
@@ -759,40 +758,42 @@ GAME_JS = r'''
   const hand = $('hand-you'), toastEl = $('toast'), promptEl = $('prompt'), closeup = $('closeup'), choiceEl = $('choice');
 
   // ---- resources ------------------------------------------------------------------
-  // A scrapped contract (taken instead of launching) is kept SIDEWAYS: any sideways goal card = $1, whatever it says.
-  const reward = gid => st.scrapped.has(gid) ? { kind: 'money', n: 1 } : G.goals[gid].reward;
-  const famCount = f => st.won.filter(g => !st.scrapped.has(g) && G.goals[g].family === f).length;
+  const reward = gid => G.goals[gid].reward;
+  const famCount = f => st.won.filter(g => G.goals[g].family === f).length;
   const total = kind => {                                       // plain rewards + infrastructure sets (each family scores its set table)
     let n = st.won.filter(g => reward(g).kind === kind && !reward(g).set).reduce((a, g) => a + reward(g).n, 0);
-    const fams = new Set(st.won.filter(g => !st.scrapped.has(g) && G.goals[g].family && reward(g).kind === kind).map(g => G.goals[g].family));
+    const fams = new Set(st.won.filter(g => G.goals[g].family && reward(g).kind === kind).map(g => G.goals[g].family));
     for (const f of fams) { const t = G.goals[st.won.find(g => G.goals[g].family === f)].reward.set; n += t[Math.min(famCount(f), t.length) - 1]; }
     return n; };
   const moneyCards = () => st.won.filter(g => reward(g).kind === 'money' && !reward(g).set && !st.spent.has(g));
-  const money = () => moneyCards().reduce((n, g) => n + reward(g).n, 0);
+  // Money = money mission cards you've won + 💰1 cards from the bank (st.cash), the launch consolation prize.
+  const money = () => moneyCards().reduce((n, g) => n + reward(g).n, 0) + st.cash;
   const science = () => total('science');
   const vp = () => total('vp') - st.penalty;
   function pay(n) {                                            // spend money cards: least overpay, then fewest cards
     if (n <= 0) return 0;
     let best = null;
-    const cards = moneyCards(), walk = (k, picked, sum) => {
+    const cards = [...moneyCards(), ...Array(st.cash).fill('CASH')], val = g => g === 'CASH' ? 1 : reward(g).n;
+    const walk = (k, picked, sum) => {
       if (sum >= n) { if (!best || sum < best.sum || (sum === best.sum && picked.length < best.picked.length)) best = { picked: picked.slice(), sum }; return; }
       if (k >= cards.length) return;
-      picked.push(cards[k]); walk(k + 1, picked, sum + reward(cards[k]).n); picked.pop(); walk(k + 1, picked, sum);
+      picked.push(cards[k]); walk(k + 1, picked, sum + val(cards[k])); picked.pop(); walk(k + 1, picked, sum);
     };
     walk(0, [], 0);
-    best.picked.forEach(g => st.spent.add(g));
+    best.picked.forEach(g => g === 'CASH' ? st.cash-- : st.spent.add(g));
     return best.sum - n;                                       // overpaid (lost)
   }
   const ICON = { vp: '★', money: '$', science: '⚛' };
-  const rewardHtml = gid => { const g = G.goals[gid], r = reward(gid), side = st.scrapped.has(gid);
+  const CASH_HTML = n => `<div class="card rwd money"><b>💰1</b><span>${n > 1 ? `× ${n} money cards` : 'money card'}</span></div>`;
+  const rewardHtml = gid => { const g = G.goals[gid], r = reward(gid);
     if (r.set) return `<div class="card rwd ${r.kind}"><b>${ICON[r.kind]}</b><span>${g.name}<br>set of ${famCount(g.family) || 1}: ${r.set.join(' / ')}</span></div>`;
-    return `<div class="card rwd ${r.kind}${side ? ' side' : ''}${st.spent.has(gid) ? ' spent' : ''}"><b>${ICON[r.kind]}${r.n}</b><span>${side ? 'sideways = $1' : g.name}</span></div>`; };
+    return `<div class="card rwd ${r.kind}${st.spent.has(gid) ? ' spent' : ''}"><b>${ICON[r.kind]}${r.n}</b><span>${g.name}</span></div>`; };
 
   // ---- helpers ------------------------------------------------------------------------
   let tt; const toast = msg => { toastEl.textContent = msg; toastEl.classList.add('on'); clearTimeout(tt); tt = setTimeout(() => toastEl.classList.remove('on'), 3200); };
   const prompt = msg => { promptEl.textContent = msg || idlePrompt(); promptEl.classList.add('on'); };
   const idlePrompt = () => innerWidth < 600 ? `Turn ${st.turn} · tap anything glowing, then End turn.`
-    : `Turn ${st.turn} · Launch, Mission Control, buy from the market, or remove the dashed rightmost contract for $1 instead of launching. End turn draws your next card.`;
+    : `Turn ${st.turn} · Launch, Mission Control, buy from the market, or pay $1 to clear the rightmost market card and go first. End turn draws your next card.`;
   const posOf = el => { let x = 0, y = 0; while (el && el.id !== 'table') { x += el.offsetLeft; y += el.offsetTop; el = el.offsetParent; } return { x: x / MM, y: y / MM }; };
   const centerOf = el => { const p = posOf(el); return { x: p.x + el.offsetWidth / MM / 2, y: p.y + el.offsetHeight / MM / 2 }; };
   function flyTokens(list, fromOf, toOf, done) {               // wooden deltas hop one by one, lifted off the table
@@ -915,7 +916,7 @@ GAME_JS = r'''
     $('donebtn').hidden = st.mode !== 'load';
     const md = $('deck-rockets');
     md.style.setProperty('--t', (st.main.length * 0.3).toFixed(2) + 'mm'); md.style.visibility = st.main.length ? '' : 'hidden';
-    const takeOK = idle && launchesLeft() > 0, mr = rightmost(st.market), gr = rightmost(st.goals.row);
+    const mr = rightmost(st.market);
     st.market.forEach((id, i) => { const el = $('mk-' + i);
       if (el.dataset.id !== (id || '')) { el.innerHTML = id ? C(id).html : ''; el.dataset.id = id || ''; }
       const p = id && priceAt(id, i), afford = p && money() >= p.money && science() >= p.science;
@@ -923,7 +924,7 @@ GAME_JS = r'''
       el.classList.toggle('take', idle && i === mr && !afford && money() >= 1);
       $('mkp-' + i).innerHTML = id ? `${p.money ? '$' + p.money : ''}${p.money && p.science ? ' + ' : ''}${p.science ? '⚛' + p.science : ''}${!p.money && !p.science ? 'free' : ''}`
         + (G.marketSurcharge[i] ? ` <span class="sur">(+$${G.marketSurcharge[i]} new)</span>` : '') : ''; });
-    renderGoals(takeOK, gr);
+    renderGoals();
     const dy = $('deck-you');
     dy.innerHTML = st.deck.length ? `${BACK}<em>${st.deck.length}</em>` : '<span>YOUR DECK</span>';
     dy.title = `Your deck: ${st.deck.length} cards. You draw ${drawSize()} at the end of your turn.`;
@@ -932,16 +933,17 @@ GAME_JS = r'''
     const fp = $('fp-token'), at = st.firstPlayer ? G.fpYou : G.fpMiddle;
     fp.style.left = at[0] + 'mm'; fp.style.top = at[1] + 'mm'; fp.title = st.firstPlayer ? 'You hold the first player token' : 'First player token';
   }
-  function renderGoals(takeOK, gr) {
+  function renderGoals() {
     const fill = (el, gid) => { if (!el) return;
       if (el.dataset.gid !== (gid || '')) { el.innerHTML = gid ? G.goals[gid].html : ''; el.dataset.gid = gid || ''; } };
     st.goals.perm.forEach((gid, i) => fill($('goal-f' + i), gid));
-    st.goals.row.forEach((gid, i) => { fill($('goal-m' + i), gid); $('goal-m' + i).classList.toggle('take', !!takeOK && i === gr); });
+    st.goals.row.forEach((gid, i) => fill($('goal-m' + i), gid));
     const gd = $('deck-missions'); gd.style.setProperty('--t', (st.goals.deck.length * 0.3).toFixed(2) + 'mm'); gd.style.visibility = st.goals.deck.length ? '' : 'hidden';
-    const cg = $('cgoals-you'), key = st.won.join() + '|' + [...st.spent].join() + '|' + [...st.scrapped].join();
+    const cg = $('cgoals-you'), key = st.won.join() + '|' + [...st.spent].join() + '|' + st.cash;
     if (cg.dataset.k !== key) {
       cg.dataset.k = key;
-      cg.innerHTML = st.won.length ? st.won.map((gid, k) => `<div class="slot cg" style="left:${3 + k * Math.min(15, 100 / st.won.length)}mm;top:7mm">${rewardHtml(gid)}</div>`).join('')
+      const shown = [...st.won.map(rewardHtml), ...(st.cash ? [CASH_HTML(st.cash)] : [])];
+      cg.innerHTML = shown.length ? shown.map((h, k) => `<div class="slot cg" style="left:${3 + k * Math.min(15, 100 / shown.length)}mm;top:7mm">${h}</div>`).join('')
         : '<span class="cg-hint">goals you\'ve won<br>reward side up</span>';
     }
   }
@@ -1159,19 +1161,7 @@ GAME_JS = r'''
       toast(`${C(id).name} is discarded. You hold the first player token: you go first next round.${lost ? ` ($${lost} overpaid)` : ''}`); });
   }
   function goalClick(i) {
-    const gid = st.goals.row[i]; if (!gid) return;
-    if (launchesLeft() <= 0 || i !== rightmost(st.goals.row))
-      return toast(`Goals are claimed at the end of your turn, after the draw, by a mission that meets them.${i < G.goalDvSurcharge ? ' This one is new: its destination is 1 Δv farther.' : ''}`);
-    const g = G.goals[gid];
-    choice(g.html, `Scrap ${g.name} instead of launching? You keep the card sideways as <b>$1</b> (not its printed reward).`,
-      [{ label: 'Scrap it for $1', main: true, fn: () => takeGoal(i) }, { label: 'Cancel' }]);
-  }
-  function takeGoal(i) {
-    const gid = st.goals.row[i], from = $('goal-m' + i);
-    st.used.launch++; st.goals.row.splice(i, 1); st.goals.row.unshift(st.goals.deck.pop() || null);
-    st.scrapped.add(gid); st.mode = 'anim'; render();
-    fly(rewardHtml(gid), from, $('cgoals-you'), () => { st.won.push(gid); st.mode = 'idle'; render(); prompt();
-      toast(`${G.goals[gid].name} scrapped: +$1 (kept sideways).`); });
+    toast(`Missions are claimed at the end of your turn, after the draw, by a mission that meets them.${i < G.goalDvSurcharge ? ' This one is new: its destination is 1 Δv farther.' : ''}`);
   }
 
   // ---- action cards ---------------------------------------------------------------------
@@ -1228,12 +1218,13 @@ GAME_JS = r'''
         if (m) hit(m); else out.push('You have no uncrewed mission in flight: no harm done.');
       }
       if (d.effect === 'lose_infra') {
-        const g = [...st.won].reverse().find(g => G.goals[g].family === d.family && !st.scrapped.has(g));
+        const g = [...st.won].reverse().find(g => G.goals[g].family === d.family);
         if (g) { st.won.splice(st.won.lastIndexOf(g), 1); st.goals.deck.unshift(g); out.push(`You lose a ${d.family.toLowerCase()} card (to the bottom of the contract deck).`, ...kingOfTheHill()); }
         else out.push(`You have no ${d.family.toLowerCase()}: no harm done.`);
       }
       if (d.effect === 'lose_money') { const mc = moneyCards().sort((a, b) => reward(a).n - reward(b).n)[0];
-        if (mc) { st.spent.add(mc); out.push(`You lose a $${reward(mc).n} money card.`); } else out.push('You have no money to lose.'); }
+        if (st.cash) { st.cash--; out.push('You lose a 💰1 card.'); }
+        else if (mc) { st.spent.add(mc); out.push(`You lose a $${reward(mc).n} money card.`); } else out.push('You have no money to lose.'); }
       if (d.recurring) { st.deck.push(id); out.push(`It stays in your deck until you buy ${fixFor(d).name}.`); }
       else { st.removed.push(id); out.push('A one-shot: it leaves the game.'); }
       finish(`<b>${d.name}!</b> ${out.join(' ')}`);
@@ -1264,13 +1255,23 @@ GAME_JS = r'''
       && (!c.equipCount || m.equip.length >= c.equipCount) && (!c.cargo || mass(m.tokens) >= c.cargo)
       && (!c.turns || st.turn - m.arrived >= c.turns);
   }
+  // Launched this turn but met no goal: the rightmost mission card is discarded and you take a 💰1 card.
+  function consolation(done) {
+    const i = rightmost(st.goals.row); cam(G.focusGoals);
+    if (i < 0) { st.cash++; render(); toast('No mission met a goal: take a 💰1 card.'); return setTimeout(done, 900); }
+    const gid = st.goals.row[i], from = $('goal-m' + i);
+    st.goals.row.splice(i, 1); st.goals.row.unshift(st.goals.deck.pop() || null); from.innerHTML = ''; from.dataset.gid = '';
+    fly(G.goals[gid].html, from, $('deck-missions'), () => { render();
+      fly(CASH_HTML(1), $('deck-missions'), $('cgoals-you'), () => { st.cash++; render();
+        toast(`You launched but met no goal: ${G.goals[gid].name} (rightmost) is discarded and you take a 💰1 card.`); setTimeout(done, 900); }); });
+  }
   function prizes(done) {                                       // step 4: every open goal a surviving mission meets pays out
     const claims = [], used = new Set();
     st.goals.perm.forEach((gid, i) => { if (!gid) return; const m = st.missions.find(m => meets(m, effCheck(gid, null)));
       if (m) claims.push({ gid, m, from: $('goal-f' + i), perm: i }); });
     st.goals.row.forEach((gid, i) => { if (!gid) return; const m = st.missions.find(m => !used.has(m.i + G.goals[gid].name) && meets(m, effCheck(gid, i)));
       if (m) { used.add(m.i + G.goals[gid].name); claims.push({ gid, m, from: $('goal-m' + i), row: true }); } });
-    if (!claims.length) return done();
+    if (!claims.length) return st.used.launch ? consolation(done) : done();
     cam(G.focusGoals);
     let k = 0;
     const one = () => {

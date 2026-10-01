@@ -183,16 +183,18 @@ FIRST goals aren't in the row (they're all face-up from the start), so no surcha
 
 Replaces the earlier "take the rightmost card of either row instead of launching". Two ways to clear stale cards:
 
-1. **Instead of launching, remove the rightmost contract and take $1.** Keep that card **sideways** with your won goals: *any sideways goal card is worth $1*, whatever is printed on it, and you spend it like any money card. (Earlier versions: take the market card free, or keep the contract's printed reward. Both dropped.)
+1. **Launched but met no goal? — DECIDED (Alex, Oct 2026, replaces "instead of launching").** At the end of your turn, if you launched and none of your missions met a goal, discard the **rightmost mission card** and take a **💰1 card**. Launching is never wasted, and stale missions leave the row. (Earlier versions: take the rightmost card instead of launching, as the card's reward or as a sideways $1. All dropped.)
 2. **Pay $1 to remove the rightmost market card and take the first player token.** The card is discarded. Not instead of anything: it's a purchase, any time on your turn.
 
 **First player:** when everyone has played, the next round starts with whoever holds the token.
 
 - **No free VP — DECIDED.** FIRST, MOST, RESCUE and ENDURANCE are **permanent goals**, all face-up from the start, never in the temporary row. The row holds only transient contracts (commercial, military, science), which pay money or science. 
 
-### Money is goal cards, no tokens — DECIDED
+### Money: mission cards + 💰1 cards — DECIDED (Alex, Oct 2026)
 
-Money goals pay **mostly 1 bag, a few 2, rarely 3**, so change is rarely an issue. Pay by discarding money goal cards; overpaying loses the extra. Budget overrun / Budget Cut: discard one money card (your choice which).
+**The objectives deck is now called the mission deck.** Money comes from money mission cards you've won (spent by discarding them) and from **💰1 cards**, a bank supply used for the launch consolation. Pay with any mix; overpaying loses the extra. Budget overrun / Budget Cut take a 💰1 card first.
+
+**Money missions pay 💰2 or more — DECIDED (Alex):** otherwise the 💰1 consolation is as good as flying a mission. Prototype values: Comsat 2, Special Delivery 2, Unnamed Payload 2, GPS 3, TV Broadcast 3, Orbital Tourist 3, Intercontinental Express 3, Maximum Throw 3.
 
 ## 7. First card draft — *proposal*, all numbers to playtest
 
@@ -238,7 +240,7 @@ The reward amount = the goal's current `vp` value, so nothing needs re-balancing
 |---|---|
 | FIRST, MOST, RESCUE, ENDURANCE (12) — permanent | VP |
 | SCIENCE (4) + FLYBY (4) — transient | science |
-| COMMERCIAL (4) + MILITARY (4) — transient | money (mostly 1 bag; Maximum Throw, GPS, TV = 2) |
+| COMMERCIAL (4) + MILITARY (4) — transient | money, 💰2–3 (see section 6) |
 
 **The transient deck is multiplied — DECIDED (Alex, Oct 2026).** The 16 transient goals (4 each commercial, military, science, flyby) are printed **3 times each = 48 cards**, so money and science keep coming. `objectives.json`: `"transient": true, "copies": 3`; the old `filler` flag is gone. The kit prints them on their own MISSIONS sheets (12 permanent + 48 transient = 60 goal cards, 4 sheets); the table prototype gives each copy its own id.
 
@@ -252,7 +254,7 @@ Top row = the **price**: what you must get where, in tokens/chips and board name
 
 ## In the web prototype (Oct 2026)
 
-`build/table.html` (Blue's seat) now plays these rules: your own deck with draw at end of turn, the 5-step turn order, disasters (all 10) with Backup Systems, crewed/uncrewed slots, buying with money/science and the price gradient, +1 Δv on new contracts, removing the rightmost contract for $1 instead of launching, paying $1 to discard the rightmost market card and take the first player token, permanent goals (VP) face-up and the ×3 transient deck, Space Center improvements (fixes, pads, +1 draw, second Launch, extra Mission Control). Data: `data/cards.json` → `disasters`, `actions`, `improvements`, `starting_deck`, and a `price` on every card.
+`build/table.html` (Blue's seat) now plays these rules: your own deck with draw at end of turn, the 5-step turn order, disasters (all 10) with Backup Systems, crewed/uncrewed slots, buying with money/science and the price gradient, +1 Δv on new contracts, the 💰1 consolation (launched but met no goal: discard the rightmost mission), paying $1 to discard the rightmost market card and take the first player token, permanent goals (VP) face-up and the ×3 transient deck, Space Center improvements (fixes, pads, +1 draw, second Launch, extra Mission Control). Data: `data/cards.json` → `disasters`, `actions`, `improvements`, `starting_deck`, and a `price` on every card.
 
 Placeholders chosen for the prototype (all to playtest, none decided):
 - **Starting deck:** 2× Kerolox Sustainer, 2× Light Solid Booster, Solid Kick Motor, Atmospheric Return, 2× Science Package, Backup Systems, Overtime + the 10 disasters (20 cards).
