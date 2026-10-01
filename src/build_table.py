@@ -118,10 +118,9 @@ LAUNCH_TOKENS = "R"         # the basic pad's lift: 1 red = 160t, single-stage s
 # Goals (docs/09): permanent goals are all face-up and pay VP; transient contracts come in "copies",
 # cycle through a 5-card row and pay resources. Each copy gets its own id (fil01, fil01b, fil01c).
 PERMANENT_TYPES = ("FIRST", "MOST", "RESCUE", "ENDURANCE")
-REWARD_KIND = {"COMMERCIAL": "money", "MILITARY": "money", "SCIENCE": "science", "FLYBY": "science"}
 GOALS = {o["id"] + ("" if k == 0 else "bcdefgh"[k - 1]):
          {"name": o["name"], "type": o["type"], "vp": o["vp"], "check": o.get("check"),
-          "reward": {"kind": REWARD_KIND.get(o["type"], "vp"), "n": o["vp"]},
+          "reward": o["reward"],
           "html": objective_card_html(o)} for o in OBJS for k in range(o.get("copies", 1))}
 GOAL_PERM = [o["id"] for o in OBJS if o["type"] in PERMANENT_TYPES]
 GOAL_DECK = [g for g, v in GOALS.items() if v["type"] not in PERMANENT_TYPES]
@@ -329,7 +328,7 @@ def main():
         "marketN": MARKET_N, "marketSurcharge": MARKET_SURCHARGE, "goalRowN": GOAL_ROW_N, "goalDvSurcharge": GOAL_DV_SURCHARGE,
         "you": PLAYERS[0][2], "tokenColors": TOKEN_COLORS,
         "spaces": {sp["id"]: {"x": round(sp["x"] / 1000 * BOARD_W, 2), "y": round(sp["y"] / 707 * BOARD_H, 2),
-                              "stop": sp["stop"], "label": sp.get("label", ""), "kind": sp["kind"]} for sp in BOARD["spaces"]},
+                              "stop": sp["stop"], "label": sp["name"], "kind": sp["kind"]} for sp in BOARD["spaces"]},
         "aero": [[l["a"], l["b"]] for l in BOARD["links"] if l["type"] in ("aero", "mars_aero")],
         "links": [[l["a"], l["b"]] for l in BOARD["links"]],
         "board": [BOARD_X, BOARD_Y],

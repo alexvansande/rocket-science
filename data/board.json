@@ -13,6 +13,7 @@
   "spaces": [
     {
       "id": "earth",
+      "name": "EARTH",
       "label": "Earth",
       "kind": "surface",
       "park": true,
@@ -22,6 +23,7 @@
     },
     {
       "id": "a1",
+      "name": "E1",
       "kind": "ascent",
       "park": false,
       "x": 750,
@@ -30,6 +32,7 @@
     },
     {
       "id": "a2",
+      "name": "E2",
       "kind": "ascent",
       "park": false,
       "x": 776,
@@ -38,6 +41,7 @@
     },
     {
       "id": "a3",
+      "name": "E3",
       "kind": "ascent",
       "park": false,
       "x": 800,
@@ -46,6 +50,7 @@
     },
     {
       "id": "a4",
+      "name": "E4",
       "kind": "ascent",
       "park": false,
       "x": 816,
@@ -54,6 +59,7 @@
     },
     {
       "id": "a5",
+      "name": "E5",
       "kind": "ascent",
       "park": false,
       "x": 822,
@@ -62,6 +68,7 @@
     },
     {
       "id": "a6",
+      "name": "E6",
       "kind": "ascent",
       "park": false,
       "x": 817,
@@ -70,6 +77,7 @@
     },
     {
       "id": "a7",
+      "name": "E7",
       "kind": "ascent",
       "park": false,
       "x": 802,
@@ -78,6 +86,7 @@
     },
     {
       "id": "a8",
+      "name": "E8",
       "kind": "ascent",
       "park": false,
       "x": 770,
@@ -86,6 +95,7 @@
     },
     {
       "id": "leo",
+      "name": "LEO",
       "label": "Low Earth Orbit",
       "kind": "orbit",
       "park": true,
@@ -96,6 +106,7 @@
     },
     {
       "id": "t1",
+      "name": "MEO",
       "kind": "transfer",
       "park": false,
       "icon": "rocket",
@@ -105,6 +116,7 @@
     },
     {
       "id": "t2",
+      "name": "HEO",
       "kind": "transfer",
       "park": false,
       "icon": "rocket",
@@ -114,6 +126,7 @@
     },
     {
       "id": "geo",
+      "name": "GEO",
       "label": "Geostationary Orbit",
       "kind": "orbit",
       "park": true,
@@ -123,6 +136,7 @@
     },
     {
       "id": "escape",
+      "name": "ESC",
       "label": "Earth Escape",
       "kind": "escape",
       "park": true,
@@ -133,6 +147,7 @@
     },
     {
       "id": "lunar_orbit",
+      "name": "LLO",
       "label": "Lunar Orbit",
       "kind": "orbit",
       "park": true,
@@ -143,6 +158,7 @@
     },
     {
       "id": "lunar_descent",
+      "name": "L1",
       "kind": "descent",
       "park": false,
       "icon": "triangle",
@@ -152,6 +168,7 @@
     },
     {
       "id": "moon",
+      "name": "MOON",
       "label": "Moon",
       "kind": "surface",
       "park": true,
@@ -162,6 +179,7 @@
     },
     {
       "id": "ds1",
+      "name": "D1",
       "label": "+1",
       "kind": "deep",
       "park": true,
@@ -171,6 +189,7 @@
     },
     {
       "id": "ds2",
+      "name": "D2",
       "label": "+2",
       "kind": "deep",
       "park": true,
@@ -180,6 +199,7 @@
     },
     {
       "id": "ds3",
+      "name": "D3",
       "label": "+3",
       "kind": "deep",
       "park": true,
@@ -189,6 +209,7 @@
     },
     {
       "id": "ds4",
+      "name": "D4",
       "label": "+4",
       "kind": "deep",
       "park": true,
@@ -198,6 +219,7 @@
     },
     {
       "id": "ds5",
+      "name": "D5",
       "label": "+5",
       "kind": "deep",
       "park": true,
@@ -207,6 +229,7 @@
     },
     {
       "id": "ds6",
+      "name": "D6",
       "label": "+6",
       "kind": "deep",
       "park": true,
@@ -216,6 +239,7 @@
     },
     {
       "id": "ds7",
+      "name": "D7",
       "label": "+7",
       "kind": "deep",
       "park": true,
@@ -225,6 +249,7 @@
     },
     {
       "id": "ds8",
+      "name": "D8",
       "label": "+8",
       "kind": "deep",
       "park": true,
@@ -234,6 +259,7 @@
     },
     {
       "id": "ds9",
+      "name": "D9",
       "label": "+9",
       "kind": "deep",
       "park": true,
@@ -243,6 +269,7 @@
     },
     {
       "id": "ds10",
+      "name": "D10",
       "label": "+10",
       "kind": "deep",
       "park": true,
@@ -252,6 +279,7 @@
     },
     {
       "id": "ds11",
+      "name": "D11",
       "label": "+11",
       "kind": "deep",
       "park": true,
@@ -261,6 +289,7 @@
     },
     {
       "id": "m2",
+      "name": "MT1",
       "kind": "deep",
       "park": true,
       "x": 235,
@@ -269,6 +298,7 @@
     },
     {
       "id": "m3",
+      "name": "MT2",
       "kind": "deep",
       "park": true,
       "x": 115,
@@ -277,6 +307,7 @@
     },
     {
       "id": "m4",
+      "name": "MT3",
       "kind": "deep",
       "park": true,
       "x": 72,
@@ -285,6 +316,7 @@
     },
     {
       "id": "mars_orbit",
+      "name": "LMO",
       "label": "Mars Orbit",
       "kind": "orbit",
       "park": true,
@@ -295,6 +327,7 @@
     },
     {
       "id": "phobos",
+      "name": "PHOBOS",
       "label": "Phobos",
       "kind": "surface",
       "park": true,
@@ -305,6 +338,7 @@
     },
     {
       "id": "deimos",
+      "name": "DEIMOS",
       "label": "Deimos",
       "kind": "surface",
       "park": true,
@@ -315,6 +349,7 @@
     },
     {
       "id": "md1",
+      "name": "M3",
       "kind": "descent",
       "park": false,
       "x": 98,
@@ -323,6 +358,7 @@
     },
     {
       "id": "md2",
+      "name": "M2",
       "kind": "descent",
       "park": false,
       "x": 120,
@@ -331,6 +367,7 @@
     },
     {
       "id": "md3",
+      "name": "M1",
       "kind": "descent",
       "park": false,
       "x": 143,
@@ -339,6 +376,7 @@
     },
     {
       "id": "mars",
+      "name": "MARS",
       "label": "Mars",
       "kind": "surface",
       "park": true,
@@ -552,5 +590,6 @@
     "park": "Circle: a mission may end any number of turns here.",
     "waypoint": "Square/diamond: a mission may end a turn here but must move on next turn.",
     "none": "Triangle / unmarked ascent: a mission may not end a turn here."
-  }
+  },
+  "naming": "Short names printed on the board (Oct 2026): EARTH, E1-E8 = \u0394v climbed from Earth's surface, LEO, MEO, HEO, GEO, ESC (Earth escape); Moon: LLO (low lunar orbit), L1 (\u0394v above the surface), MOON; deep space D1-D11 = \u0394v beyond escape; Mars transfer MT1-MT3; LMO (low Mars orbit), M3/M2/M1 (\u0394v above the surface), MARS, PHOBOS, DEIMOS."
 }

@@ -23,6 +23,21 @@ Every boundary on the board is one of three crossing types:
 
 (The red/orange hatched segment on the inner Mars spiral is **purely aesthetic** — no special rule.)
 
+## Space names (Oct 2026)
+
+Every space has a short name (`data/board.json` → `name`), so goal cards can say "YY → LEO" instead of a sentence. Numbers count Δv from the nearest surface, or from escape:
+
+| Where | Names |
+|---|---|
+| Earth climb | EARTH, E1–E8 (Δv above the surface), LEO |
+| Earth high orbits | MEO, HEO (the two spaces past LEO), GEO, ESC (Earth escape) |
+| Moon | LLO (low lunar orbit), L1 (1 Δv above the surface), MOON |
+| Deep space | D1–D11 (Δv beyond escape) |
+| To Mars | MT1–MT3 (Mars transfer), LMO (low Mars orbit), PHOBOS, DEIMOS |
+| Mars descent | M3, M2, M1 (Δv above the surface), MARS |
+
+Goal cards print the requirement as **what → where** on the top row and the prize on the bottom row (`build_kit.py` `goal_price_html`). "D4+" means D4 or farther. The names still need to go on Alex's board art.
+
 ## Dv budgets
 
 | From → To | Dv |

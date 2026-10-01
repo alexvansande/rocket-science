@@ -17,6 +17,10 @@
       "equip": [
         "CREW CAPSULE"
       ]
+    },
+    "reward": {
+      "kind": "vp",
+      "n": 1
     }
   },
   {
@@ -37,6 +41,10 @@
       "equip": [
         "CREW CAPSULE"
       ]
+    },
+    "reward": {
+      "kind": "vp",
+      "n": 2
     }
   },
   {
@@ -54,6 +62,10 @@
       "without": [
         "CREW CAPSULE"
       ]
+    },
+    "reward": {
+      "kind": "vp",
+      "n": 1
     }
   },
   {
@@ -75,6 +87,10 @@
       "equip": [
         "CREW CAPSULE"
       ]
+    },
+    "reward": {
+      "kind": "vp",
+      "n": 4
     }
   },
   {
@@ -85,7 +101,11 @@
     "requires": "Habitat in LEO + most attached tokens",
     "type": "MOST",
     "vp": 1,
-    "note": "Stealable: claim transfers when another player surpasses you"
+    "note": "Stealable: claim transfers when another player surpasses you",
+    "reward": {
+      "kind": "vp",
+      "n": 1
+    }
   },
   {
     "id": "obj06",
@@ -95,7 +115,11 @@
     "requires": "Habitat on Moon + most attached tokens",
     "type": "MOST",
     "vp": 2,
-    "note": "Stealable"
+    "note": "Stealable",
+    "reward": {
+      "kind": "vp",
+      "n": 2
+    }
   },
   {
     "id": "obj07",
@@ -105,7 +129,11 @@
     "requires": "Habitat on Mars + most attached tokens",
     "type": "MOST",
     "vp": 2,
-    "note": "Stealable"
+    "note": "Stealable",
+    "reward": {
+      "kind": "vp",
+      "n": 2
+    }
   },
   {
     "id": "obj08",
@@ -115,7 +143,11 @@
     "requires": "Rendezvous with stranded craft + return crew to Earth",
     "type": "RESCUE",
     "vp": 2,
-    "note": "Claimable once per stranded crew"
+    "note": "Claimable once per stranded crew",
+    "reward": {
+      "kind": "vp",
+      "n": 2
+    }
   },
   {
     "id": "obj09",
@@ -135,6 +167,10 @@
       "equip": [
         "SAMPLE CONTAINER"
       ]
+    },
+    "reward": {
+      "kind": "vp",
+      "n": 2
     }
   },
   {
@@ -150,7 +186,11 @@
       "cargo": 10
     },
     "transient": true,
-    "copies": 3
+    "copies": 3,
+    "reward": {
+      "kind": "science",
+      "n": 1
+    }
   },
   {
     "id": "obj11",
@@ -160,7 +200,11 @@
     "requires": "Single delivery of cargo to another player's orbital Habitat",
     "type": "MOST",
     "vp": 1,
-    "note": "Stealable by larger single delivery. Markers track contributions"
+    "note": "Stealable by larger single delivery. Markers track contributions",
+    "reward": {
+      "kind": "vp",
+      "n": 1
+    }
   },
   {
     "id": "obj12",
@@ -175,7 +219,11 @@
       "cargo": 10
     },
     "transient": true,
-    "copies": 3
+    "copies": 3,
+    "reward": {
+      "kind": "science",
+      "n": 2
+    }
   },
   {
     "id": "obj13",
@@ -190,7 +238,11 @@
       "cargo": 10
     },
     "transient": true,
-    "copies": 3
+    "copies": 3,
+    "reward": {
+      "kind": "science",
+      "n": 2
+    }
   },
   {
     "id": "obj14",
@@ -205,7 +257,11 @@
       "cargo": 10
     },
     "transient": true,
-    "copies": 3
+    "copies": 3,
+    "reward": {
+      "kind": "science",
+      "n": 3
+    }
   },
   {
     "id": "obj15",
@@ -221,6 +277,10 @@
         "SCIENCE PACKAGE",
         "SOLAR ARRAY"
       ]
+    },
+    "reward": {
+      "kind": "vp",
+      "n": 1
     }
   },
   {
@@ -230,7 +290,11 @@
     "desc": "4-person crew on Mars surface, sustained by a Greenhouse, for 12 months.",
     "requires": "4 crew + Habitat + Greenhouse on Mars, 12 turns endurance",
     "type": "ENDURANCE",
-    "vp": 3
+    "vp": 3,
+    "reward": {
+      "kind": "vp",
+      "n": 3
+    }
   },
   {
     "id": "fil01",
@@ -247,7 +311,11 @@
       "equipCount": 1
     },
     "transient": true,
-    "copies": 3
+    "copies": 3,
+    "reward": {
+      "kind": "money",
+      "n": 1
+    }
   },
   {
     "id": "fil02",
@@ -265,7 +333,11 @@
       "equipCount": 3
     },
     "transient": true,
-    "copies": 3
+    "copies": 3,
+    "reward": {
+      "kind": "money",
+      "n": 2
+    }
   },
   {
     "id": "fil03",
@@ -282,7 +354,11 @@
       "equipCount": 1
     },
     "transient": true,
-    "copies": 3
+    "copies": 3,
+    "reward": {
+      "kind": "money",
+      "n": 2
+    }
   },
   {
     "id": "fil04",
@@ -305,7 +381,11 @@
       ]
     },
     "transient": true,
-    "copies": 3
+    "copies": 3,
+    "reward": {
+      "kind": "money",
+      "n": 1
+    }
   },
   {
     "id": "fil05",
@@ -322,7 +402,11 @@
       "cargo": 10
     },
     "transient": true,
-    "copies": 3
+    "copies": 3,
+    "reward": {
+      "kind": "money",
+      "n": 1
+    }
   },
   {
     "id": "fil06",
@@ -339,7 +423,11 @@
       "cargo": 20
     },
     "transient": true,
-    "copies": 3
+    "copies": 3,
+    "reward": {
+      "kind": "money",
+      "n": 1
+    }
   },
   {
     "id": "fil07",
@@ -356,7 +444,11 @@
       "cargo": 10
     },
     "transient": true,
-    "copies": 3
+    "copies": 3,
+    "reward": {
+      "kind": "money",
+      "n": 1
+    }
   },
   {
     "id": "fil08",
@@ -373,7 +465,11 @@
       "cargo": 40
     },
     "transient": true,
-    "copies": 3
+    "copies": 3,
+    "reward": {
+      "kind": "money",
+      "n": 2
+    }
   },
   {
     "id": "fil09",
@@ -393,7 +489,11 @@
       "turns": 4
     },
     "transient": true,
-    "copies": 3
+    "copies": 3,
+    "reward": {
+      "kind": "science",
+      "n": 1
+    }
   },
   {
     "id": "fil10",
@@ -410,7 +510,11 @@
       ]
     },
     "transient": true,
-    "copies": 3
+    "copies": 3,
+    "reward": {
+      "kind": "science",
+      "n": 2
+    }
   },
   {
     "id": "fil11",
@@ -428,7 +532,11 @@
       ]
     },
     "transient": true,
-    "copies": 3
+    "copies": 3,
+    "reward": {
+      "kind": "science",
+      "n": 2
+    }
   },
   {
     "id": "fil12",
@@ -446,6 +554,10 @@
       ]
     },
     "transient": true,
-    "copies": 3
+    "copies": 3,
+    "reward": {
+      "kind": "science",
+      "n": 3
+    }
   }
 ]

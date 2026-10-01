@@ -303,23 +303,62 @@ OBJ_TYPE_ICON = {
 }
 
 
+# Board space names (data/board.json "name"), so goal cards say "LEO", "E5", "D4" like the board does.
+try:
+    SPACE_NAME = {sp["id"]: sp["name"] for sp in json.load(open("../data/board.json"))["spaces"]}
+except (OSError, KeyError):
+    SPACE_NAME = {}
+REWARD_ICON = {"vp": "&#9733;", "money": "$", "science": "&#9883;"}
+
+
+def goal_price_html(o):
+    """The top row of a goal card: what you must get where, as tokens/chips + board names
+    ("RR → LEO"). Goals without a machine check fall back to their 'requires' text."""
+    c = o.get("check")
+    if not c:
+        return f'<span class="gp-text">{esc(o["requires"])}</span>'
+    what = []
+    if "CREW CAPSULE" in c.get("equip", []):
+        what.append('<span class="gp-chip crew">CREW</span>')
+    if "CREW CAPSULE" in c.get("without", []):
+        what.append('<span class="gp-chip robot">UNCREWED</span>')
+    if c.get("cargo"):
+        what.append(f'<span class="tokens">{render_tokens(tokens_for_mass(c["cargo"]))}</span>')
+    if c.get("equipCount"):
+        what.append(f'<span class="gp-chip eq">{c["equipCount"]} eq</span>')
+    for n in c.get("equip", []):
+        if n != "CREW CAPSULE":
+            what.append(f'<span class="gp-chip eq">{esc(n.title())}</span>')
+    route = [SPACE_NAME.get(v, v) for v in c.get("visited", [])]
+    if c.get("at"):
+        route.append(" / ".join(SPACE_NAME.get(a, a) for a in c["at"]))
+    if c.get("deep"):
+        route.append(f'D{c["deep"]}+')
+    where = ' <span class="gp-arr">&rarr;</span> '.join(f'<b class="gp-at">{esc(r)}</b>' for r in route)
+    turns = f' <span class="gp-turns">&times;{c["turns"]} turns</span>' if c.get("turns") else ""
+    return f'{"".join(what)} <span class="gp-arr">&rarr;</span> {where}{turns}'
+
+
 def objective_card_html(o):
+    """Goal card (docs/09): TOP row = the price (what, where), BOTTOM row = the prize.
+    Everything between is explanation and flavour."""
     color = OBJ_TYPE_COLOR.get(o["type"], "#444")
     icon = OBJ_TYPE_ICON.get(o["type"], "")
-    vp_stars = ''.join('<span class="vp-star">&#9733;</span>' for _ in range(o["vp"]))
+    r = o.get("reward") or {"kind": "vp", "n": o["vp"]}
+    prize = REWARD_ICON[r["kind"]] * r["n"] if r["kind"] == "vp" else f'{REWARD_ICON[r["kind"]]}{r["n"]}'
     note = f'<div class="obj-note">{esc(o.get("note",""))}</div>' if o.get("note") else ""
     return f'''
 <div class="card obj" style="--accent: {color};">
+  <div class="obj-price">{goal_price_html(o)}</div>
   <div class="obj-head">
     <div class="obj-icon">{icon}</div>
     <div class="obj-type-label">{esc(o["type"])}</div>
-    <div class="obj-vp">{vp_stars}</div>
   </div>
   <div class="obj-title">{esc(o["name"])}</div>
   <div class="obj-tagline">{esc(o["tagline"])}</div>
   <div class="obj-desc">{esc(o["desc"])}</div>
-  <div class="obj-req">{esc(o["requires"])}</div>
   {note}
+  <div class="obj-prize {r["kind"]}">{prize}</div>
 </div>'''
 
 
@@ -501,10 +540,19 @@ table.strip td { padding: 0.1mm 1mm 0.1mm 0; vertical-align: middle; }
 .obj-title { font-weight: bold; font-size: 9pt; letter-spacing: 0.2pt; line-height: 1.05; margin-bottom: 0.5mm; }
 .obj-tagline { font-style: italic; font-size: 6pt; color: #888; margin-bottom: 1.5mm; line-height: 1.15; }
 .obj-desc { font-size: 7pt; line-height: 1.3; margin-bottom: 1.5mm; flex: 1; }
-.obj-req {
-  font-size: 6pt; font-weight: bold; padding: 0.8mm 1mm; background: #f3f1e8;
-  border-left: 2pt solid var(--accent); color: #333; line-height: 1.25;
-}
+.obj-price { display: flex; flex-wrap: wrap; align-items: center; gap: 0.8mm; min-height: 7mm; margin: -0.6mm -0.6mm 1.4mm;
+  padding: 1mm 1.2mm; background: #f3f1e8; border-radius: 1mm; font-size: 7pt; line-height: 1.15; }
+.obj-price .tokens { display: inline-flex; gap: 0.4mm; }
+.obj-price .t { width: 3.6mm; height: 3.6mm; line-height: 3.6mm; font-size: 6pt; }
+.gp-at { font-size: 8.5pt; letter-spacing: 0.2pt; color: #111; }
+.gp-arr { color: #555; font-size: 9pt; font-weight: bold; line-height: 1; }
+.gp-chip { font-size: 5.6pt; font-weight: bold; padding: 0.3mm 0.8mm; border-radius: 0.8mm; background: #1b3a6b; color: #fff; white-space: nowrap; }
+.gp-chip.crew { background: #2f6db5; } .gp-chip.robot { background: #6b6356; } .gp-chip.eq { background: #1b3a6b; }
+.gp-turns { font-size: 6.5pt; font-weight: bold; color: #555; }
+.gp-text { font-size: 6pt; font-weight: bold; color: #333; }
+.obj-desc { overflow: hidden; min-height: 0; }
+.obj-prize { flex-shrink: 0; margin: 1mm -2mm -1.8mm; padding: 1.2mm 2mm; text-align: center; font-weight: 800; font-size: 13pt; letter-spacing: 0.5pt; color: #fff; background: #b8860b; }
+.obj-prize.money { background: #2f6b3a; } .obj-prize.science { background: #46237a; }
 .obj-note { font-size: 5.5pt; font-style: italic; color: #888; margin-top: 1mm; line-height: 1.2; }
 '''
 

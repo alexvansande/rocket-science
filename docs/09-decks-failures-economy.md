@@ -236,6 +236,10 @@ The reward amount = the goal's current `vp` value, so nothing needs re-balancing
 
 *Proposal, by tech tier:* tier 1 = 1 money; tier 2 = 2 money + 2 science; tier 3 = 3 money + 4 science; tier 4 and paper rockets = 4 money + 6 science. Pad upgrades: Heavy = 3 money + 3 science, Super = 4 + 6.
 
+## Goal card layout — DECIDED (Alex, Oct 2026)
+
+Top row = the **price**: what you must get where, in tokens/chips and board names ("YY → LEO", "CREW → MOON → EARTH"). Bottom row = the **prize** (★, $ or ⚛). Everything between is explanation and flavour. Rewards now live in `objectives.json` → `reward`. Space names: docs/04.
+
 ## In the web prototype (Oct 2026)
 
 `build/table.html` (Blue's seat) now plays these rules: your own deck with draw at end of turn, the 5-step turn order, disasters (all 10) with Backup Systems, crewed/uncrewed slots, buying with money/science and the price gradient, +1 Δv on new contracts, taking the rightmost card instead of launching, permanent goals (VP) face-up and the ×3 transient deck, Space Center improvements (fixes, pads, +1 draw, second Launch, extra Mission Control). Data: `data/cards.json` → `disasters`, `actions`, `improvements`, `starting_deck`, and a `price` on every card.
