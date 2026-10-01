@@ -919,7 +919,7 @@ GAME_JS = r'''
     return (!c.at || c.at.includes(m.space)) && (!c.deep || deepN(m.space) >= c.deep)
       && (!c.visited || c.visited.every(v => m.visited.includes(v)))
       && (!c.equip || c.equip.every(n => names.includes(n))) && (!c.without || !c.without.some(n => names.includes(n)))
-      && (!c.equipCount || m.equip.length >= c.equipCount) && (!c.cargo || mass(m.tokens) >= c.cargo)
+      && (!c.equipCount || names.filter(n => n !== 'CREW CAPSULE').length >= c.equipCount)   // crew isn't a satellite && (!c.cargo || mass(m.tokens) >= c.cargo)
       && (!c.turns || st.turn - m.arrived >= c.turns);
   }
   const openGoals = () => [...st.goals.firsts, ...st.goals.market].filter(Boolean);
