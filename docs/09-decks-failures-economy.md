@@ -260,6 +260,23 @@ The reward amount = the goal's current `vp` value, so nothing needs re-balancing
 
 Top row = the **price**: what you must get where, in tokens/chips and board names ("YY → LEO", "CREW → MOON → EARTH"). Bottom row = the **prize** (★, $ or ⚛). Everything between is explanation and flavour. Rewards now live in `objectives.json` → `reward`. Space names: docs/04.
 
+## Science test (Oct 2026, `src/science_ladder.py`)
+
+Best case (money, hand and row ignored): which science missions can be flown at each science level, given only the engines and pad that science allows.
+
+| Mission | Δv | ⚛ | ⚛0 | ⚛1 | ⚛2 | ⚛3 | ⚛4 | ⚛6 |
+|---|---|---|---|---|---|---|---|---|
+| Weather Watch / Satellite Network | 9 | 1 / set | – | ok | ok | ok | ok | ok |
+| Venera, Deep Space Network, Halley | 13–14 | 1–2 | – | – | ok | ok | ok | ok |
+| Cassini, Voyager, Ice Moon Survey | 16–18 | 2–3 | – | – | – | ok | ok | ok |
+| Solar Probe (needs Atmospheric Return ⚛4) | 16 | 2 | – | – | – | – | ok | ok |
+| New Horizons | 20 | 3 | – | – | – | – | – | ok |
+
+Findings:
+1. **Deadlock at the start.** At ⚛0 nothing fits the 160t basic pad (Weather Watch needs 202t: K1 + Solid Kick Motor), and the Orbital Pad needs ⚛1. Without a suborbital science source (e.g. the proposed Sounding Rocket: Science Package → E5, ⚛1) science never starts.
+2. **Science saturates fast.** From ⚛1 the greedy ladder goes Weather Watch → ⚛2, Halley → ⚛4, Ice Moon Survey → ⚛7: **three flights and every card in the game is unlocked** (the top requirement is ⚛6). After that, science is worthless unless something else uses it.
+3. **Tech-label pricing gives odd gates.** Price follows the digit in the tech label, which counts within a family, not across history: Methalox Booster, Orbiter, Hydrolox Drop Tank and Ion Engine cost $1 ⚛0, while the Light Solid Booster and K2 need ⚛2. The cheapest science stacks end up built from Shuttle parts and a Methalox Booster.
+
 ## In the web prototype (Oct 2026)
 
 `build/table.html` (Blue's seat) now plays these rules: your own deck with draw at end of turn, the 5-step turn order, disasters (all 10) with Backup Systems, crewed/uncrewed slots, buying with money/science and the price gradient, +1 Δv on new contracts, the 💰1 consolation (launched but met no goal: discard the rightmost mission), paying $1 to discard the rightmost market card and take the first player token, permanent goals (VP) face-up and the ×3 transient deck, Space Center improvements (fixes, pads, +1 draw, second Launch, extra Mission Control). Data: `data/cards.json` → `disasters`, `actions`, `improvements`, `starting_deck`, and a `price` on every card.
