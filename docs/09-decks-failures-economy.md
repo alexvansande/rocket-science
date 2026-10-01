@@ -8,8 +8,9 @@ Status: **draft, Oct 2026**, from Alex's playtest notes. **DECIDED** = Alex's ca
 - **Draw from the top; every card you use goes to the bottom.** No discard pile and no regular shuffle: the deck is a queue. (Disasters shuffle it, see 3.)
 - **Starting hand: 3 cards.** Starting deck: ~16–20 cards, including the failure cards.
 - **Bought cards go to the bottom of your deck.** You wait for them to come round.
-- **The Research action is gone.** Drawing is automatic at the start of your turn. Cards you buy later can raise your draw size. *Proposal:* the base draw is 1 card. **OPEN:** confirm.
-- That leaves two tapped actions: **Launch** and **Mission Control**. Buying happens once per turn (*proposal*; **OPEN**).
+- **The Research action is gone.** You **draw 1 card** automatically at the start of your turn. Cards you buy later can raise your draw size.
+- That leaves two tapped actions: **Launch** and **Mission Control**. **Buy as much as you can afford** each turn (for now).
+- *Proposal:* draw-size upgrades sit **on your Space Center** once bought, not in your deck. A "+1 draw" card buried in your deck would only work on the turn you draw it.
 
 ## 2. Mission slots: 2 crewed, 2 uncrewed — DECIDED
 
@@ -18,10 +19,9 @@ The Space Center has **4 mission slots: 2 crewed, 2 uncrewed.** A crewed mission
 - **Losing a crewed mission costs victory points.**
 - Crewed goals need a mission flown from a crewed slot. Robotic goals need an uncrewed slot. That replaces the `without: Crew Capsule` / `equipCount` goal checks.
 
-**OPEN, the capsule's mass.** The physics needs the crew to weigh something: K2 orbits *with a capsule* only because the capsule rides an equipment row (First Orbit, docs/06 principle 10), and Apollo's CSM is real mass. Options:
-- (a) *Proposal:* a crewed slot **comes with a capsule printed on it, taking 1 equipment slot.** The first equipment space on any crewed mission is always the crew. No card needed, mass stays honest.
-- (b) You still fly a Crew Capsule card on a crewed mission; the slot just says it must carry one.
-- (c) The crew is weightless. Simplest, but K2 + nothing then orbits a "crew" for free, which breaks First Orbit's history lesson.
+**The crew takes one equipment slot — DECIDED.** A crewed mission must have room for the crew: the first equipment slot it gets is the crew's. (Equipment slots are used immediately or lost, docs/07, so the crew simply fills one when slots appear.) A crewed mission that ends without an equipment slot has no room for a crew. K2's `1 eq` row still orbits a crew (First Orbit), and the mass stays honest.
+- Fallback if this plays badly: keep a separate generic payload card (today's Crew Capsule) that must ride a crewed mission.
+- **OPEN:** the **Crew Capsule card (C1)** then has no job. Retire it, or turn it into something else (e.g. a crewed-only upgrade)? C2 Crew Habitat, Consumables and C3 Greenhouse stay as they are.
 
 ## 3. Disaster cards — DECIDED (mechanics), counts OPEN
 
@@ -74,7 +74,7 @@ The main deck holds **actions** as well as rockets and equipment. Played actions
 
 *Proposal, flavour names from history* (no real engine names, per CLAUDE.md, but historical events are fine): Backup Systems (Redundancy), Operation Paperclip (take a card from an opponent's hand), Espionage (look at an opponent's top 3, reorder them), Budget Cut (an opponent loses one money card).
 
-**OPEN:** does playing an action need a tap (Mission Control), or is it free?
+Playing an action is **free** (for now) — DECIDED.
 
 ## 5. Goals pay out; market cards have a price — DECIDED
 
@@ -97,6 +97,57 @@ Market cards get a price, e.g. **"3 science (not spent) + 2 money (spent)".**
 *Proposal: a conveyor.* Market and goal rows fill from one end. At the end of each round the **oldest card drops off** and everything slides along, with a new card coming in. Stale cards leave on their own, and the row already reads as "a window of opportunity" (docs/05). Optional: the older a card is, the cheaper it gets.
 
 Alternatives: (b) an action card that wipes the row ("New Administration"); (c) spend 1 money to discard a market card.
+
+## 7. First card draft — *proposal*, all numbers to playtest
+
+### Disaster cards (10 in the starting deck)
+
+Every disaster shuffles your deck. "Accident" = the mission is lost (tokens to the bowls, cards to the bottom of your deck, badge home). A **crewed** mission lost costs **−2 VP** (*proposal*). Recurring cards are deliberately milder than one-shots, since you'll see them again.
+
+| # | Name (real case) | Kind | Effect | Removed by |
+|---|---|---|---|---|
+| 1 | Kaputnik (Vanguard TV-3) | one-shot | Lose your hand. | gone after use |
+| 2 | Pad explosion (Nedelin) | one-shot | No Launch this turn. Lose your hand. | gone after use |
+| 3 | Range safety destruct | one-shot | Accident: the mission in slot 3. | gone after use |
+| 4 | Metric mix-up (Mars Climate Orbiter) | one-shot | Accident: your uncrewed mission farthest from Earth. | gone after use |
+| 5 | Budget overrun | one-shot | Lose 1 money. | gone after use |
+| 6 | Pogo oscillation (Apollo 6) | recurring | Accident: the mission in slot 1, if it's below orbit. | Pogo suppressor |
+| 7 | Combustion instability (F-1) | recurring | No Launch this turn. | Baffled injector |
+| 8 | Staging failure | recurring | Accident: the mission in slot 4, if it's below orbit. | Stage-separation testing |
+| 9 | Guidance failure (Ariane 501) | recurring | Accident: the mission in slot 3, if it's below orbit. | Redundant flight computer |
+| 10 | Cabin fire (Apollo 1) | recurring | Accident: the mission in slot 2. | Crew-safety review |
+
+Slots 1–2 are crewed, 3–4 uncrewed. "Below orbit" = on Earth or on the climb to LEO: launches are the risky part, a parked satellite isn't. The slot numbers mean you choose your risk: an empty slot can't have an accident.
+
+The 5 fixes are market cards. *Proposal:* once bought, a fix sits on your Space Center (like draw upgrades) and you **remove that disaster from your deck the next time it's drawn** (no deck search). Cheap: 1 money each, so early money has an obvious use.
+
+### Action cards (main deck)
+
+| Name | Effect |
+|---|---|
+| Backup Systems | Play when you draw a disaster: ignore it. The disaster goes to the bottom of your deck. |
+| Operation Paperclip | Take a random card from an opponent's hand. It's yours now. |
+| Espionage | Look at an opponent's top 3 cards and put them back in any order. |
+| Press Leak | Put an opponent's top card on the bottom of their deck. |
+| Budget Cut | An opponent loses 1 money. |
+| Overtime | Draw 2 cards. |
+| Extra Shift | One more Mission Control this turn. (The Shuttle's third burn, docs/07.) |
+
+### Goal rewards (existing 28 goals)
+
+The reward amount = the goal's current `vp` value, so nothing needs re-balancing to start:
+
+| Goals | Pay |
+|---|---|
+| FIRST, MOST, RESCUE, ENDURANCE (12) | VP |
+| FLYBY (4) + SCIENCE (4) | science |
+| COMMERCIAL (4) + MILITARY (4) | money (1–2 bags) |
+
+**Flag: money now comes only from the 8 commercial/military contracts, which are marked `filler` ("cut these first").** They're now the economy, so the flag should go, and the deck probably needs more money contracts (more copies of the military throws, which level-1 rockets can reach). Science has the same problem: only 8 cards pay it.
+
+### Prices
+
+*Proposal, by tech tier:* tier 1 = 1 money; tier 2 = 2 money + 2 science; tier 3 = 3 money + 4 science; tier 4 and paper rockets = 4 money + 6 science. Pad upgrades: Heavy = 3 money + 3 science, Super = 4 + 6.
 
 ## What this changes elsewhere
 
