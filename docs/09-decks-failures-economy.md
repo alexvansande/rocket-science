@@ -8,7 +8,7 @@ Status: **draft, Oct 2026**, from Alex's playtest notes. **DECIDED** = Alex's ca
 - **Draw from the top; every card you use goes to the bottom.** No discard pile and no regular shuffle: the deck is a queue. (Disasters shuffle it, see 3.)
 - **Starting hand: 3 cards.** Starting deck: ~16–20 cards, including the failure cards.
 - **Bought cards go to the bottom of your deck.** You wait for them to come round.
-- **The Research action is gone.** You **draw 1 card** automatically at the start of your turn. Cards you buy later can raise your draw size.
+- **The Research action is gone.** You **draw 1 card** automatically at the **end** of your turn (see Turn order). Cards you buy later can raise your draw size.
 - That leaves two tapped actions: **Launch** and **Mission Control**. **Buy as much as you can afford** each turn (for now).
 - *Proposal:* draw-size upgrades sit **on your Space Center** once bought, not in your deck. A "+1 draw" card buried in your deck would only work on the turn you draw it.
 
@@ -50,15 +50,22 @@ Two lifetimes (from the first round of notes, still assumed):
 
 *Proposal:* slot-targeted disasters are the natural way to make crewed flight riskier. "Slot 1 or 2" = the crewed slots, so a disaster there also costs VP.
 
-### When you draw — OPEN (Alex, Oct 2026)
+### Turn order — DECIDED (Alex, Oct 2026)
 
-Problem: if you draw at the **start** of your turn, disasters mostly find empty slots. Short missions (a suborbital hop, a delivery) launch, score and get recovered within one turn, so they're gone before the next draw. And park-or-fail means nothing is ever "below orbit" at the start of a turn, so the draft's "below orbit" cards can never fire.
+1. **Play:** Launch, move spacecraft, play actions, buy. Cards you fly **pile up on the mission slot**; nothing is removed mid-turn, spent stages included.
+2. **Draw 1 card.**
+3. **Disaster?** Follow its instructions, against your missions as they stand right now.
+4. **Otherwise, collect prizes:** claim the goals your missions met this turn.
+5. **Clear completed missions:** their cards go to the bottom of your deck, tokens to the bowls, badge home.
 
-Options:
-- (A) *Claude's pick:* **draw at the end of your turn, Exploding Kittens style, before anything is scored or recovered.** Order: act → draw → resolve a disaster against the missions as they stand → then park-or-fail, claim goals, recover. Every mission you flew this turn is at risk until the draw, which is the drama. Bonus: you see your new card before your next turn and can plan during the others' turns. Cost: goals are claimed at end of turn, not the moment they're met.
-- (B) Draw at the start, and a disaster's consequence **stops you flying this turn** (no Launch, or no Mission Control). Always bites, but it's a skipped turn, not an accident.
+Why: the risk sits on what you just flew. Apollo reaches the Moon, then you flip the card. Drawing at the start of the turn had disasters finding empty slots (short missions are launched, scored and recovered within one turn) and "below orbit" could never be true then (park-or-fail).
 
-Either way the "below orbit" wording goes: under (A) targets are "the mission in slot N" wherever it is; under (B) slot targets are rare and most disasters become "no Launch / lose hand".
+Consequences:
+- **Goals are claimed at end of turn**, not the moment they're met. (The table prototype claims immediately today; that changes.)
+- **A long mission locks its cards up.** A Mars expedition keeps every stage it flew on its slot for many turns, out of your deck. That's the real cost of a big program, and it falls out of the rule.
+- *Proposal:* park-or-fail is checked in step 5 too. A mission not at a stop is lost; its cards go to the bottom.
+- *Proposal:* a disaster drawn in step 3 still lets you collect prizes from missions it didn't hit. (Alex's list reads "if it's not, then pick up prizes"; **OPEN:** does any disaster cost you the whole turn's prizes, or only the hit mission's?)
+- With the draw at the end of your turn, "this turn" effects become "your next turn" (e.g. "No Launch on your next turn").
 
 ### Density warning (simulated)
 
@@ -117,17 +124,17 @@ Every disaster shuffles your deck. "Accident" = the mission is lost (tokens to t
 | # | Name (real case) | Kind | Effect | Removed by |
 |---|---|---|---|---|
 | 1 | Kaputnik (Vanguard TV-3) | one-shot | Lose your hand. | gone after use |
-| 2 | Pad explosion (Nedelin) | one-shot | No Launch this turn. Lose your hand. | gone after use |
+| 2 | Pad explosion (Nedelin) | one-shot | No Launch on your next turn. Lose your hand. | gone after use |
 | 3 | Range safety destruct | one-shot | Accident: the mission in slot 3. | gone after use |
 | 4 | Metric mix-up (Mars Climate Orbiter) | one-shot | Accident: your uncrewed mission farthest from Earth. | gone after use |
 | 5 | Budget overrun | one-shot | Lose 1 money. | gone after use |
-| 6 | Pogo oscillation (Apollo 6) | recurring | Accident: the mission in slot 1, if it's below orbit. | Pogo suppressor |
-| 7 | Combustion instability (F-1) | recurring | No Launch this turn. | Baffled injector |
-| 8 | Staging failure | recurring | Accident: the mission in slot 4, if it's below orbit. | Stage-separation testing |
-| 9 | Guidance failure (Ariane 501) | recurring | Accident: the mission in slot 3, if it's below orbit. | Redundant flight computer |
+| 6 | Pogo oscillation (Apollo 6) | recurring | Accident: the mission in slot 1, if it launched this turn. | Pogo suppressor |
+| 7 | Combustion instability (F-1) | recurring | No Launch on your next turn. | Baffled injector |
+| 8 | Staging failure | recurring | Accident: the mission in slot 4, if it launched this turn. | Stage-separation testing |
+| 9 | Guidance failure (Ariane 501) | recurring | Accident: the mission in slot 3, if it launched this turn. | Redundant flight computer |
 | 10 | Cabin fire (Apollo 1) | recurring | Accident: the mission in slot 2. | Crew-safety review |
 
-Slots 1–2 are crewed, 3–4 uncrewed. "Below orbit" = on Earth or on the climb to LEO: launches are the risky part, a parked satellite isn't. The slot numbers mean you choose your risk: an empty slot can't have an accident.
+Slots 1–2 are crewed, 3–4 uncrewed. Pogo, staging and guidance failures only hit **a mission launched this turn**: launches are the risky part, a satellite parked for ten turns isn't. Cabin fire hits a crewed mission wherever it is. The slot numbers mean you choose your risk: an empty slot can't have an accident.
 
 The 5 fixes are market cards. *Proposal:* once bought, a fix sits on your Space Center (like draw upgrades) and you **remove that disaster from your deck the next time it's drawn** (no deck search). Cheap: 1 money each, so early money has an obvious use.
 
