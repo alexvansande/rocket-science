@@ -179,11 +179,15 @@ FIRST goals aren't in the row (they're all face-up from the start), so no surcha
 **+1 Δv = the destination is one step farther — DECIDED.** One more ascent space for a MILITARY "DVn" throw (DV7 becomes DV8), one more rung for an "escape +N" goal. Physically it's **flying now instead of waiting for the best launch window**: a fresh contract is wanted now, and now costs extra Δv. Wait for the card to age, and the window opens.
 - **OPEN:** goals with no Δv to raise (land on the Moon, station for N turns): no surcharge, or 1 money instead?
 
-### Taking the rightmost card — DECIDED
+### Clearing the rightmost cards, and the first player token — DECIDED (Alex, Oct 2026)
 
-**Instead of your Launch this turn, take the rightmost card of either row.** A player without a good rocket still does something useful, and it clears the cards nobody wants.
-- **Market card:** free, to the bottom of your deck like any bought card.
-- **Goal card — DECIDED (revised Oct 2026):** you get a plain **$1**, not the goal's reward. No token needed: keep the card **sideways** with your won goals. *Any sideways goal card is worth $1*, whatever is printed on it; spend it like any money card. (Earlier version: flip it and keep its printed reward. Dropped: a $2 or ⚛3 contract for skipping a launch was too much.)
+Replaces the earlier "take the rightmost card of either row instead of launching". Two ways to clear stale cards:
+
+1. **Instead of launching, remove the rightmost contract and take $1.** Keep that card **sideways** with your won goals: *any sideways goal card is worth $1*, whatever is printed on it, and you spend it like any money card. (Earlier versions: take the market card free, or keep the contract's printed reward. Both dropped.)
+2. **Pay $1 to remove the rightmost market card and take the first player token.** The card is discarded. Not instead of anything: it's a purchase, any time on your turn.
+
+**First player:** when everyone has played, the next round starts with whoever holds the token.
+
 - **No free VP — DECIDED.** FIRST, MOST, RESCUE and ENDURANCE are **permanent goals**, all face-up from the start, never in the temporary row. The row holds only transient contracts (commercial, military, science), which pay money or science. 
 
 ### Money is goal cards, no tokens — DECIDED
@@ -248,7 +252,7 @@ Top row = the **price**: what you must get where, in tokens/chips and board name
 
 ## In the web prototype (Oct 2026)
 
-`build/table.html` (Blue's seat) now plays these rules: your own deck with draw at end of turn, the 5-step turn order, disasters (all 10) with Backup Systems, crewed/uncrewed slots, buying with money/science and the price gradient, +1 Δv on new contracts, taking the rightmost card instead of launching, permanent goals (VP) face-up and the ×3 transient deck, Space Center improvements (fixes, pads, +1 draw, second Launch, extra Mission Control). Data: `data/cards.json` → `disasters`, `actions`, `improvements`, `starting_deck`, and a `price` on every card.
+`build/table.html` (Blue's seat) now plays these rules: your own deck with draw at end of turn, the 5-step turn order, disasters (all 10) with Backup Systems, crewed/uncrewed slots, buying with money/science and the price gradient, +1 Δv on new contracts, removing the rightmost contract for $1 instead of launching, paying $1 to discard the rightmost market card and take the first player token, permanent goals (VP) face-up and the ×3 transient deck, Space Center improvements (fixes, pads, +1 draw, second Launch, extra Mission Control). Data: `data/cards.json` → `disasters`, `actions`, `improvements`, `starting_deck`, and a `price` on every card.
 
 Placeholders chosen for the prototype (all to playtest, none decided):
 - **Starting deck:** 2× Kerolox Sustainer, 2× Light Solid Booster, Solid Kick Motor, Atmospheric Return, 2× Science Package, Backup Systems, Overtime + the 10 disasters (20 cards).

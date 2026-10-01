@@ -27,6 +27,7 @@ TABLE_W, TABLE_H = 1300, 1240
 CARD_W, CARD_H, GAP = 47, 66, 6
 BOARD_W, BOARD_H = 594, 420            # printed at A2
 BOARD_X, BOARD_Y = 353, 410
+FP_MIDDLE = (BOARD_X - 40, BOARD_Y + BOARD_H + 40)   # first player token, unclaimed
 GOALS_X = 10                           # the goal rows run above the board, from the table's left edge
 SEAT_W, SEAT_H = 440, 285              # Space Center board (180 deep) + hand in front
 PB_H = 180
@@ -216,7 +217,7 @@ def bowl(color, label, cx, cy, r=30):
 
 # ---- Space Center (player board) -----------------------------------------
 ACTIONS = [
-    ("LAUNCH", "Put a mission token on Earth in a free slot (I–II crewed, III–IV uncrewed) with your pad's cargo tokens, then a <b>free Mission Control</b>. <b>Or instead:</b> take the rightmost market or goal card."),
+    ("LAUNCH", "Put a mission token on Earth in a free slot (I–II crewed, III–IV uncrewed) with your pad's cargo tokens, then a <b>free Mission Control</b>. <b>Or instead:</b> remove the rightmost contract and take $1."),
     ("MISSION CONTROL", "Spend a mission's cargo to place a rocket from your hand on it. Spent stages stay on the slot until the mission is done."),
 ]
 TAP = ('<svg viewBox="0 0 20 20" class="tap"><path d="M15 6 A7 7 0 1 0 17 11" fill="none" stroke="currentColor" '
@@ -316,6 +317,9 @@ def main():
         parts.append(f'<div class="slot mkslot" id="mk-{i}" {at(kx, ry, CARD_W, CARD_H)}></div>')
         parts.append(f'<div class="ptag" id="mkp-{i}" {at(kx, ry + CARD_H + 2, CARD_W, None)}></div>')
 
+    # First player token: starts in the middle; pay $1 (discarding the rightmost market card) to take it
+    parts.append(f'<div id="fp-token" class="fptoken" {at(FP_MIDDLE[0], FP_MIDDLE[1], 16, 16)}>1st</div>')
+
     # Cargo token bowls
     bx = BOARD_X + 5 * (CARD_W + GAP) + 45
     parts.append(zone_label("CARGO TOKENS", bx - 30, ry - 13))
@@ -340,6 +344,7 @@ def main():
         "focusBoard": [BOARD_X - 10, BOARD_Y - 10, BOARD_X + BOARD_W + 10, BOARD_Y + BOARD_H + 10],
         "focusGoals": [GOALS_X - 10, 296, GOALS_X + (len(GOAL_PERM) + GOAL_ROW_N + 1) * (CARD_W + GAP) + 40, 396],
         "focusMarket": [BOARD_X - 10, BOARD_Y + BOARD_H + 5, BOARD_X + 5 * (CARD_W + GAP) + 10, BOARD_Y + BOARD_H + 100],
+        "fpMiddle": FP_MIDDLE, "fpYou": (PLAYERS[0][4][0] - SEAT_W / 2 - 22, PLAYERS[0][4][1] - SEAT_H / 2 + 8),
         "goals": GOALS, "goalPerm": GOAL_PERM, "goalDeck": GOAL_DECK,
         "tri": {c: tri_svg(c) for c in TOKEN_COLORS},
         "badges": [badge_svg(PLAYERS[0][2], i) for i in range(4)], "badgeNames": BADGE_NAMES,
@@ -512,6 +517,9 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #332d29; fon
 .card.rwd.vp { background: #b8860b; color: #fff; } .card.rwd.money { background: #2f6b3a; color: #fff; } .card.rwd.science { background: #46237a; color: #fff; }
 .card.rwd b { font-size: 16mm; line-height: 1; } .card.rwd span { font-size: 3mm; font-weight: 700; padding: 0 3mm; margin-top: 2mm; }
 .card.rwd.spent { opacity: .3; }
+.fptoken { border-radius: 50%; background: radial-gradient(circle at 40% 35%, #ffe08a, #d9a441 60%, #a8741f); color: #3a2608;
+  font: 800 4.6mm/16mm Helvetica, Arial, sans-serif; text-align: center; box-shadow: 0 1mm 0 #7a5214, 0 2mm 4mm rgba(0,0,0,.5);
+  transition: left 1.2s cubic-bezier(.3,.7,.2,1), top 1.2s cubic-bezier(.3,.7,.2,1); }
 .peekrow { display: flex; gap: 3mm; justify-content: center; margin-top: 3mm; }
 .peek { width: 28.2mm; height: 39.6mm; position: relative; }
 .peek > .card { position: absolute; left: 0; top: 0; width: 47mm; height: 66mm; transform: scale(.6); transform-origin: 0 0; border-radius: 2mm; }
@@ -739,7 +747,7 @@ GAME_JS = r'''
     missions: [0, 1, 2, 3].map(blank), upgrades: [], removed: [],
     mode: 'idle', handOpen: false, sel: null, pending: null, firing: null, move: null, load: null,
     goals: { perm: G.goalPerm.slice(), row: [], deck: shuffle(G.goalDeck.slice()) },
-    won: [], spent: new Set(), scrapped: new Set(), penalty: 0,
+    won: [], spent: new Set(), scrapped: new Set(), penalty: 0, firstPlayer: false,
   };
   for (let i = 0; i < G.marketN; i++) st.market.push(st.main.pop() || null);
   for (let i = 0; i < G.goalRowN; i++) st.goals.row.push(st.goals.deck.pop() || null);
@@ -784,7 +792,7 @@ GAME_JS = r'''
   let tt; const toast = msg => { toastEl.textContent = msg; toastEl.classList.add('on'); clearTimeout(tt); tt = setTimeout(() => toastEl.classList.remove('on'), 3200); };
   const prompt = msg => { promptEl.textContent = msg || idlePrompt(); promptEl.classList.add('on'); };
   const idlePrompt = () => innerWidth < 600 ? `Turn ${st.turn} · tap anything glowing, then End turn.`
-    : `Turn ${st.turn} · Launch, Mission Control, buy from the market, or take a dashed rightmost card instead of launching. End turn draws your next card.`;
+    : `Turn ${st.turn} · Launch, Mission Control, buy from the market, or remove the dashed rightmost contract for $1 instead of launching. End turn draws your next card.`;
   const posOf = el => { let x = 0, y = 0; while (el && el.id !== 'table') { x += el.offsetLeft; y += el.offsetTop; el = el.offsetParent; } return { x: x / MM, y: y / MM }; };
   const centerOf = el => { const p = posOf(el); return { x: p.x + el.offsetWidth / MM / 2, y: p.y + el.offsetHeight / MM / 2 }; };
   function flyTokens(list, fromOf, toOf, done) {               // wooden deltas hop one by one, lifted off the table
@@ -912,7 +920,7 @@ GAME_JS = r'''
       if (el.dataset.id !== (id || '')) { el.innerHTML = id ? C(id).html : ''; el.dataset.id = id || ''; }
       const p = id && priceAt(id, i), afford = p && money() >= p.money && science() >= p.science;
       el.classList.toggle('can', idle && !!afford);
-      el.classList.toggle('take', takeOK && i === mr && !afford);
+      el.classList.toggle('take', idle && i === mr && !afford && money() >= 1);
       $('mkp-' + i).innerHTML = id ? `${p.money ? '$' + p.money : ''}${p.money && p.science ? ' + ' : ''}${p.science ? '⚛' + p.science : ''}${!p.money && !p.science ? 'free' : ''}`
         + (G.marketSurcharge[i] ? ` <span class="sur">(+$${G.marketSurcharge[i]} new)</span>` : '') : ''; });
     renderGoals(takeOK, gr);
@@ -921,6 +929,8 @@ GAME_JS = r'''
     dy.title = `Your deck: ${st.deck.length} cards. You draw ${drawSize()} at the end of your turn.`;
     $('upg-you').querySelector('.upg-list').innerHTML = st.upgrades.map(u => `<div class="mini" title="${C(u).name}">${C(u).html}</div>`).join('');
     $('vp-you').textContent = `★ ${vp()} · $ ${money()} · ⚛ ${science()}`;
+    const fp = $('fp-token'), at = st.firstPlayer ? G.fpYou : G.fpMiddle;
+    fp.style.left = at[0] + 'mm'; fp.style.top = at[1] + 'mm'; fp.title = st.firstPlayer ? 'You hold the first player token' : 'First player token';
   }
   function renderGoals(takeOK, gr) {
     const fill = (el, gid) => { if (!el) return;
@@ -1121,27 +1131,32 @@ GAME_JS = r'''
   function marketClick(i) {
     const id = st.market[i]; if (!id) return;
     const c = C(id), p = priceAt(id, i), afford = money() >= p.money && science() >= p.science;
-    const canTake = launchesLeft() > 0 && i === rightmost(st.market);
+    const canToken = i === rightmost(st.market) && money() >= 1;   // pay $1: discard it and take the first player token
     const lack = science() < p.science ? `It needs ⚛${p.science} science (you have ${science()}).` : `It costs $${p.money} (you have $${money()}).`;
     const btns = [];
-    if (afford) btns.push({ label: `Buy for ${p.money ? '$' + p.money : 'free'}${p.science ? ` (needs ⚛${p.science})` : ''}`, main: true, fn: () => buy(i, true) });
-    if (canTake) btns.push({ label: 'Take it free instead of launching', main: !afford, fn: () => buy(i, false) });
-    if (!btns.length) return toast(`${c.name}: ${lack}${launchesLeft() > 0 ? ' Only the rightmost card can be taken instead of launching.' : ''}`);
+    if (afford) btns.push({ label: `Buy for ${p.money ? '$' + p.money : 'free'}${p.science ? ` (needs ⚛${p.science})` : ''}`, main: true, fn: () => buy(i) });
+    if (canToken) btns.push({ label: `Pay $1: discard it and take the first player token${st.firstPlayer ? ' (you have it)' : ''}`, main: !afford, fn: () => takeToken(i) });
+    if (!btns.length) return toast(`${c.name}: ${lack}${i === rightmost(st.market) ? ' With $1 you could discard it and take the first player token.' : ''}`);
     btns.push({ label: 'Cancel' });
     choice(c.html, `${c.name}${afford ? '' : ` · ${lack}`}<br><small>${c.kind === 'improvement' ? 'Improvements stay in front of you, on your Space Center.' : 'Bought cards go to the bottom of your deck.'}</small>`, btns);
   }
-  function buy(i, paid) {
-    const id = st.market[i], c = C(id), p = priceAt(id, i);
-    let lost = 0;
-    if (paid) lost = pay(p.money); else st.used.launch++;
+  function buy(i) {
+    const id = st.market[i], c = C(id), p = priceAt(id, i), lost = pay(p.money);
     st.market.splice(i, 1); st.market.unshift(st.main.pop() || null);
     st.mode = 'anim'; render();
     const to = c.kind === 'improvement' ? $('upg-you') : $('deck-you');
     fly(c.html, $('mk-' + i), to, () => {
       if (c.kind === 'improvement') st.upgrades.push(id); else st.deck.push(id);
       st.mode = 'idle'; render(); prompt();
-      toast(`${c.name} ${c.kind === 'improvement' ? 'is on your Space Center' : 'goes to the bottom of your deck'}${paid ? (lost ? ` ($${lost} overpaid)` : '') : ' (instead of launching)'}.`);
+      toast(`${c.name} ${c.kind === 'improvement' ? 'is on your Space Center' : 'goes to the bottom of your deck'}${lost ? ` ($${lost} overpaid)` : ''}.`);
     });
+  }
+  function takeToken(i) {                                      // pay $1, the rightmost market card is discarded, you go first next round
+    const id = st.market[i], lost = pay(1);
+    st.market.splice(i, 1); st.market.unshift(st.main.pop() || null); st.firstPlayer = true;
+    st.mode = 'anim'; render();
+    fly(C(id).html, $('mk-' + i), $('deck-rockets'), () => { st.mode = 'idle'; render(); prompt();
+      toast(`${C(id).name} is discarded. You hold the first player token: you go first next round.${lost ? ` ($${lost} overpaid)` : ''}`); });
   }
   function goalClick(i) {
     const gid = st.goals.row[i]; if (!gid) return;
