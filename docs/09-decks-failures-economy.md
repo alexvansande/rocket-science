@@ -129,7 +129,8 @@ FIRST goals aren't in the row (they're all face-up from the start), so no surcha
 
 **Instead of your Launch this turn, take the rightmost card of either row.** A player without a good rocket still does something useful, and it clears the cards nobody wants.
 - **Market card:** free, to the bottom of your deck like any bought card.
-- **Goal card: OPEN.** What do you get? Options: (a) its reward, straight away (a cancelled contract that pays anyway); (b) you hold it as a private goal only you can complete, at its printed Δv; (c) it's simply discarded, and you get 1 money... except money has no tokens (below), so (c) is out.
+- **Goal card — DECIDED:** flip it and keep it as its reward, exactly as if you'd completed it. Goal backs *are* the resources, however you got the card. (Cheap on purpose: a stale goal is a cancelled contract that pays anyway, and it costs you your Launch.)
+- **OPEN, free VP:** if a VP goal sits rightmost, a player gets VP for skipping a launch. *Proposal:* goals in the temporary row pay only money or science; VP comes from FIRST / MOST / RESCUE / ENDURANCE, which aren't in the row.
 
 ### Money is goal cards, no tokens — DECIDED
 
