@@ -89,6 +89,10 @@ The first batch of TRANSIENT contracts exists as 12 carded fillers occupying the
 - **MILITARY (olive, shield):** suborbital ballistic throws, "Don't ask questions" — 10t@DV5, 20t@DV6, 10t@DV7, 40t@DV8. No real place names; unnamed payloads.
 - **SCIENCE (indigo, atom):** Weather Watch (TIROS — Science Package in LEO, 4 turns), Halley Armada (escape +2), Solar Probe (escape +4, needs Atmospheric Return as heat shield), Ice Moon Survey (escape +6, needs RTG).
 
+## Machine-checkable goals (Sep 2026)
+
+22 of the 28 goals carry a `check` in `objectives.json`, which the table prototype evaluates after every move, equipment load and end of turn. Fields (all optional, all must hold): `at` (space ids), `deep` (deep-space ladder rung ≥ N, i.e. "escape + N Dv"), `visited` (spaces the mission flew through earlier: "go there, then return"), `equip` (equipment names aboard), `without` (e.g. no Crew Capsule = robotic), `equipCount`, `cargo` (tons of tokens aboard), `turns` (turns parked at `at`). Military "DVn" = ascent space aN (pays on delivery, even mid-climb). MOST / RESCUE / ENDURANCE goals have no check yet. When a goal is met the camera glides to the goal row; clicking the glowing card claims it (it moves to your Space Center's completed-goals spot, its stars are added, the market refills from the missions deck).
+
 ## VP-scoring conventions (current objective deck)
 
 The 16-card objective deck has 5 categories (colors):

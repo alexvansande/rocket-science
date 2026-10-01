@@ -6,7 +6,18 @@
     "desc": "First crew capsule to reach LEO and return alive.",
     "requires": "Crew Capsule at LEO, then return to Earth",
     "type": "FIRST",
-    "vp": 1
+    "vp": 1,
+    "check": {
+      "visited": [
+        "leo"
+      ],
+      "at": [
+        "earth"
+      ],
+      "equip": [
+        "CREW CAPSULE"
+      ]
+    }
   },
   {
     "id": "obj02",
@@ -15,7 +26,18 @@
     "desc": "First crew to land on Moon surface and return alive.",
     "requires": "Crew Capsule lands on Moon, returns to Earth",
     "type": "FIRST",
-    "vp": 2
+    "vp": 2,
+    "check": {
+      "visited": [
+        "moon"
+      ],
+      "at": [
+        "earth"
+      ],
+      "equip": [
+        "CREW CAPSULE"
+      ]
+    }
   },
   {
     "id": "obj03",
@@ -24,7 +46,15 @@
     "desc": "First unmanned probe to land on Mars.",
     "requires": "Robotic lander on Mars surface",
     "type": "FIRST",
-    "vp": 1
+    "vp": 1,
+    "check": {
+      "at": [
+        "mars"
+      ],
+      "without": [
+        "CREW CAPSULE"
+      ]
+    }
   },
   {
     "id": "obj04",
@@ -34,7 +64,18 @@
     "requires": "Crew on Mars surface + return to Earth",
     "type": "FIRST",
     "vp": 4,
-    "note": "Game-winning objective"
+    "note": "Game-winning objective",
+    "check": {
+      "visited": [
+        "mars"
+      ],
+      "at": [
+        "earth"
+      ],
+      "equip": [
+        "CREW CAPSULE"
+      ]
+    }
   },
   {
     "id": "obj05",
@@ -83,7 +124,18 @@
     "desc": "Deliver a Sample Container to Mars surface, then return it to Earth.",
     "requires": "Sample Container lands on Mars, returns to Earth surface",
     "type": "FIRST",
-    "vp": 2
+    "vp": 2,
+    "check": {
+      "visited": [
+        "mars"
+      ],
+      "at": [
+        "earth"
+      ],
+      "equip": [
+        "SAMPLE CONTAINER"
+      ]
+    }
   },
   {
     "id": "obj10",
@@ -92,7 +144,11 @@
     "desc": "Deliver 10t (1 yellow token) past Earth escape + 1 Dv into deep space.",
     "requires": "10t at escape + 1 Dv",
     "type": "FLYBY",
-    "vp": 1
+    "vp": 1,
+    "check": {
+      "deep": 1,
+      "cargo": 10
+    }
   },
   {
     "id": "obj11",
@@ -111,7 +167,11 @@
     "desc": "Deliver 10t past Earth escape + 4 Dv into deep space.",
     "requires": "10t at escape + 4 Dv",
     "type": "FLYBY",
-    "vp": 2
+    "vp": 2,
+    "check": {
+      "deep": 4,
+      "cargo": 10
+    }
   },
   {
     "id": "obj13",
@@ -120,7 +180,11 @@
     "desc": "Deliver 10t past Earth escape + 5 Dv into deep space.",
     "requires": "10t at escape + 5 Dv",
     "type": "FLYBY",
-    "vp": 2
+    "vp": 2,
+    "check": {
+      "deep": 5,
+      "cargo": 10
+    }
   },
   {
     "id": "obj14",
@@ -129,7 +193,11 @@
     "desc": "Deliver 10t past Earth escape + 8 Dv into deep space.",
     "requires": "10t at escape + 8 Dv",
     "type": "FLYBY",
-    "vp": 3
+    "vp": 3,
+    "check": {
+      "deep": 8,
+      "cargo": 10
+    }
   },
   {
     "id": "obj15",
@@ -138,7 +206,14 @@
     "desc": "Deploy a Science Package at Earth escape + 1 Dv. Requires Solar Array.",
     "requires": "Science Package at escape + 1 Dv with Solar Array",
     "type": "FIRST",
-    "vp": 1
+    "vp": 1,
+    "check": {
+      "deep": 1,
+      "equip": [
+        "SCIENCE PACKAGE",
+        "SOLAR ARRAY"
+      ]
+    }
   },
   {
     "id": "obj16",
@@ -157,7 +232,13 @@
     "requires": "1 equipment at LEO",
     "type": "COMMERCIAL",
     "vp": 1,
-    "filler": true
+    "filler": true,
+    "check": {
+      "at": [
+        "leo"
+      ],
+      "equipCount": 1
+    }
   },
   {
     "id": "fil02",
@@ -168,7 +249,13 @@
     "type": "COMMERCIAL",
     "vp": 2,
     "note": "An Equipment Bundle x3 does it in one action",
-    "filler": true
+    "filler": true,
+    "check": {
+      "at": [
+        "leo"
+      ],
+      "equipCount": 3
+    }
   },
   {
     "id": "fil03",
@@ -178,7 +265,13 @@
     "requires": "1 equipment at GEO",
     "type": "COMMERCIAL",
     "vp": 2,
-    "filler": true
+    "filler": true,
+    "check": {
+      "at": [
+        "geo"
+      ],
+      "equipCount": 1
+    }
   },
   {
     "id": "fil04",
@@ -188,7 +281,19 @@
     "requires": "Crew Capsule to LEO + Atmospheric Return home",
     "type": "COMMERCIAL",
     "vp": 1,
-    "filler": true
+    "filler": true,
+    "check": {
+      "visited": [
+        "leo"
+      ],
+      "at": [
+        "earth"
+      ],
+      "equip": [
+        "CREW CAPSULE",
+        "ATMOSPHERIC RETURN"
+      ]
+    }
   },
   {
     "id": "fil05",
@@ -198,7 +303,13 @@
     "requires": "10t at DV5 \u00b7 pays on delivery",
     "type": "MILITARY",
     "vp": 1,
-    "filler": true
+    "filler": true,
+    "check": {
+      "at": [
+        "a5"
+      ],
+      "cargo": 10
+    }
   },
   {
     "id": "fil06",
@@ -208,7 +319,13 @@
     "requires": "20t at DV6 \u00b7 pays on delivery",
     "type": "MILITARY",
     "vp": 1,
-    "filler": true
+    "filler": true,
+    "check": {
+      "at": [
+        "a6"
+      ],
+      "cargo": 20
+    }
   },
   {
     "id": "fil07",
@@ -218,7 +335,13 @@
     "requires": "10t at DV7 \u00b7 pays on delivery",
     "type": "MILITARY",
     "vp": 1,
-    "filler": true
+    "filler": true,
+    "check": {
+      "at": [
+        "a7"
+      ],
+      "cargo": 10
+    }
   },
   {
     "id": "fil08",
@@ -228,7 +351,13 @@
     "requires": "40t at DV8 \u00b7 pays on delivery",
     "type": "MILITARY",
     "vp": 2,
-    "filler": true
+    "filler": true,
+    "check": {
+      "at": [
+        "a8"
+      ],
+      "cargo": 40
+    }
   },
   {
     "id": "fil09",
@@ -238,7 +367,16 @@
     "requires": "Science Package at LEO, 4 turns",
     "type": "SCIENCE",
     "vp": 1,
-    "filler": true
+    "filler": true,
+    "check": {
+      "at": [
+        "leo"
+      ],
+      "equip": [
+        "SCIENCE PACKAGE"
+      ],
+      "turns": 4
+    }
   },
   {
     "id": "fil10",
@@ -248,7 +386,13 @@
     "requires": "Science Package at escape +2 Dv",
     "type": "SCIENCE",
     "vp": 2,
-    "filler": true
+    "filler": true,
+    "check": {
+      "deep": 2,
+      "equip": [
+        "SCIENCE PACKAGE"
+      ]
+    }
   },
   {
     "id": "fil11",
@@ -258,7 +402,14 @@
     "requires": "Science Package + Atmospheric Return at escape +4 Dv",
     "type": "SCIENCE",
     "vp": 2,
-    "filler": true
+    "filler": true,
+    "check": {
+      "deep": 4,
+      "equip": [
+        "SCIENCE PACKAGE",
+        "ATMOSPHERIC RETURN"
+      ]
+    }
   },
   {
     "id": "fil12",
@@ -268,6 +419,13 @@
     "requires": "Science Package + RTG at escape +6 Dv",
     "type": "SCIENCE",
     "vp": 3,
-    "filler": true
+    "filler": true,
+    "check": {
+      "deep": 6,
+      "equip": [
+        "SCIENCE PACKAGE",
+        "RTG"
+      ]
+    }
   }
 ]

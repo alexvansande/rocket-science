@@ -80,6 +80,14 @@ MARKET_IDS = [cid("LIGHT SOLID BOOSTER"), cid("HYPERGOLIC UPPER"), cid("SOLID KI
 DECK_IDS = [c for c in CARDS if c not in MARKET_IDS and not any(c in h for h in HAND_IDS.values())]
 LAUNCH_TOKENS = "RRRR"      # the basic pad's lift (docs/07). One place to change it.
 
+# Goals: FIRSTs always open; a 5-card market; the rest shuffle into the missions deck.
+GOALS = {o["id"]: {"name": o["name"], "type": o["type"], "vp": o["vp"], "check": o.get("check"),
+                   "html": objective_card_html(o)} for o in OBJS}
+GOAL_FIRSTS = [o["id"] for o in OBJS if o["type"] == "FIRST"]
+GOAL_MARKET = [o["id"] for o in OBJS if o["name"] in
+               ("LARGEST SPACE STATION", "VENERA", "COMSAT", "WEATHER WATCH", "INTERCONTINENTAL EXPRESS")]
+GOAL_DECK = [g for g in GOALS if g not in GOAL_FIRSTS and g not in GOAL_MARKET]
+
 TOKEN_COLORS = {"K": "#1c1c1c", "R": "#b3261e", "O": "#e07b00", "Y": "#f0b400"}
 
 
@@ -112,20 +120,50 @@ def zone_label(text, x, y, w=None, align="left"):
     return f'<div class="zlabel" {at(x, y, w, None, f"text-align:{align};")}>{text}</div>'
 
 
+def _shade(hex_, k):
+    """Darken (k<1) or lighten (k>1) a #rrggbb colour."""
+    r, g, b = (int(hex_[i:i + 2], 16) for i in (1, 3, 5))
+    f = (lambda v: round(v * k)) if k < 1 else (lambda v: round(v + (255 - v) * (k - 1)))
+    return "#%02x%02x%02x" % tuple(max(0, min(255, f(v))) for v in (r, g, b))
+
+
+def tri_svg(color, cls="", style="", rot=0):
+    """A delta-shaped wooden cargo meeple. The triangle may be rotated (tokens lie at any angle),
+    but its thickness is drawn as darker copies pushed DOWN the screen, so the side always faces
+    the viewer the way a real token's does under one light."""
+    c, side = TOKEN_COLORS[color], _shade(TOKEN_COLORS[color], .55)
+    tri = "12,2.5 21,18 3,18"
+    rt = f'transform="rotate({rot:.0f} 12 12.8)"'
+    body = "".join(f'<g transform="translate(0 {k * 0.6:.1f})"><polygon points="{tri}" {rt} fill="{side}" '
+                   f'stroke="{side}" stroke-width="0.5" stroke-linejoin="round"/></g>' for k in range(5, 0, -1))
+    return (f'<svg class="tok {cls}" {style} viewBox="0 0 24 24">{body}'
+            f'<polygon points="{tri}" {rt} fill="{c}" stroke="rgba(0,0,0,.3)" stroke-width="0.5" stroke-linejoin="round"/>'
+            f'<polygon points="12,2.5 12,13 3,18" {rt} fill="rgba(255,255,255,.17)"/>'
+            f'<polyline points="3.7,17.6 12,3.4 20.3,17.6" {rt} fill="none" stroke="rgba(255,255,255,.28)" stroke-width="0.5"/></svg>')
+
+
 def cargo(color, x, y, rot=0, size=12):
-    """A triangular wooden cargo token."""
-    c = TOKEN_COLORS[color]
-    return (f'<svg class="tok" {at(x, y, size, size * 0.9, f"transform:rotate({rot}deg);")} viewBox="0 0 20 18">'
-            f'<polygon points="10,1 19,17 1,17" fill="{c}" stroke="rgba(0,0,0,.35)" stroke-width="0.8" stroke-linejoin="round"/>'
-            f'<polygon points="10,1 19,17 10,12" fill="rgba(255,255,255,.14)"/></svg>')
+    return tri_svg(color, style=at(x, y, size, size), rot=rot)
 
 
-def rocket_token(color, x, y, size=13, rot=0):
-    """A player's wooden mission token (rocket meeple)."""
-    return (f'<svg class="tok meeple" {at(x, y, size * 0.62, size, f"transform:rotate({rot}deg);")} viewBox="0 0 16 26">'
-            f'<path d="M8,1 C12,5 12.5,10 12,17 L15,22 L15,25 L11,23 L5,23 L1,25 L1,22 L4,17 C3.5,10 4,5 8,1 Z" '
-            f'fill="{color}" stroke="rgba(0,0,0,.45)" stroke-width="0.9" stroke-linejoin="round"/>'
-            f'<circle cx="8" cy="10" r="2" fill="rgba(255,255,255,.55)"/></svg>')
+# Mission badges: a round wooden disc in the player's colour, one symbol per mission slot
+GLYPHS = [
+    '<polygon points="12,4.6 13.9,9.6 19.2,9.8 15,13.1 16.5,18.3 12,15.3 7.5,18.3 9,13.1 4.8,9.8 10.1,9.6" fill="{g}"/>',   # star
+    '<path d="M15 5.4 A7 7 0 1 0 15 18.6 A5.4 5.4 0 1 1 15 5.4 Z" fill="{g}"/>',                                          # crescent
+    '<circle cx="12" cy="12" r="4.3" fill="{g}"/><ellipse cx="12" cy="12" rx="8.2" ry="2.4" fill="none" stroke="{g}" '
+    'stroke-width="1.3" transform="rotate(-22 12 12)"/>',                                                                  # ringed planet
+    '<polygon points="12.7,6.7 17.3,11.3 5,19" fill="{g}" opacity=".65"/><circle cx="15" cy="9" r="3.3" fill="{g}"/>',     # comet
+]
+BADGE_NAMES = ["star", "crescent", "ringed planet", "comet"]
+
+
+def badge_svg(color, i, cls="badge", style=""):
+    g = "#2a2a2a" if sum(int(color[k:k + 2], 16) for k in (1, 3, 5)) > 600 else "#ffffff"
+    return (f'<svg class="tok {cls}" {style} viewBox="0 0 24 26">'
+            f'<circle cx="12" cy="14.3" r="11" fill="{_shade(color, .55)}" stroke="rgba(0,0,0,.45)" stroke-width="0.6"/>'
+            f'<circle cx="12" cy="12" r="11" fill="{color}" stroke="rgba(0,0,0,.35)" stroke-width="0.6"/>'
+            f'<circle cx="12" cy="12" r="9.3" fill="none" stroke="{g}" stroke-opacity=".45" stroke-width="0.7"/>'
+            f'{GLYPHS[i].format(g=g)}</svg>')
 
 
 def bowl(color, label, cx, cy, r=30):
@@ -133,7 +171,7 @@ def bowl(color, label, cx, cy, r=30):
     rnd = random.Random(color)
     toks = "".join(cargo(color, cx - 6 + rnd.uniform(-r * 0.5, r * 0.5), cy - 5 + rnd.uniform(-r * 0.45, r * 0.45),
                          rnd.uniform(0, 360)) for _ in range(9))
-    return (f'<div class="bowl" {at(cx - r, cy - r, 2 * r, 2 * r)}></div>{toks}'
+    return (f'<div class="bowl" id="bowl-{color}" {at(cx - r, cy - r, 2 * r, 2 * r)}></div>{toks}'
             + zone_label(label, cx - r, cy + r + 3, 2 * r, "center"))
 
 
@@ -163,19 +201,19 @@ def space_center(name, color, you=False):
         slot = f'<div class="cslot" {at(7.5, 9, CARD_W, CARD_H)}><span>rocket</span></div>'
         if you:   # empty shells; the game script fills card, cargo and token
             missions += (f'<div class="marea mcol" id="mcol-{i}" data-i="{i}" {at(mx, 20, MCOL_W, 152)}>'
-                         f'<div class="mname">MISSION {"I II III IV".split()[i]}</div>'
+                         f'<div class="mname">{badge_svg(color, i, "mini-badge")}MISSION {"I II III IV".split()[i]}</div>'
                          f'<div class="ctag" {at(0, 79, MCOL_W, None)}>cargo</div>{slot}'
                          f'<div class="slot mslot" id="mslot-{i}" {at(7.5, 9, CARD_W, CARD_H)}></div>'
                          f'<div class="mcargo" id="mcargo-{i}" {at(2, 86, MCOL_W - 4, 34)}></div>'
                          f'<div class="rest" id="mrest-{i}" {at(23, 126, 16, 20)}></div></div>')
             continue
-        body = slot + f'<div class="rest" {at(23, 126, 16, 20)}></div>' + rocket_token(color, 26, 128, 16)
-        missions += (f'<div class="marea" {at(mx, 20, MCOL_W, 152)}><div class="mname">MISSION {"I II III IV".split()[i]}</div>'
+        body = slot + f'<div class="rest" {at(23, 126, 16, 20)}>{badge_svg(color, i)}</div>'
+        missions += (f'<div class="marea" {at(mx, 20, MCOL_W, 152)}><div class="mname">{badge_svg(color, i, "mini-badge")}MISSION {"I II III IV".split()[i]}</div>'
                      f'<div class="ctag" {at(0, 79, MCOL_W, None)}>cargo</div>{body}</div>')
     return f'''<div class="pboard" style="--pc:{color};">
-  <div class="pb-title">SPACE CENTER <span>· {name}</span></div>
+  <div class="pb-title">SPACE CENTER <span>· {name}</span>{' <b id="vp-you" class="vp"></b>' if you else ''}</div>
   {acts}
-  <div class="improve" {at(8, 92, 3 * CARD_W + 10, 80)}>completed goals<br>reward side up</div>
+  <div class="improve"{' id="cgoals-you"' if you else ''} {at(8, 92, 3 * CARD_W + 10, 80)}><span class="cg-hint">completed goals<br>reward side up</span></div>
   {missions}
 </div>'''
 
@@ -219,12 +257,12 @@ def main():
     fx = BOARD_X - 25
     parts.append(zone_label("FIRSTS · always open", fx, 305))
     for i, o in enumerate(firsts):
-        parts.append(card(objective_card_html(o), fx + i * (CARD_W + GAP), 318))
+        parts.append(f'<div class="slot gslot" id="goal-f{i}" {at(fx + i * (CARD_W + GAP), 318, CARD_W, CARD_H)}>{objective_card_html(o)}</div>')
     mx = fx + 6 * (CARD_W + GAP) + 24
     parts.append(zone_label("MISSIONS · deck + 5 open", mx, 305))
-    parts.append(stack("missions", "MISSIONS", mx, 318, 17))
-    for i, name in enumerate(["LARGEST SPACE STATION", "VENERA", "COMSAT", "WEATHER WATCH", "INTERCONTINENTAL EXPRESS"]):
-        parts.append(card(objective_card_html(OBJ[name]), mx + (i + 1) * (CARD_W + GAP) - 2, 318))
+    parts.append(stack("missions", "MISSIONS", mx, 318, len(GOAL_DECK), "deck-missions"))
+    for i, gid in enumerate(GOAL_MARKET):
+        parts.append(f'<div class="slot gslot" id="goal-m{i}" {at(mx + (i + 1) * (CARD_W + GAP) - 2, 318, CARD_W, CARD_H)}>{GOALS[gid]["html"]}</div>')
 
     # Rockets & tech: main deck + open market
     ry = BOARD_Y + BOARD_H + 22
@@ -254,6 +292,10 @@ def main():
         "focusYou": [PLAYERS[0][4][0] - SEAT_W / 2 - 10, PLAYERS[0][4][1] - SEAT_H / 2 - 70,
                      PLAYERS[0][4][0] + SEAT_W / 2 + 60, PLAYERS[0][4][1] + SEAT_H / 2 + 5],
         "focusBoard": [BOARD_X - 10, BOARD_Y - 10, BOARD_X + BOARD_W + 10, BOARD_Y + BOARD_H + 10],
+        "focusGoals": [BOARD_X - 35, 296, BOARD_X - 25 + 12 * (CARD_W + GAP) + 30, 392],
+        "goals": GOALS, "goalFirsts": GOAL_FIRSTS, "goalMarket": GOAL_MARKET, "goalDeck": GOAL_DECK,
+        "tri": {c: tri_svg(c) for c in TOKEN_COLORS},
+        "badges": [badge_svg(PLAYERS[0][2], i) for i in range(4)], "badgeNames": BADGE_NAMES,
     }
     game_json = json.dumps(game).replace("</", "<\\/")
 
@@ -390,7 +432,7 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #332d29; fon
   border: 0.5mm solid #8a2a1a; padding: 0.3mm 1.2mm; border-radius: 1mm; transform: rotate(-12deg); }
 .action.free .ahead::after { content: 'FREE'; margin-left: auto; background: #f0b400; color: #1d1d1d; font-size: 2.5mm; padding: 0.3mm 1mm; border-radius: 1mm; }
 .mcargo { display: flex; flex-wrap: wrap; gap: 1mm; align-content: flex-start; justify-content: center; }
-.mcargo .tok { position: static; width: 10mm; height: 9mm; }
+.mcargo .tok { position: static; width: 11mm; height: 11mm; }
 .mcargo .tok.spent { opacity: .35; }
 .minis { display: flex; gap: 1mm; width: 100%; justify-content: center; }
 .mini { width: 16.9mm; height: 23.8mm; flex: none; position: relative; }
@@ -401,20 +443,28 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #332d29; fon
   background: #d9a441; color: #1d1d1d; border: 0; border-radius: 18px; padding: 8px 18px; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,.4); }
 #donebtn[hidden] { display: none; }
 .eqchip { font-size: 2.6mm; font-weight: 700; color: #1b3a6b; background: #e6ecf5; border-radius: 1mm; padding: 0.6mm 1.2mm; }
-.rest .tok { position: absolute; left: 3mm; top: 2mm; width: 10mm; height: 16mm; }
+.rest .tok { position: absolute; left: 1.5mm; top: 3mm; width: 13mm; height: 14mm; }
+.mname .mini-badge { position: static; width: 4.2mm; height: 4.5mm; vertical-align: -1.3mm; margin-right: 1.2mm; filter: none; }
+.gslot.claim > .card { animation: glow 1.2s ease-in-out infinite; }
+.gslot.claim { cursor: pointer; }
+.improve .cg { position: absolute; width: 47mm; height: 66mm; }
+.improve .cg > .card { width: 100%; height: 100%; border-radius: 1.8mm; box-shadow: 0 1mm 3mm rgba(0,0,0,.35); }
+.pb-title .vp { margin-left: 3mm; color: #b8860b; }
 .mslot.fired > .card { filter: saturate(.35) brightness(.92); }
 .mslot.fired::after { content: 'FIRED'; position: absolute; left: 50%; top: 45%; transform: translate(-50%,-50%) rotate(-14deg);
   font: 800 5mm Helvetica, Arial, sans-serif; color: rgba(140,40,20,.8); border: 0.7mm solid rgba(140,40,20,.8); padding: 0.5mm 2mm; border-radius: 1mm; }
 .dslot { overflow: visible; }
 .dslot em { position: absolute; right: -2mm; top: -2mm; background: #1d1d1d; color: #fff; font: 700 3mm Helvetica; font-style: normal; border-radius: 3mm; padding: 0.5mm 1.5mm; }
 .flycard { position: absolute; width: 47mm; height: 66mm; z-index: 50; pointer-events: none; transform: translateZ(18mm);
-  transition: left .65s cubic-bezier(.3,.7,.2,1), top .65s cubic-bezier(.3,.7,.2,1); }
+  transition: left 1.1s cubic-bezier(.3,.7,.2,1), top 1.1s cubic-bezier(.3,.7,.2,1); }
+.flytok { position: absolute; width: 11mm; height: 11mm; z-index: 50; pointer-events: none; transform: translateZ(14mm);
+  transition: left .9s cubic-bezier(.3,.7,.2,1), top .9s cubic-bezier(.3,.7,.2,1); }
+.flytok .tok { width: 100%; height: 100%; }
 #boardlayer { pointer-events: none; }
-.btok { position: absolute; width: 7mm; height: 11mm; margin: -9.5mm 0 0 -3.5mm; pointer-events: none;
-  transition: left .8s cubic-bezier(.3,.7,.2,1), top .8s cubic-bezier(.3,.7,.2,1); }
+.btok { position: absolute; width: 10mm; height: 10.8mm; margin: -5.4mm 0 0 -5mm; pointer-events: none;
+  transition: left 1.4s cubic-bezier(.3,.7,.2,1), top 1.4s cubic-bezier(.3,.7,.2,1); }
 .btok .tok { position: static; width: 100%; height: 100%; }
-.btok span { position: absolute; top: -3.8mm; left: 50%; transform: translateX(-50%); font: 800 2.6mm Helvetica, Arial, sans-serif; color: #fff;
-  background: #2f6db5; padding: 0 0.8mm; border-radius: 0.8mm; }
+
 @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.2); } }
 .hl { position: absolute; width: 9mm; height: 9mm; margin: -4.5mm 0 0 -4.5mm; border-radius: 50%; pointer-events: auto; cursor: pointer;
   border: 0.8mm solid #ffbf3c; background: rgba(255,191,60,.3); animation: pulse 1.2s ease-in-out infinite; }
@@ -570,8 +620,7 @@ GAME_JS = r'''
   const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
   const mass = toks => toks.reduce((m, t) => m + VAL[t], 0);
   const tokensFor = t => { const out = []; for (const k of 'KROY') while (t >= VAL[k] - 1e-9) { out.push(k); t -= VAL[k]; } return out; };
-  const tri = (c, cls = '') => `<svg class="tok ${cls}" viewBox="0 0 20 18"><polygon points="10,1 19,17 1,17" fill="${G.tokenColors[c]}" stroke="rgba(0,0,0,.35)" stroke-width="0.8" stroke-linejoin="round"/><polygon points="10,1 19,17 10,12" fill="rgba(255,255,255,.14)"/></svg>`;
-  const MEEPLE = `<svg class="tok meeple" viewBox="0 0 16 26"><path d="M8,1 C12,5 12.5,10 12,17 L15,22 L15,25 L11,23 L5,23 L1,25 L1,22 L4,17 C3.5,10 4,5 8,1 Z" fill="${G.you}" stroke="rgba(0,0,0,.45)" stroke-width="0.9" stroke-linejoin="round"/><circle cx="8" cy="10" r="2" fill="rgba(255,255,255,.55)"/></svg>`;
+  const tri = (c, cls = '') => G.tri[c].replace('class="tok ', `class="tok ${cls} `);
   const BACK = '<div class="card cback rockets"><span>ROCKETS</span></div>';
   const adj = {}; for (const [a, b] of G.links) { (adj[a] = adj[a] || []).push(b); (adj[b] = adj[b] || []).push(a); }
 
@@ -580,6 +629,8 @@ GAME_JS = r'''
     used: { research: false, launch: false, mc: false }, freeMC: 0,
     missions: [0, 1, 2, 3].map(i => ({ i, active: false, space: null, tokens: [], paid: false, eq: 0, equip: [], card: null, fired: false })),
     mode: 'idle', handOpen: false, sel: null, pending: null, firing: null, move: null, load: null,
+    goals: { firsts: G.goalFirsts.slice(), market: G.goalMarket.slice(), deck: shuffle(G.goalDeck.slice()), mine: [] },
+    vp: 0, claimable: [],
   };
   const hand = $('hand-you'), toastEl = $('toast'), promptEl = $('prompt'), closeup = $('closeup');
 
@@ -588,17 +639,33 @@ GAME_JS = r'''
   const prompt = msg => { promptEl.textContent = msg || idlePrompt(); promptEl.classList.add('on'); };
   const idlePrompt = () => `Turn ${st.turn} · Research, Launch or Mission Control (glowing), or click a glowing rocket to fire it. Then End turn.`;
   const posOf = el => { let x = 0, y = 0; while (el && el.id !== 'table') { x += el.offsetLeft; y += el.offsetTop; el = el.offsetParent; } return { x: x / MM, y: y / MM }; };
+  const centerOf = el => { const p = posOf(el); return { x: p.x + el.offsetWidth / MM / 2, y: p.y + el.offsetHeight / MM / 2 }; };
+  function flyTokens(list, fromOf, toOf, done) {               // wooden deltas hop one by one, lifted off the table
+    if (!list.length) return done && done();
+    let left = list.length;
+    list.forEach((c, i) => setTimeout(() => {
+      const spread = (i - (list.length - 1) / 2) * 11;
+      const a = centerOf(fromOf(c, i)), b = centerOf(toOf(c, i)), f = document.createElement('div');
+      f.className = 'flytok'; f.innerHTML = G.tri[c];
+      f.style.left = (a.x - 5) + 'mm'; f.style.top = (a.y - 5) + 'mm';
+      $('table').appendChild(f); void f.offsetWidth;
+      f.style.left = (b.x - 5 + spread) + 'mm'; f.style.top = (b.y - 5) + 'mm';
+      let fin = false; const end = () => { if (fin) return; fin = true; f.remove(); if (--left === 0) done && done(); };
+      f.addEventListener('transitionend', e => e.propertyName === 'top' && end()); setTimeout(end, 1300);
+    }, i * 200));
+  }
   function fly(html, fromEl, toEl, done) {                    // a card lifted off the table and slid across
     const a = posOf(fromEl), b = posOf(toEl), f = document.createElement('div');
     f.className = 'slot flycard'; f.innerHTML = html; f.style.left = a.x + 'mm'; f.style.top = a.y + 'mm';
     $('table').appendChild(f); void f.offsetWidth;
     f.style.left = b.x + 'mm'; f.style.top = b.y + 'mm';
     let fin = false; const end = () => { if (fin) return; fin = true; f.remove(); done && done(); };
-    f.addEventListener('transitionend', end); setTimeout(end, 950);
+    f.addEventListener('transitionend', e => e.propertyName === 'top' && end()); setTimeout(end, 1500);
   }
   function reach(from, n) {                                    // spaces within n crossings (1 dv each)
-    const d = { [from]: 0 }, q = [from];
-    while (q.length) { const s = q.shift(); if (d[s] >= n) continue; for (const t of adj[s] || []) if (!(t in d)) { d[t] = d[s] + 1; q.push(t); } }
+    const d = { [from]: 0 }, q = [from], par = {};
+    while (q.length) { const s = q.shift(); if (d[s] >= n) continue; for (const t of adj[s] || []) if (!(t in d)) { d[t] = d[s] + 1; par[t] = s; q.push(t); } }
+    Object.defineProperty(d, 'par', { value: par });
     return d;
   }
   const pendingCard = () => st.pending == null ? null : G.cards[st.hand[st.pending]];
@@ -657,11 +724,11 @@ GAME_JS = r'''
       $('mcargo-' + m.i).innerHTML = m.tokens.map(t => tri(t, m.paid ? 'spent' : '')).join('')
         + (st.load && st.load.m === m ? `<span class="eqchip">${st.load.n} slot${st.load.n > 1 ? 's' : ''} to fill</span>` : '')
         + (m.equip.length ? `<div class="minis">${m.equip.map(e => `<div class="mini" title="${G.cards[e].name}">${G.cards[e].html}</div>`).join('')}</div>` : '');
-      $('mrest-' + m.i).innerHTML = m.active ? '' : MEEPLE;
+      $('mrest-' + m.i).innerHTML = m.active ? '' : G.badges[m.i];
       $('mcol-' + m.i).classList.toggle('target', st.mode === 'mc-target' && eligible(m));
       let bt = $('btok-' + m.i);
       if (m.active) {
-        if (!bt) { bt = document.createElement('div'); bt.id = 'btok-' + m.i; bt.className = 'btok'; bt.innerHTML = MEEPLE + `<span>${ROMAN[m.i]}</span>`; $('boardlayer').appendChild(bt); }
+        if (!bt) { bt = document.createElement('div'); bt.id = 'btok-' + m.i; bt.className = 'btok'; bt.title = `Mission ${ROMAN[m.i]} (${G.badgeNames[m.i]})`; bt.innerHTML = G.badges[m.i]; $('boardlayer').appendChild(bt); }
         const p = G.spaces[m.space], off = st.missions.filter(o => o.active && o.space === m.space && o.i < m.i).length;
         bt.style.left = (p.x + off * 5) + 'mm'; bt.style.top = p.y + 'mm';
       } else if (bt) bt.remove();
@@ -671,6 +738,7 @@ GAME_JS = r'''
     $('donebtn').hidden = st.mode !== 'load';
     const deck = $('deck-rockets');
     deck.style.setProperty('--t', (st.deck.length * 0.3).toFixed(2) + 'mm'); deck.style.visibility = st.deck.length ? '' : 'hidden';
+    renderGoals();
     const top = st.discard[st.discard.length - 1], ds = $('discard-you');
     ds.innerHTML = top ? `<div class="slot" style="inset:0">${G.cards[top].html}</div><em>${st.discard.length}</em>` : '<span>DISCARD</span>';
   }
@@ -686,11 +754,15 @@ GAME_JS = r'''
     });
   }
   function launch() {
-    const m = st.missions.find(m => !m.active);
-    Object.assign(m, { active: true, space: 'earth', tokens: G.launch.split(''), paid: false, eq: 0, equip: [], card: null, fired: false });
-    st.used.launch = true; st.freeMC++;
-    render(); toast(`Mission ${ROMAN[m.i]} is on the pad with ${mass(m.tokens)}t of lift.`);
-    startMC();
+    const m = st.missions.find(m => !m.active), toks = G.launch.split('');
+    Object.assign(m, { active: true, space: 'earth', tokens: [], paid: false, eq: 0, equip: [], card: null, fired: false, visited: ['earth'], arrived: st.turn });
+    st.used.launch = true; st.freeMC++; st.mode = 'anim';
+    render(); camYou();
+    setTimeout(() => flyTokens(toks, c => $('bowl-' + c), () => $('mcargo-' + m.i), () => {
+      m.tokens = toks; st.mode = 'idle'; render();
+      toast(`Mission ${ROMAN[m.i]} is on the pad with ${mass(m.tokens)}t of lift.`);
+      startMC();
+    }), 500);
   }
   function startMC() {
     st.mode = 'mc-pick'; st.handOpen = true; st.sel = null; syncHand(); render(); camYou();
@@ -728,7 +800,7 @@ GAME_JS = r'''
       const t = [...m.tokens].sort((a, b) => VAL[a] - VAL[b])[0];   // the rest must be filled now or are lost
       m.tokens.splice(m.tokens.indexOf(t), 1);
       const slots = VAL[t] / 2.5;
-      render();
+      render(); flyTokens([t], () => $('mcargo-' + m.i), () => $('bowl-' + t), null);
       return fly(c.html, hand, $('mcargo-' + m.i), () => {
         m.equip.push(id); render();
         toast(`${c.name} is aboard Mission ${ROMAN[m.i]}. Your ${t} token made ${slots} equipment slots.`);
@@ -756,12 +828,17 @@ GAME_JS = r'''
     const m = st.firing, c = G.cards[m.card], row = c.rows[r];
     const had = mass(m.tokens), spare = had - c.T;
     closeup.hidden = true;
-    m.tokens = row.eq ? [] : tokensFor(row.cargo); m.paid = false; m.fired = true;
+    const old = m.tokens.slice(), fresh = row.eq ? [] : tokensFor(row.cargo);
     const slots = (row.eq || 0) + (c.carry || 0);
-    st.mode = 'idle'; render();
-    toast(`Paid ${c.T}t${spare > 0 ? `, ${spare}t discarded` : ''}.${row.eq ? '' : ` ${row.cargo}t aboard.`}${slots ? ` ${slots} equipment slot${slots > 1 ? 's' : ''} to fill now.` : ''}`);
-    const go = () => startMove(m, row.dv);
-    slots ? startLoad(m, slots, go) : go();
+    m.tokens = []; m.paid = false; m.fired = true; st.mode = 'anim'; render();
+    toast(`Paying ${c.T}t${spare > 0 ? ` (${spare}t left over, discarded)` : ''}…`);
+    flyTokens(old, () => $('mcargo-' + m.i), t => $('bowl-' + t), () =>          // spent cargo back to the bowls
+      setTimeout(() => flyTokens(fresh, t => $('bowl-' + t), () => $('mcargo-' + m.i), () => {   // the row's cargo aboard
+        m.tokens = fresh; st.mode = 'idle'; render();
+        toast(`Paid ${c.T}t${spare > 0 ? `, ${spare}t discarded` : ''}.${row.eq ? '' : ` ${row.cargo}t aboard.`}${slots ? ` ${slots} equipment slot${slots > 1 ? 's' : ''} to fill now.` : ''}`);
+        const go = () => startMove(m, row.dv);
+        slots ? startLoad(m, slots, go) : go();
+      }), 250));
   }
   function startMove(m, dv) {
     st.mode = 'move'; st.move = { m, reach: reach(m.space, dv) };
@@ -791,7 +868,7 @@ GAME_JS = r'''
     const L = st.load; if (!L) return;
     st.load = null; st.mode = 'idle'; st.handOpen = false; st.sel = null; syncHand(); render();
     if (L.n > 0) toast(`${L.n} equipment slot${L.n > 1 ? 's' : ''} left empty and lost.`);
-    if (L.then) L.then(); else prompt();
+    if (L.then) L.then(); else if (!checkGoals()) prompt();
   }
   function showReach() {
     const layer = $('boardlayer'), { m, reach: d } = st.move;
@@ -805,9 +882,13 @@ GAME_JS = r'''
   }
   const clearReach = () => $('boardlayer').querySelectorAll('.hl').forEach(h => h.remove());
   function moveTo(sid) {
-    const m = st.move.m; m.space = sid; clearReach(); st.mode = 'idle'; st.move = null; render();
+    const m = st.move.m, par = st.move.reach.par, path = [];
+    for (let s = sid; s && s !== m.space; s = par[s]) path.push(s);
+    for (const s of path) if (!m.visited.includes(s)) m.visited.push(s);
+    if (sid !== m.space) m.arrived = st.turn;
+    m.space = sid; clearReach(); st.mode = 'idle'; st.move = null; render();
     const sp = G.spaces[sid];
-    setTimeout(camYou, 1100);                                  // after the token lands, back to your Space Center
+    setTimeout(() => { if (!checkGoals()) camYou(); }, 1600);  // after the badge lands: a goal? else back to you
     if (sp.stop === 'none') toast(`Mission ${ROMAN[m.i]} can't stop here. Fire another stage before you end your turn, or it fails.`);
     else toast(`Mission ${ROMAN[m.i]} reached ${sp.label || 'its new position'}.`);
     prompt();
@@ -822,11 +903,63 @@ GAME_JS = r'''
     const lost = [];
     for (const m of st.missions) if (m.active && G.spaces[m.space].stop === 'none') {
       lost.push(ROMAN[m.i]); if (m.card) st.discard.push(m.card);
-      Object.assign(m, { active: false, space: null, tokens: [], paid: false, eq: 0, equip: [], card: null, fired: false });
+      Object.assign(m, { active: false, space: null, tokens: [], paid: false, eq: 0, equip: [], card: null, fired: false, visited: [] });
     }
     st.used = { research: false, launch: false, mc: false }; st.freeMC = 0; st.turn++;
     render(); prompt();
     toast(lost.length ? `Mission ${lost.join(' & ')} couldn't stop mid-flight and was lost.` : `Turn ${st.turn}.`);
+    setTimeout(checkGoals, 600);
+  }
+
+  // ---- goals ------------------------------------------------------------------
+  const deepN = sid => { const r = /^ds(\d+)$/.exec(sid); return r ? +r[1] : 0; };
+  function meets(m, g) {
+    const c = g.check; if (!c || !m.active) return false;
+    const names = m.equip.map(e => G.cards[e].name);
+    return (!c.at || c.at.includes(m.space)) && (!c.deep || deepN(m.space) >= c.deep)
+      && (!c.visited || c.visited.every(v => m.visited.includes(v)))
+      && (!c.equip || c.equip.every(n => names.includes(n))) && (!c.without || !c.without.some(n => names.includes(n)))
+      && (!c.equipCount || m.equip.length >= c.equipCount) && (!c.cargo || mass(m.tokens) >= c.cargo)
+      && (!c.turns || st.turn - m.arrived >= c.turns);
+  }
+  const openGoals = () => [...st.goals.firsts, ...st.goals.market].filter(Boolean);
+  function checkGoals() {                                       // true if we switched to claiming
+    const hits = [];
+    for (const gid of openGoals()) { const m = st.missions.find(m => meets(m, G.goals[gid])); if (m) hits.push({ gid, m }); }
+    if (!hits.length || st.mode !== 'idle') return false;
+    st.claimable = hits; st.mode = 'claim'; render(); cam(G.focusGoals);
+    const h = hits[0], g = G.goals[h.gid];
+    prompt(`Mission ${ROMAN[h.m.i]} achieved ${g.name}! Click the glowing goal card to claim it (+${g.vp}★).`);
+    return true;
+  }
+  const slotOfGoal = gid => { let i = st.goals.firsts.indexOf(gid); if (i >= 0) return $('goal-f' + i); i = st.goals.market.indexOf(gid); return i >= 0 ? $('goal-m' + i) : null; };
+  function claim(gid) {
+    const g = G.goals[gid], from = slotOfGoal(gid);
+    let i = st.goals.firsts.indexOf(gid);
+    if (i >= 0) st.goals.firsts[i] = null;
+    else { i = st.goals.market.indexOf(gid); st.goals.market[i] = st.goals.deck.pop() || null; }
+    st.claimable = st.claimable.filter(h => h.gid !== gid); st.mode = st.claimable.length ? 'claim' : 'anim';
+    from.innerHTML = ''; render();
+    fly(g.html, from, $('cgoals-you'), () => {
+      st.goals.mine.push(gid); st.vp += g.vp; if (st.mode === 'anim') st.mode = 'idle'; render();
+      toast(`${g.name} claimed! +${g.vp}★`);
+      if (st.mode === 'idle') { prompt(); setTimeout(camYou, 700); }
+    });
+  }
+  function renderGoals() {
+    const fill = (el, gid) => { if (!el) return;
+      if (el.dataset.gid !== (gid || '')) { el.innerHTML = gid ? G.goals[gid].html : ''; el.dataset.gid = gid || ''; }
+      el.classList.toggle('claim', st.mode === 'claim' && st.claimable.some(h => h.gid === gid)); };
+    st.goals.firsts.forEach((gid, i) => fill($('goal-f' + i), gid));
+    st.goals.market.forEach((gid, i) => fill($('goal-m' + i), gid));
+    const gd = $('deck-missions'); gd.style.setProperty('--t', (st.goals.deck.length * 0.3).toFixed(2) + 'mm'); gd.style.visibility = st.goals.deck.length ? '' : 'hidden';
+    const cg = $('cgoals-you');
+    if (cg.dataset.n !== String(st.goals.mine.length)) {
+      cg.dataset.n = st.goals.mine.length;
+      cg.innerHTML = st.goals.mine.length ? st.goals.mine.map((gid, k) => `<div class="slot cg" style="left:${3 + k * 15}mm;top:7mm">${G.goals[gid].html}</div>`).join('')
+        : '<span class="cg-hint">completed goals<br>reward side up</span>';
+    }
+    $('vp-you').textContent = st.vp ? `★ ${st.vp}` : '';
   }
   const why = k => ({
     research: st.used.research ? 'You already researched this turn.' : 'The deck is empty.',
@@ -840,6 +973,12 @@ GAME_JS = r'''
   window.game = {
     tap(target) {
       const t = target.closest ? target : target.parentElement;
+      if (st.mode === 'anim') return true;
+      if (st.mode === 'claim') {
+        const gs = t.closest('.gslot.claim');
+        if (gs) { const gid = gs.dataset.gid; claim(gid); return true; }
+        st.mode = 'idle'; st.claimable = []; render(); prompt(); camYou(); return true;
+      }
       const act = t.closest('[data-act]');
       if (act) { const k = act.dataset.act; if (st.mode !== 'idle') cancel(); if (can()[k]) ({ research, launch, mc: startMC })[k](); else toast(why(k)); return true; }
       const hc = t.closest('#hand-you .hc');
