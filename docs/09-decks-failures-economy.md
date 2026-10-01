@@ -141,17 +141,9 @@ A kind of **transient** goal card (it comes and goes through the contract row). 
 - **Infrastructure disasters join your deck when you build** (*proposal, in the prototype*): Station Fire, Orbital Debris and Dust Storm aren't in the starting deck. Each is shuffled into your deck when you win your first card of its family, so owning infrastructure brings its own risk and the starting deck doesn't get heavier. Each has a fix (Fire Suppression, Debris Tracking, Dust-Proof Power, $1 + ⚛1). A lost card goes to the bottom of the contract deck.
 - Infrastructure cards: 4 copies of each family in the contract deck (`objectives.json` → `type: INFRASTRUCTURE`, `family`, `reward.set`).
 
-### Income from other players' actions — DIRECTION (Alex), mechanism *proposal*
+### Income from other players' actions — DIRECTION (Alex), OPEN
 
-Instead of upkeep, some cards pay you **when another player does something**. Money has no tokens, so the payout uses the sideways trick: **take the top card of the contract deck and keep it sideways = $1.**
-
-*Proposal, examples* (Space Center improvements, so they sit in front of you as a reminder):
-- **Launch Services:** when another player Launches, take $1.
-- **Tracking Station:** when another player's mission reaches D1 or farther, take $1 (they use your network).
-- **Recovery Fleet:** when another player's crew lands on Earth, take $1.
-- **Insurance Broker:** when another player draws a disaster, take $1.
-
-Needs opponents to test; the prototype has none yet.
+Some cards could pay you when another player does something (instead of income every turn). Mechanism and cards to be designed later.
 
 ## 5. Goals pay out; market cards have a price — DECIDED
 
