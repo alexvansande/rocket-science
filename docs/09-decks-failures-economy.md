@@ -50,6 +50,16 @@ Two lifetimes (from the first round of notes, still assumed):
 
 *Proposal:* slot-targeted disasters are the natural way to make crewed flight riskier. "Slot 1 or 2" = the crewed slots, so a disaster there also costs VP.
 
+### When you draw — OPEN (Alex, Oct 2026)
+
+Problem: if you draw at the **start** of your turn, disasters mostly find empty slots. Short missions (a suborbital hop, a delivery) launch, score and get recovered within one turn, so they're gone before the next draw. And park-or-fail means nothing is ever "below orbit" at the start of a turn, so the draft's "below orbit" cards can never fire.
+
+Options:
+- (A) *Claude's pick:* **draw at the end of your turn, Exploding Kittens style, before anything is scored or recovered.** Order: act → draw → resolve a disaster against the missions as they stand → then park-or-fail, claim goals, recover. Every mission you flew this turn is at risk until the draw, which is the drama. Bonus: you see your new card before your next turn and can plan during the others' turns. Cost: goals are claimed at end of turn, not the moment they're met.
+- (B) Draw at the start, and a disaster's consequence **stops you flying this turn** (no Launch, or no Mission Control). Always bites, but it's a skipped turn, not an accident.
+
+Either way the "below orbit" wording goes: under (A) targets are "the mission in slot N" wherever it is; under (B) slot targets are rare and most disasters become "no Launch / lose hand".
+
 ### Density warning (simulated)
 
 With the first-round rule (every failure throws back your whole hand) and about half the starting deck as failures, a player **loses ~8–9 of their first 20 turns** and has a 3-card hand on only ~4 of them. Per-card effects fix most of this: only the "lose your hand" cards cause it. Keep those few.
