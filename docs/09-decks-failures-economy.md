@@ -89,7 +89,7 @@ The main deck holds **actions** as well as rockets and equipment. Played actions
 - **Meddling with an opponent's deck:** e.g. look at their top 3 and reorder them.
 - **Stealing a card** from another player.
 
-*Proposal, flavour names from history* (no real engine names, per CLAUDE.md, but historical events are fine): Backup Systems (Redundancy), Operation Paperclip (take a card from an opponent's hand), Espionage (look at an opponent's top 3, reorder them), Budget Cut (an opponent loses one money card).
+*Proposal, flavour names from history* (no real engine names, per CLAUDE.md, but historical events are fine): Backup Systems (Redundancy), Operation Paperclip (take a card from an opponent's hand), Espionage (look at an opponent's top 3, reorder them), Budget Cut (an opponent loses 1 money).
 
 Playing an action is **free** (for now) — DECIDED.
 
@@ -101,7 +101,7 @@ Completing a goal and flipping it shows a reward on the back. **Each goal pays o
 |---|---|---|
 | **Victory points** | star | Win the game. |
 | **Science** | atom | A **threshold**: kept, never spent. |
-| **Money** | money bag | **Spent:** discard the goal card to pay. |
+| **Money** | money bag | **Spent.** *Proposal:* paid out as bag tokens (see 6). |
 
 Market cards get a price, e.g. **"3 science (not spent) + 2 money (spent)".**
 
@@ -109,11 +109,41 @@ Market cards get a price, e.g. **"3 science (not spent) + 2 money (spent)".**
 
 *Proposal, which goal pays what:* MILITARY and COMMERCIAL pay money, SCIENCE pays science, FIRSTs pay VP.
 
-## 6. Clearing stale cards — DECIDED (want), mechanism *proposal*
+## 6. The rows: a price gradient, and scrapping stale cards
 
-*Proposal: a conveyor.* Market and goal rows fill from one end. At the end of each round the **oldest card drops off** and everything slides along, with a new card coming in. Stale cards leave on their own, and the row already reads as "a window of opportunity" (docs/05). Optional: the older a card is, the cheaper it gets.
+### Price gradient — DECIDED (to try)
 
-Alternatives: (b) an action card that wipes the row ("New Administration"); (c) spend 1 money to discard a market card.
+New cards enter the market and the temporary-goal row on the **left**. When a card is taken, the cards to its left **slide right** to fill the gap and a new card comes in on the left. So fresh cards cost a premium and get cheaper as they age:
+
+| Row | Slot 1 (newest) | Slot 2 | Slot 3 | Rest |
+|---|---|---|---|---|
+| Market | +2 money | +1 money | — | printed price |
+| Temporary goals | +1 Δv | +1 Δv | +1 Δv | as printed |
+
+FIRST goals aren't in the row (they're all face-up from the start), so no surcharge on them.
+
+**OPEN, what "+1 Δv" means at the table.** Options:
+- (a) *Claude's pick:* the goal's **destination is one step farther**: one more ascent space for a MILITARY "DVn" throw (DV7 becomes DV8), one more rung for an "escape +N" goal. Readable straight off the board, and it's the honest version (a fresh contract is a harder spec).
+- (b) The mission must **burn 1 more Δv** than it needs to reach the goal. Hard to see at the table: a spacecraft's leftover Δv isn't tracked anywhere.
+- Some goals have no Δv to raise (land on the Moon, station for N turns). For those: (a) gives no surcharge, or they pay 1 money instead.
+
+### Scrapping the rightmost card — DECIDED (want), mechanism *proposal*
+
+Alex wants the stale rightmost cards gone, but by a player's choice with a small payoff, not by a per-turn conveyor.
+
+*Proposal: **Scrap**, once per turn, free.* Discard the rightmost card of **either** row:
+- **market card → take 1 money** ("surplus sale");
+- **goal card → take 1 science**? Too strong, since science is permanent. *Better:* **goal card → take 1 money** too ("cancelled contract, the agency pays a fee").
+
+One rule for both rows, and it doubles as a trickle of income, so a player with a bad hand can still do something useful. If 1 money a turn is too generous, limit it to "only if you bought nothing this turn".
+
+Other options considered:
+- (b) **Take the rightmost market card for free, to the bottom of your deck.** The consolation *is* the card. Clears stale cards only if somebody wants them for free, which might not happen for really bad ones.
+- (c) **Instead of your end-of-turn draw, take the rightmost market card.** You skip the disaster flip: safety is the consolation. Elegant, but a player could avoid disasters indefinitely by always taking it.
+
+### Money needs tokens — *proposal*
+
+If money is paid by discarding goal cards worth 1–3 bags, paying 2 with a 3-bag card means either losing 1 or making change. And scrapping needs a "1 money" to hand out. *Proposal:* **money-bag tokens.** Money goals pay out tokens; you keep the goal card in your completed pile like any other. VP and science goals stay as cards (science is just counted). Then Budget overrun / Budget Cut take a token.
 
 ## 7. First card draft — *proposal*, all numbers to playtest
 
