@@ -3,19 +3,17 @@
     "id": "obj01",
     "name": "FIRST ORBIT",
     "tagline": "Vostok 1, Gagarin 1961",
-    "desc": "First crew capsule to reach LEO and return alive.",
-    "requires": "Crew Capsule at LEO, then return to Earth",
+    "desc": "First crew to reach low Earth orbit, carrying a heat shield to come home.",
+    "requires": "Crew + Atmospheric Return in LEO",
     "type": "FIRST",
     "vp": 1,
     "check": {
-      "visited": [
+      "at": [
         "leo"
       ],
-      "at": [
-        "earth"
-      ],
       "equip": [
-        "CREW CAPSULE"
+        "CREW CAPSULE",
+        "ATMOSPHERIC RETURN"
       ]
     },
     "reward": {
