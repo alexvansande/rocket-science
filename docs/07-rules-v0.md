@@ -2,6 +2,8 @@
 
 Status: **draft, Sep 2026.** Items marked **DECIDED** are Alex's calls. Items marked *proposal* are Claude's suggestions awaiting a yes/no. The card physics (docs/01) is unchanged. This doc is the turn loop wrapped around it.
 
+> **Being revised (Oct 2026):** personal decks, failure cards, action cards and goal rewards as VP/science/money are drafted in `docs/09-decks-failures-economy.md`. Once decided, they replace Research and the goal-reward sections below.
+
 ## Components
 
 - **Main board:** Earth / Moon / Mars spirals + deep-space ladder (docs/04).

@@ -64,7 +64,7 @@ v0.3-playtest (June 2026)
 
 ## Pending — high priority
 
-1. **Event / failure deck**. Two failure types per the discussion:
+1. **Event / failure deck**. Now drafted as failure cards in your personal deck: `docs/09-decks-failures-economy.md`. Earlier sketch, two failure types:
    - **Small failures**: humans recover (cost: Consumables/turn loss); robots get stuck
    - **Big failures**: catastrophic; crewed mission losses freeze player for a turn, lose cards. Uncrewed losses are just a single ledger entry.
 2. **Mission flow / market draft** for objectives. Sketched in `docs/05-missions-and-tech-tree.md` — hybrid open + personal recommended.
