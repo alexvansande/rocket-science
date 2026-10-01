@@ -623,6 +623,7 @@ table.strip td { padding: 0.1mm 1mm 0.1mm 0; vertical-align: middle; }
 
 # Paginate each deck at 16 cards per A4 page (4x4 grid).
 PER_PAGE = 16
+MONEY_CARDS = 32          # the 💰1 bank deck
 def _npages(n):
     return (n + PER_PAGE - 1) // PER_PAGE
 
@@ -647,7 +648,9 @@ def main():
     n_engine_pages = _npages(len(engine_cards))
     n_equip_pages = _npages(len(equip_cards))
     n_obj_pages = _npages(len(main_objs))
-    TOTAL_PAGES = n_engine_pages + n_equip_pages + n_obj_pages
+    # The bank: 💰1 cards printed the same on both sides, for change and the launch consolation (docs/09)
+    n_money_pages = _npages(MONEY_CARDS)
+    TOTAL_PAGES = n_engine_pages + n_equip_pages + n_obj_pages + n_money_pages
 
     # Every front page is followed by its back page, so even pages = card backs.
     # Engine + equipment fronts get the red ROCKETS back; objectives get the gold MISSIONS back.
@@ -670,6 +673,11 @@ def main():
         pages.append(objective_page(pgnum, TOTAL_PAGES, main_objs[i:i + PER_PAGE]))
         pages.append(mission_back_page(main_objs[i:i + PER_PAGE]))
 
+    for i in range(0, MONEY_CARDS, PER_PAGE):
+        pgnum += 1
+        n = min(PER_PAGE, MONEY_CARDS - i)
+        pages.append(card_page("MONEY CARDS · 💰1 · same on both sides", pgnum, TOTAL_PAGES, [mission_back_html(amount=1)] * n))
+        pages.append(card_page("MONEY CARDS · backs", pgnum, TOTAL_PAGES, [mission_back_html(amount=1)] * n))
     pages_html = "\n".join(pages)
     data_json = json.dumps(data, indent=2)
 

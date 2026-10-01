@@ -27,7 +27,8 @@ TABLE_W, TABLE_H = 1300, 1240
 CARD_W, CARD_H, GAP = 47, 66, 6
 BOARD_W, BOARD_H = 594, 420            # printed at A2
 BOARD_X, BOARD_Y = 353, 410
-FP_MIDDLE = (BOARD_X - 40, BOARD_Y + BOARD_H + 40)   # first player token, unclaimed
+FP_MIDDLE = (BOARD_X - 40, BOARD_Y + BOARD_H + 40)
+BANK_XY = (BOARD_X - 110, BOARD_Y + BOARD_H + 22)   # first player token, unclaimed
 GOALS_X = 10                           # the goal rows run above the board, from the table's left edge
 SEAT_W, SEAT_H = 440, 285              # Space Center board (180 deep) + hand in front
 PB_H = 180
@@ -316,6 +317,12 @@ def main():
         kx = BOARD_X + (i + 1) * (CARD_W + GAP)
         parts.append(f'<div class="slot mkslot" id="mk-{i}" {at(kx, ry, CARD_W, CARD_H)}></div>')
         parts.append(f'<div class="ptag" id="mkp-{i}" {at(kx, ry + CARD_H + 2, CARD_W, None)}></div>')
+
+    # The bank: a small deck of 💰1 cards (same on both sides) for change and the launch consolation
+    bank = stack("missions", "", BANK_XY[0], BANK_XY[1], 32, "bank")
+    bank = bank.replace('<div class="card cback missions"><span></span></div>', mission_back_html(amount=1))
+    parts.append(zone_label("BANK · 💰1", BANK_XY[0], BANK_XY[1] - 13))
+    parts.append(bank)
 
     # First player token: starts in the middle; pay $1 (discarding the rightmost market card) to take it
     parts.append(f'<div id="fp-token" class="fptoken" {at(FP_MIDDLE[0], FP_MIDDLE[1], 16, 16)}>1st</div>')
@@ -782,7 +789,8 @@ GAME_JS = r'''
     };
     walk(0, [], 0);
     best.picked.forEach(g => g === 'CASH' ? st.cash-- : st.spent.add(g));
-    return best.sum - n;                                       // overpaid (lost)
+    st.cash += best.sum - n;                                   // change comes back from the bank as 💰1 cards
+    return best.sum - n;
   }
   const ICON = { vp: '★', money: '$', science: '⚛' };
   const CASH_HTML = n => G.cashHtml.replace('</div></div>', `</div>${n > 1 ? `<div class="mb-name">× ${n}</div>` : ''}</div>`);
@@ -1152,7 +1160,7 @@ GAME_JS = r'''
     fly(c.html, $('mk-' + i), to, () => {
       if (c.kind === 'improvement') st.upgrades.push(id); else st.deck.push(id);
       st.mode = 'idle'; render(); prompt();
-      toast(`${c.name} ${c.kind === 'improvement' ? 'is on your Space Center' : 'goes to the bottom of your deck'}${lost ? ` ($${lost} overpaid)` : ''}.`);
+      toast(`${c.name} ${c.kind === 'improvement' ? 'is on your Space Center' : 'goes to the bottom of your deck'}${lost ? ` (💰${lost} change from the bank)` : ''}.`);
     });
   }
   function takeToken(i) {                                      // pay $1, the rightmost market card is discarded, you go first next round
@@ -1160,7 +1168,7 @@ GAME_JS = r'''
     st.market.splice(i, 1); st.market.unshift(st.main.pop() || null); st.firstPlayer = true;
     st.mode = 'anim'; render();
     fly(C(id).html, $('mk-' + i), $('deck-rockets'), () => { st.mode = 'idle'; render(); prompt();
-      toast(`${C(id).name} is discarded. You hold the first player token: you go first next round.${lost ? ` ($${lost} overpaid)` : ''}`); });
+      toast(`${C(id).name} is discarded. You hold the first player token: you go first next round.${lost ? ` (💰${lost} change from the bank)` : ''}`); });
   }
   function goalClick(i) {
     toast(`Missions are claimed at the end of your turn, after the draw, by a mission that meets them.${i < G.goalDvSurcharge ? ' This one is new: its destination is 1 Δv farther.' : ''}`);
@@ -1260,11 +1268,11 @@ GAME_JS = r'''
   // Launched this turn but met no goal: the rightmost mission card is discarded and you take a 💰1 card.
   function consolation(done) {
     const i = rightmost(st.goals.row); cam(G.focusGoals);
-    if (i < 0) { st.cash++; render(); toast('No mission met a goal: take a 💰1 card.'); return setTimeout(done, 900); }
+    if (i < 0) { st.cash++; render(); toast('No mission met a goal: take a 💰1 card from the bank.'); return setTimeout(done, 900); }
     const gid = st.goals.row[i], from = $('goal-m' + i);
     st.goals.row.splice(i, 1); st.goals.row.unshift(st.goals.deck.pop() || null); from.innerHTML = ''; from.dataset.gid = '';
     fly(G.goals[gid].html, from, $('deck-missions'), () => { render();
-      fly(CASH_HTML(1), $('deck-missions'), $('cgoals-you'), () => { st.cash++; render();
+      fly(CASH_HTML(1), $('bank'), $('cgoals-you'), () => { st.cash++; render();
         toast(`You launched but met no goal: ${G.goals[gid].name} (rightmost) is discarded and you take a 💰1 card.`); setTimeout(done, 900); }); });
   }
   function prizes(done) {                                       // step 4: every open goal a surviving mission meets pays out

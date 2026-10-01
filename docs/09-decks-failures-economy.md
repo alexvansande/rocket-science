@@ -198,7 +198,9 @@ Replaces the earlier "take the rightmost card of either row instead of launching
 
 ### Money: mission cards + 💰1 cards — DECIDED (Alex, Oct 2026)
 
-**The objectives deck is now called the mission deck.** Money comes from money mission cards you've won (spent by discarding them) and from **💰1 cards**, a bank supply used for the launch consolation. Pay with any mix; overpaying loses the extra. Budget overrun / Budget Cut take a 💰1 card first.
+**The objectives deck is now called the mission deck.** Money comes from money mission cards you've won (spent by discarding them) and from **💰1 cards**, a bank supply used for the launch consolation. Pay with any mix; change comes back as 💰1 cards. Budget overrun / Budget Cut take a 💰1 card first.
+
+**The bank — DECIDED (Alex, Oct 2026):** a small deck of **💰1 cards, printed the same on both sides** (32 in the kit). It pays the launch consolation and **makes change**: pay with a 💰3 mission card for a $1 purchase and take 💰2 back. Overpaying no longer loses anything.
 
 **Money missions pay 💰2 or more — DECIDED (Alex):** otherwise the 💰1 consolation is as good as flying a mission. Prototype values: Comsat 2, Special Delivery 2, Unnamed Payload 2, GPS 3, TV Broadcast 3, Orbital Tourist 3, Intercontinental Express 3, Maximum Throw 3.
 
