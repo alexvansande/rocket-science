@@ -1659,6 +1659,36 @@
       "slot": 2,
       "fix": "CREW-SAFETY REVIEW",
       "text": "Accident: the mission in slot II, wherever it is."
+    },
+    {
+      "id": "debris",
+      "name": "ORBITAL DEBRIS",
+      "history": "Iridium\u2013Cosmos collision, 2009",
+      "kind": "recurring",
+      "effect": "lose_infra",
+      "family": "SATELLITE NETWORK",
+      "fix": "DEBRIS TRACKING",
+      "text": "Lose 1 Satellite Network card."
+    },
+    {
+      "id": "station_fire",
+      "name": "STATION FIRE",
+      "history": "Mir, 1997",
+      "kind": "recurring",
+      "effect": "lose_infra",
+      "family": "SPACE STATION",
+      "fix": "FIRE SUPPRESSION",
+      "text": "Lose 1 Space Station card."
+    },
+    {
+      "id": "dust_storm",
+      "name": "DUST STORM",
+      "history": "Opportunity rover, 2018",
+      "kind": "recurring",
+      "effect": "lose_infra",
+      "family": "MARS BASE",
+      "fix": "DUST-PROOF POWER",
+      "text": "Lose 1 Mars Base card."
     }
   ],
   "actions": [
@@ -1792,6 +1822,36 @@
       "price": {
         "money": 1,
         "science": 0
+      }
+    },
+    {
+      "name": "DEBRIS TRACKING",
+      "kind": "fix",
+      "fixes": "debris",
+      "text": "Removes Orbital Debris from your deck the next time it's drawn.",
+      "price": {
+        "money": 1,
+        "science": 1
+      }
+    },
+    {
+      "name": "FIRE SUPPRESSION",
+      "kind": "fix",
+      "fixes": "station_fire",
+      "text": "Removes Station Fire from your deck the next time it's drawn.",
+      "price": {
+        "money": 1,
+        "science": 1
+      }
+    },
+    {
+      "name": "DUST-PROOF POWER",
+      "kind": "fix",
+      "fixes": "dust_storm",
+      "text": "Removes Dust Storm from your deck the next time it's drawn.",
+      "price": {
+        "money": 1,
+        "science": 1
       }
     },
     {

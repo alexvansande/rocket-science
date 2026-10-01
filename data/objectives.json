@@ -97,42 +97,17 @@
     "id": "obj05",
     "name": "LARGEST SPACE STATION",
     "tagline": "ISS, Mir, Skylab heritage",
-    "desc": "Most cargo tokens attached to a Crew Habitat in Earth orbit (LEO).",
-    "requires": "Habitat in LEO + most attached tokens",
+    "desc": "King of the hill: held by whoever has the most Space Station cards. Someone with more takes it from you; a tie leaves it where it is.",
+    "requires": "Most SPACE STATION cards (ties: the holder keeps it)",
     "type": "MOST",
     "vp": 1,
-    "note": "Stealable: claim transfers when another player surpasses you",
+    "note": "Lose your last station card and the card goes back.",
     "reward": {
       "kind": "vp",
       "n": 1
-    }
-  },
-  {
-    "id": "obj06",
-    "name": "LARGEST LUNAR BASE",
-    "tagline": "Artemis, Lunar Gateway",
-    "desc": "Most cargo tokens attached to a Crew Habitat on the Moon.",
-    "requires": "Habitat on Moon + most attached tokens",
-    "type": "MOST",
-    "vp": 2,
-    "note": "Stealable",
-    "reward": {
-      "kind": "vp",
-      "n": 2
-    }
-  },
-  {
-    "id": "obj07",
-    "name": "LARGEST MARTIAN BASE",
-    "tagline": "Permanent presence",
-    "desc": "Most cargo tokens attached to a Crew Habitat on Mars.",
-    "requires": "Habitat on Mars + most attached tokens",
-    "type": "MOST",
-    "vp": 2,
-    "note": "Stealable",
-    "reward": {
-      "kind": "vp",
-      "n": 2
+    },
+    "king": {
+      "family": "SPACE STATION"
     }
   },
   {
@@ -559,5 +534,146 @@
       "kind": "science",
       "n": 3
     }
+  },
+  {
+    "id": "inf01",
+    "name": "SPACE STATION",
+    "tagline": "Salyut, Skylab, Mir, ISS",
+    "desc": "One more module for your station in low Earth orbit.",
+    "requires": "",
+    "type": "INFRASTRUCTURE",
+    "vp": 0,
+    "check": {
+      "at": [
+        "leo"
+      ],
+      "cargo": 20
+    },
+    "transient": true,
+    "copies": 4,
+    "family": "SPACE STATION",
+    "reward": {
+      "kind": "vp",
+      "set": [
+        0,
+        3,
+        8,
+        15
+      ]
+    },
+    "note": "Sets score: the more you own, the more each is worth."
+  },
+  {
+    "id": "inf02",
+    "name": "MOON BASE",
+    "tagline": "Artemis Base Camp (planned)",
+    "desc": "Another 20t of habitat and supplies on the Moon.",
+    "requires": "",
+    "type": "INFRASTRUCTURE",
+    "vp": 0,
+    "check": {
+      "at": [
+        "moon"
+      ],
+      "cargo": 20
+    },
+    "transient": true,
+    "copies": 4,
+    "family": "MOON BASE",
+    "reward": {
+      "kind": "vp",
+      "set": [
+        0,
+        3,
+        8,
+        15
+      ]
+    },
+    "note": "Sets score: the more you own, the more each is worth."
+  },
+  {
+    "id": "inf03",
+    "name": "MARS BASE",
+    "tagline": "The first city on another planet",
+    "desc": "Another 20t of habitat and supplies on Mars.",
+    "requires": "",
+    "type": "INFRASTRUCTURE",
+    "vp": 0,
+    "check": {
+      "at": [
+        "mars"
+      ],
+      "cargo": 20
+    },
+    "transient": true,
+    "copies": 4,
+    "family": "MARS BASE",
+    "reward": {
+      "kind": "vp",
+      "set": [
+        1,
+        4,
+        10,
+        18
+      ]
+    },
+    "note": "Sets score: the more you own, the more each is worth."
+  },
+  {
+    "id": "inf04",
+    "name": "SATELLITE NETWORK",
+    "tagline": "Telstar to Starlink",
+    "desc": "One more satellite in your network, in LEO or GEO.",
+    "requires": "",
+    "type": "INFRASTRUCTURE",
+    "vp": 0,
+    "check": {
+      "at": [
+        "leo",
+        "geo"
+      ],
+      "equipCount": 1
+    },
+    "transient": true,
+    "copies": 4,
+    "family": "SATELLITE NETWORK",
+    "reward": {
+      "kind": "science",
+      "set": [
+        0,
+        1,
+        3,
+        6
+      ]
+    },
+    "note": "Sets score: the more you own, the more each is worth."
+  },
+  {
+    "id": "inf05",
+    "name": "DEEP SPACE NETWORK",
+    "tagline": "Relays for the outer planets",
+    "desc": "A big dish out past Earth escape to talk to your probes.",
+    "requires": "",
+    "type": "INFRASTRUCTURE",
+    "vp": 0,
+    "check": {
+      "deep": 1,
+      "equip": [
+        "LARGE ANTENNA"
+      ]
+    },
+    "transient": true,
+    "copies": 4,
+    "family": "DEEP SPACE NETWORK",
+    "reward": {
+      "kind": "science",
+      "set": [
+        1,
+        3,
+        6,
+        10
+      ]
+    },
+    "note": "Sets score: the more you own, the more each is worth."
   }
 ]

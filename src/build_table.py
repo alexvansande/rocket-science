@@ -75,7 +75,7 @@ def xcard_html(kind, head, name, sub, text, foot):
 for i, x in enumerate(DATA["disasters"]):
     foot = "one-shot: gone after use" if x["kind"] == "one-shot" else f"recurring · fixed by {x['fix'].title()}"
     CARDS[f"d{i}"] = {"kind": "disaster", "name": x["name"], "id": x["id"], "effect": x["effect"], "also": x.get("also"),
-                      "slot": x.get("slot"), "launched": x.get("launched", False), "recurring": x["kind"] == "recurring",
+                      "slot": x.get("slot"), "launched": x.get("launched", False), "recurring": x["kind"] == "recurring", "family": x.get("family"),
                       "text": x["text"],
                       "html": xcard_html("disaster", "DISASTER", x["name"], x["history"], x["text"] + "<br><i>Shuffle your deck.</i>", foot)}
 for i, a in enumerate(DATA["actions"]):
@@ -104,7 +104,9 @@ HAND_IDS = {
 }
 HANDS = {k: [CARDS[c]["html"] for c in v] for k, v in HAND_IDS.items()}
 # Your own deck (docs/09): the starting cards + every disaster. Draw from the top, used cards to the bottom.
-START_DECK = [cid(n) for n in DATA["starting_deck"]] + [c for c in CARDS if CARDS[c]["kind"] == "disaster"]
+# Infrastructure disasters (Station Fire, Orbital Debris, Dust Storm) aren't in it: each joins your deck when you
+# win your first card of that family (owning infrastructure brings its own risks).
+START_DECK = [cid(n) for n in DATA["starting_deck"]] + [c for c in CARDS if CARDS[c]["kind"] == "disaster" and not CARDS[c]["family"]]
 # The shared main deck: every rocket, equipment, bundle, action and Space Center improvement (with copies). The Crew Capsule
 # is retired: a crewed slot's first equipment slot is the crew (docs/09).
 MAIN_DECK = [c for c, v in CARDS.items() if v["kind"] in ("engine", "equipment", "bundle") and v["name"] != "CREW CAPSULE"] \
@@ -120,7 +122,7 @@ LAUNCH_TOKENS = "R"         # the basic pad's lift: 1 red = 160t, single-stage s
 PERMANENT_TYPES = ("FIRST", "MOST", "RESCUE", "ENDURANCE")
 GOALS = {o["id"] + ("" if k == 0 else "bcdefgh"[k - 1]):
          {"name": o["name"], "type": o["type"], "vp": o["vp"], "check": o.get("check"),
-          "reward": o["reward"],
+          "reward": o["reward"], "family": o.get("family"), "king": o.get("king"),
           "html": objective_card_html(o)} for o in OBJS for k in range(o.get("copies", 1))}
 GOAL_PERM = [o["id"] for o in OBJS if o["type"] in PERMANENT_TYPES]
 GOAL_DECK = [g for g, v in GOALS.items() if v["type"] not in PERMANENT_TYPES]
@@ -751,10 +753,16 @@ GAME_JS = r'''
   // ---- resources ------------------------------------------------------------------
   // A scrapped contract (taken instead of launching) is kept SIDEWAYS: any sideways goal card = $1, whatever it says.
   const reward = gid => st.scrapped.has(gid) ? { kind: 'money', n: 1 } : G.goals[gid].reward;
-  const moneyCards = () => st.won.filter(g => reward(g).kind === 'money' && !st.spent.has(g));
+  const famCount = f => st.won.filter(g => !st.scrapped.has(g) && G.goals[g].family === f).length;
+  const total = kind => {                                       // plain rewards + infrastructure sets (each family scores its set table)
+    let n = st.won.filter(g => reward(g).kind === kind && !reward(g).set).reduce((a, g) => a + reward(g).n, 0);
+    const fams = new Set(st.won.filter(g => !st.scrapped.has(g) && G.goals[g].family && reward(g).kind === kind).map(g => G.goals[g].family));
+    for (const f of fams) { const t = G.goals[st.won.find(g => G.goals[g].family === f)].reward.set; n += t[Math.min(famCount(f), t.length) - 1]; }
+    return n; };
+  const moneyCards = () => st.won.filter(g => reward(g).kind === 'money' && !reward(g).set && !st.spent.has(g));
   const money = () => moneyCards().reduce((n, g) => n + reward(g).n, 0);
-  const science = () => st.won.filter(g => reward(g).kind === 'science').reduce((n, g) => n + reward(g).n, 0);
-  const vp = () => st.won.filter(g => reward(g).kind === 'vp').reduce((n, g) => n + reward(g).n, 0) - st.penalty;
+  const science = () => total('science');
+  const vp = () => total('vp') - st.penalty;
   function pay(n) {                                            // spend money cards: least overpay, then fewest cards
     if (n <= 0) return 0;
     let best = null;
@@ -769,6 +777,7 @@ GAME_JS = r'''
   }
   const ICON = { vp: '★', money: '$', science: '⚛' };
   const rewardHtml = gid => { const g = G.goals[gid], r = reward(gid), side = st.scrapped.has(gid);
+    if (r.set) return `<div class="card rwd ${r.kind}"><b>${ICON[r.kind]}</b><span>${g.name}<br>set of ${famCount(g.family) || 1}: ${r.set.join(' / ')}</span></div>`;
     return `<div class="card rwd ${r.kind}${side ? ' side' : ''}${st.spent.has(gid) ? ' spent' : ''}"><b>${ICON[r.kind]}${r.n}</b><span>${side ? 'sideways = $1' : g.name}</span></div>`; };
 
   // ---- helpers ------------------------------------------------------------------------
@@ -1203,6 +1212,11 @@ GAME_JS = r'''
         const m = ms.sort((a, b) => (dist[b.space] || 0) - (dist[a.space] || 0))[0];
         if (m) hit(m); else out.push('You have no uncrewed mission in flight: no harm done.');
       }
+      if (d.effect === 'lose_infra') {
+        const g = [...st.won].reverse().find(g => G.goals[g].family === d.family && !st.scrapped.has(g));
+        if (g) { st.won.splice(st.won.lastIndexOf(g), 1); st.goals.deck.unshift(g); out.push(`You lose a ${d.family.toLowerCase()} card (to the bottom of the contract deck).`, ...kingOfTheHill()); }
+        else out.push(`You have no ${d.family.toLowerCase()}: no harm done.`);
+      }
       if (d.effect === 'lose_money') { const mc = moneyCards().sort((a, b) => reward(a).n - reward(b).n)[0];
         if (mc) { st.spent.add(mc); out.push(`You lose a $${reward(mc).n} money card.`); } else out.push('You have no money to lose.'); }
       if (d.recurring) { st.deck.push(id); out.push(`It stays in your deck until you buy ${fixFor(d).name}.`); }
@@ -1252,9 +1266,21 @@ GAME_JS = r'''
       if (g.check && g.check.cargo) { const toks = h.m.tokens.slice(); h.m.tokens = []; flyTokens(toks, () => $('mcargo-' + h.m.i), t => $('bowl-' + t), null); }
       h.from.innerHTML = ''; h.from.dataset.gid = ''; render();
       fly(rewardHtml(h.gid), h.from, $('cgoals-you'), () => { st.won.push(h.gid); render();
-        toast(`Mission ${ROMAN[h.m.i]}: ${g.name}! +${ICON[g.reward.kind]}${g.reward.n}`); setTimeout(one, 500); });
+        let msg = `Mission ${ROMAN[h.m.i]}: ${g.name}! ` + (g.reward.set ? `Your ${g.family.toLowerCase()} set: ${famCount(g.family)} card${famCount(g.family) > 1 ? 's' : ''}.` : `+${ICON[g.reward.kind]}${g.reward.n}`);
+        const risk = g.family && famCount(g.family) === 1 && Object.keys(G.cards).find(k => G.cards[k].family === g.family);
+        if (risk && !st.deck.includes(risk) && !st.removed.includes(risk)) { st.deck.push(risk); shuffle(st.deck); msg += ` New risk: ${C(risk).name} joins your deck.`; }
+        toast(msg); setTimeout(one, 900); });
     };
     one();
+  }
+  function kingOfTheHill() {                                    // e.g. Largest Space Station: held while you have the most of a family
+    const out = [];
+    G.goalPerm.forEach((gid, i) => { const k = G.goals[gid].king; if (!k) return;
+      const n = famCount(k.family), held = st.won.includes(gid);
+      if (n > 0 && !held) { st.won.push(gid); st.goals.perm[i] = null; out.push(`You hold ${G.goals[gid].name} (+${G.goals[gid].reward.n}★).`); }
+      if (n === 0 && held) { st.won.splice(st.won.indexOf(gid), 1); st.goals.perm[i] = gid; out.push(`${G.goals[gid].name} goes back: you have no ${k.family.toLowerCase()} left.`); }
+    });
+    render(); return out;
   }
   function clearMissions() {                                     // step 5: completed missions go home to your deck; park or fail
     const msgs = [];
@@ -1282,7 +1308,7 @@ GAME_JS = r'''
     st.mode = 'anim'; render(); camYou();
     prompt(`End of turn ${st.turn}: drawing ${drawSize()} card${drawSize() > 1 ? 's' : ''}…`);
     setTimeout(() => drawCards(drawSize(), () => prizes(() => {
-      const msgs = clearMissions();
+      const msgs = clearMissions().concat(kingOfTheHill());
       st.used = { launch: 0, mc: 0 }; st.freeMC = 0; st.extraMC = 0; st.turn++;
       st.noLaunch = st.noLaunchNext; st.noLaunchNext = false;
       st.missions.forEach(m => { m.claimed = false; });

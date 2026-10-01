@@ -289,6 +289,7 @@ OBJ_TYPE_COLOR = {
     "COMMERCIAL": "#0e7490",
     "MILITARY":   "#556b2f",
     "SCIENCE":    "#46237a",
+    "INFRASTRUCTURE": "#7a4b1b",   # transient, scores in sets (docs/09)
 }
 
 OBJ_TYPE_ICON = {
@@ -299,6 +300,7 @@ OBJ_TYPE_ICON = {
     "ENDURANCE": '<svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="7" fill="none" stroke="#1b4332" stroke-width="2"/><line x1="10" y1="10" x2="10" y2="5" stroke="#1b4332" stroke-width="2"/><line x1="10" y1="10" x2="14" y2="12" stroke="#1b4332" stroke-width="2"/></svg>',
     "COMMERCIAL": '<svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="none" stroke="#0e7490" stroke-width="2"/><text x="10" y="14.2" font-size="11" font-weight="bold" text-anchor="middle" fill="#0e7490">$</text></svg>',
     "MILITARY":   '<svg viewBox="0 0 20 20"><path d="M10 2 L17 5 V10 Q17 16 10 18 Q3 16 3 10 V5 Z" fill="#556b2f"/></svg>',
+    "INFRASTRUCTURE": '<svg viewBox="0 0 20 20"><rect x="8" y="7" width="4" height="6" fill="#7a4b1b"/><rect x="1" y="8.5" width="6" height="3" fill="#7a4b1b"/><rect x="13" y="8.5" width="6" height="3" fill="#7a4b1b"/><line x1="10" y1="3" x2="10" y2="17" stroke="#7a4b1b" stroke-width="1.2"/></svg>',
     "SCIENCE":    '<svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="2" fill="#46237a"/><ellipse cx="10" cy="10" rx="8" ry="3" fill="none" stroke="#46237a" stroke-width="1.2"/><ellipse cx="10" cy="10" rx="8" ry="3" fill="none" stroke="#46237a" stroke-width="1.2" transform="rotate(60 10 10)"/><ellipse cx="10" cy="10" rx="8" ry="3" fill="none" stroke="#46237a" stroke-width="1.2" transform="rotate(120 10 10)"/></svg>',
 }
 
@@ -345,7 +347,14 @@ def objective_card_html(o):
     color = OBJ_TYPE_COLOR.get(o["type"], "#444")
     icon = OBJ_TYPE_ICON.get(o["type"], "")
     r = o.get("reward") or {"kind": "vp", "n": o["vp"]}
-    prize = REWARD_ICON[r["kind"]] * r["n"] if r["kind"] == "vp" else f'{REWARD_ICON[r["kind"]]}{r["n"]}'
+    if r.get("set"):     # infrastructure: what the whole set is worth with 1, 2, 3, 4 cards
+        ic = REWARD_ICON[r["kind"]]
+        prize = ('<table class="setp"><tr><td>cards</td>' + "".join(f"<td>{i + 1}</td>" for i in range(len(r["set"])))
+                 + f'</tr><tr><td>{ic}</td>' + "".join(f"<td><b>{v}</b></td>" for v in r["set"]) + "</tr></table>")
+    elif r["kind"] == "vp":
+        prize = REWARD_ICON["vp"] * r["n"]
+    else:
+        prize = f'{REWARD_ICON[r["kind"]]}{r["n"]}'
     note = f'<div class="obj-note">{esc(o.get("note",""))}</div>' if o.get("note") else ""
     return f'''
 <div class="card obj" style="--accent: {color};">
@@ -552,7 +561,9 @@ table.strip td { padding: 0.1mm 1mm 0.1mm 0; vertical-align: middle; }
 .gp-text { font-size: 6pt; font-weight: bold; color: #333; }
 .obj-desc { overflow: hidden; min-height: 0; }
 .obj-prize { flex-shrink: 0; margin: 1mm -2mm -1.8mm; padding: 1.2mm 2mm; text-align: center; font-weight: 800; font-size: 13pt; letter-spacing: 0.5pt; color: #fff; background: #b8860b; }
-.obj-prize.money { background: #2f6b3a; } .obj-prize.science { background: #46237a; }
+.obj-prize.money { background: #2f6b3a; }
+.setp { margin: -0.6mm auto; border-collapse: collapse; font-size: 6pt; font-weight: 600; }
+.setp td { padding: 0 1.4mm; text-align: center; } .setp b { font-size: 10pt; } .obj-prize.science { background: #46237a; }
 .obj-note { font-size: 5.5pt; font-style: italic; color: #888; margin-top: 1mm; line-height: 1.2; }
 '''
 

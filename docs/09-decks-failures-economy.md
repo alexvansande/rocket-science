@@ -135,9 +135,23 @@ A kind of **transient** goal card (it comes and goes through the contract row). 
 | Station fire | Mir, 1997 | Lose 1 Space Station card. | Fire Suppression |
 | Dust storm | Opportunity, 2018 | Lose 1 Mars Base card. | Dust-Proof Power |
 
-**How the MOST goals work today:** on paper they're king-of-the-hill. Whoever has the biggest station or base holds the card, a bigger one steals it, and it scores at game end. In practice they don't work: a station would be a mission parked in one of your 4 slots forever, there's no endgame trigger yet, and the prototype can't check them, so they sit face-up and nobody can claim them. Infrastructure covers the same ground and does work (a delivered module becomes a card, the slot is freed).
+**Infrastructure replaces the MOST bases — DECIDED (Alex, Oct 2026).** Largest Lunar Base and Largest Martian Base are gone; the Moon Base and Mars Base families cover them. Space station sets cover Largest Space Station's ground too, but Alex wants **at least one king-of-the-hill card**, so:
 
-**OPEN:** replace Largest Space Station / Lunar Base / Martian Base with the infrastructure families? And International Station (deliver cargo to another player's station): drop it, or make it "deliver to another player's infrastructure, you both score"?
+- **Largest Space Station stays as king of the hill**, now countable: it's held by whoever has the **most Space Station cards** (a tie leaves it with the holder). Lose your last station and it goes back. International Station is unchanged (it needs other players).
+- **Infrastructure disasters join your deck when you build** (*proposal, in the prototype*): Station Fire, Orbital Debris and Dust Storm aren't in the starting deck. Each is shuffled into your deck when you win your first card of its family, so owning infrastructure brings its own risk and the starting deck doesn't get heavier. Each has a fix (Fire Suppression, Debris Tracking, Dust-Proof Power, $1 + ⚛1). A lost card goes to the bottom of the contract deck.
+- Infrastructure cards: 4 copies of each family in the contract deck (`objectives.json` → `type: INFRASTRUCTURE`, `family`, `reward.set`).
+
+### Income from other players' actions — DIRECTION (Alex), mechanism *proposal*
+
+Instead of upkeep, some cards pay you **when another player does something**. Money has no tokens, so the payout uses the sideways trick: **take the top card of the contract deck and keep it sideways = $1.**
+
+*Proposal, examples* (Space Center improvements, so they sit in front of you as a reminder):
+- **Launch Services:** when another player Launches, take $1.
+- **Tracking Station:** when another player's mission reaches D1 or farther, take $1 (they use your network).
+- **Recovery Fleet:** when another player's crew lands on Earth, take $1.
+- **Insurance Broker:** when another player draws a disaster, take $1.
+
+Needs opponents to test; the prototype has none yet.
 
 ## 5. Goals pay out; market cards have a price — DECIDED
 
