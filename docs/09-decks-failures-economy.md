@@ -97,6 +97,8 @@ Playing an action is **free** (for now) — DECIDED.
 
 Completing a goal and flipping it shows a reward on the back. **Each goal pays one type: usually 1–3 money bags, or science, or victory points.**
 
+**Permanent goals pay VP; transient goals pay resources — DECIDED.** Permanent goals (FIRST, MOST, RESCUE, ENDURANCE) are face-up all game and pay victory points. Transient contracts come and go through the row and pay money or science.
+
 | Reward | Icon | Use |
 |---|---|---|
 | **Victory points** | star | Win the game. |
@@ -130,7 +132,7 @@ FIRST goals aren't in the row (they're all face-up from the start), so no surcha
 **Instead of your Launch this turn, take the rightmost card of either row.** A player without a good rocket still does something useful, and it clears the cards nobody wants.
 - **Market card:** free, to the bottom of your deck like any bought card.
 - **Goal card — DECIDED:** flip it and keep it as its reward, exactly as if you'd completed it. Goal backs *are* the resources, however you got the card. (Cheap on purpose: a stale goal is a cancelled contract that pays anyway, and it costs you your Launch.)
-- **No free VP — DECIDED.** FIRST, MOST, RESCUE and ENDURANCE are **permanent goals**, all face-up from the start, never in the temporary row. The row holds only transient contracts (commercial, military, science), which pay money or science. **OPEN:** the 4 FLYBY goals (Venera, Cassini, Voyager, New Horizons): permanent or transient?
+- **No free VP — DECIDED.** FIRST, MOST, RESCUE and ENDURANCE are **permanent goals**, all face-up from the start, never in the temporary row. The row holds only transient contracts (commercial, military, science), which pay money or science. 
 
 ### Money is goal cards, no tokens — DECIDED
 
@@ -177,9 +179,10 @@ The reward amount = the goal's current `vp` value, so nothing needs re-balancing
 
 | Goals | Pay |
 |---|---|
-| FIRST, MOST, RESCUE, ENDURANCE (12) | VP |
-| FLYBY (4) + SCIENCE (4) | science |
-| COMMERCIAL (4) + MILITARY (4) | money (mostly 1 bag; Maximum Throw, GPS, TV = 2) |
+| FIRST, MOST, RESCUE, ENDURANCE (12) — permanent | VP |
+| SCIENCE (4) — transient | science |
+| COMMERCIAL (4) + MILITARY (4) — transient | money (mostly 1 bag; Maximum Throw, GPS, TV = 2) |
+| FLYBY (4) | **OPEN:** permanent (VP) or transient (science)? |
 
 **Flag: money now comes only from the 8 commercial/military contracts, which are marked `filler` ("cut these first").** They're now the economy, so the flag should go, and the deck probably needs more money contracts (more copies of the military throws, which level-1 rockets can reach). Science has the same problem: only 8 cards pay it.
 
