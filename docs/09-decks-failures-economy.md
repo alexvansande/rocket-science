@@ -109,27 +109,35 @@ Prototype set (names and prices are placeholders):
 
 *Proposal for more:* Tracking Network (keep 1 equipment slot instead of losing it), Astronaut Corps (a crewed mission lost costs −1★, not −2), Propellant Depot (park spare cargo tokens in LEO).
 
-## 4c. Space infrastructure goals — DIRECTION (Alex, Oct 2026), details OPEN
+## 4c. Space infrastructure goals — DECIDED (direction), card list *proposal*
 
-A new kind of goal card: **infrastructure** (space stations, Moon bases, satellite networks…). One alone is worth little; **sets pay escalating rewards**, e.g. one = nothing, two = 3★, three = 8★. Some sets pay science or money instead of VP.
+A kind of **transient** goal card (it comes and goes through the contract row). Complete it and keep it; one alone is worth little, **sets pay escalating rewards** (e.g. one = nothing, two = 3★, three = 8★).
 
-*Proposal, families* (each card = one delivery, kept like any won goal):
+- **Transient — DECIDED (Alex).**
+- **No money sets — DECIDED (Alex: income every turn is upkeep to remember).** And a one-off money payout can't work either: money only exists as cards you discard, so a set can't hand out "$2" without a token. *Proposal:* infrastructure pays **VP or science** only. Science is a threshold you count, so a growing set simply counts for more.
+- **Disasters target infrastructure — DECIDED (Alex).** A lost infrastructure card goes to the bottom of the contract deck, and your set shrinks.
 
-| Family | One card's delivery | Set pays | 1 / 2 / 3 / 4 |
+*Proposal, families* (each card = one delivery):
+
+| Family | One card's delivery | Set pays | 1 / 2 / 3 / 4 cards |
 |---|---|---|---|
-| Space Station | a module (≥ 10t + 1 eq) to LEO | ★ VP | 0 / 3 / 8 / 15 |
-| Moon Base | Crew Habitat or 20t to the Moon's surface | ★ VP | 0 / 3 / 8 / 15 |
-| Mars Base | Crew Habitat or 20t to Mars' surface | ★ VP | 1 / 4 / 10 / 18 |
-| Satellite Network | 1 eq to LEO or GEO | $ income | 0 / 1 / 2 / 4 money **each turn** |
-| Deep Space Network | Large Antenna at escape or beyond | ⚛ science | 1 / 3 / 6 / 10 |
+| Space Station | a module: Crew Habitat or 20t to LEO | ★ | 0 / 3 / 8 / 15 |
+| Moon Base | Crew Habitat or 20t to the Moon's surface | ★ | 0 / 3 / 8 / 15 |
+| Mars Base | Crew Habitat or 20t to Mars' surface | ★ | 1 / 4 / 10 / 18 |
+| Satellite Network | 1 eq to LEO or GEO | ⚛ | 0 / 1 / 3 / 6 |
+| Deep Space Network | Large Antenna at escape or beyond | ⚛ | 1 / 3 / 6 / 10 |
 
-The 0/3/8 curve is Alex's; the others are filler to tune. A Satellite Network paying money every turn is the real thing (a comsat constellation is a business), and it gives the economy a growth engine.
+*Proposal, disasters that hit infrastructure* (recurring, each with a fix):
 
-**OPEN:**
-1. Where do they live: in the transient contract row (they come and go, so you grab them when they show up), or their own face-up row?
-2. Do they replace the four MOST goals (Largest Space Station / Lunar Base / Martian Base, International Station)? They cover the same ground, and sets are simpler than "most at the end".
-3. Money sets: a one-off payout when the set grows, or income every turn (as proposed)?
-4. Can a disaster destroy infrastructure (a station fire takes a card back)? Thematic, but it's a second kind of loss to track.
+| Disaster | Real case | Effect | Fixed by |
+|---|---|---|---|
+| Orbital debris | Kessler syndrome, Iridium–Cosmos 2009 | Lose 1 Satellite Network card. | Debris Tracking |
+| Station fire | Mir, 1997 | Lose 1 Space Station card. | Fire Suppression |
+| Dust storm | Opportunity, 2018 | Lose 1 Mars Base card. | Dust-Proof Power |
+
+**How the MOST goals work today:** on paper they're king-of-the-hill. Whoever has the biggest station or base holds the card, a bigger one steals it, and it scores at game end. In practice they don't work: a station would be a mission parked in one of your 4 slots forever, there's no endgame trigger yet, and the prototype can't check them, so they sit face-up and nobody can claim them. Infrastructure covers the same ground and does work (a delivered module becomes a card, the slot is freed).
+
+**OPEN:** replace Largest Space Station / Lunar Base / Martian Base with the infrastructure families? And International Station (deliver cargo to another player's station): drop it, or make it "deliver to another player's infrastructure, you both score"?
 
 ## 5. Goals pay out; market cards have a price — DECIDED
 
