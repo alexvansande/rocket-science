@@ -180,11 +180,10 @@ The reward amount = the goal's current `vp` value, so nothing needs re-balancing
 | Goals | Pay |
 |---|---|
 | FIRST, MOST, RESCUE, ENDURANCE (12) — permanent | VP |
-| SCIENCE (4) — transient | science |
+| SCIENCE (4) + FLYBY (4) — transient | science |
 | COMMERCIAL (4) + MILITARY (4) — transient | money (mostly 1 bag; Maximum Throw, GPS, TV = 2) |
-| FLYBY (4) | **OPEN:** permanent (VP) or transient (science)? |
 
-**Flag: money now comes only from the 8 commercial/military contracts, which are marked `filler` ("cut these first").** They're now the economy, so the flag should go, and the deck probably needs more money contracts (more copies of the military throws, which level-1 rockets can reach). Science has the same problem: only 8 cards pay it.
+**The transient deck should be big — DECIDED (Alex): many flybys and contracts**, cycling through the row. Today it has 16 (4 each of commercial, military, science, flyby), and the 12 contracts are still marked `filler` ("cut these first") in `objectives.json`. That flag no longer fits: they're the whole economy. Next: drop the flag and write more transient cards (more flyby targets, parameter variants of the military/commercial throws).
 
 ### Prices
 
