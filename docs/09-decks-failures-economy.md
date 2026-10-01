@@ -101,7 +101,7 @@ Completing a goal and flipping it shows a reward on the back. **Each goal pays o
 |---|---|---|
 | **Victory points** | star | Win the game. |
 | **Science** | atom | A **threshold**: kept, never spent. |
-| **Money** | money bag | **Spent.** *Proposal:* paid out as bag tokens (see 6). |
+| **Money** | money bag | **Spent:** discard the goal card to pay. Mostly 1 bag, a few 2, rarely 3. |
 
 Market cards get a price, e.g. **"3 science (not spent) + 2 money (spent)".**
 
@@ -122,28 +122,18 @@ New cards enter the market and the temporary-goal row on the **left**. When a ca
 
 FIRST goals aren't in the row (they're all face-up from the start), so no surcharge on them.
 
-**OPEN, what "+1 Δv" means at the table.** Options:
-- (a) *Claude's pick:* the goal's **destination is one step farther**: one more ascent space for a MILITARY "DVn" throw (DV7 becomes DV8), one more rung for an "escape +N" goal. Readable straight off the board, and it's the honest version (a fresh contract is a harder spec).
-- (b) The mission must **burn 1 more Δv** than it needs to reach the goal. Hard to see at the table: a spacecraft's leftover Δv isn't tracked anywhere.
-- Some goals have no Δv to raise (land on the Moon, station for N turns). For those: (a) gives no surcharge, or they pay 1 money instead.
+**+1 Δv = the destination is one step farther — DECIDED.** One more ascent space for a MILITARY "DVn" throw (DV7 becomes DV8), one more rung for an "escape +N" goal. Physically it's **flying now instead of waiting for the best launch window**: a fresh contract is wanted now, and now costs extra Δv. Wait for the card to age, and the window opens.
+- **OPEN:** goals with no Δv to raise (land on the Moon, station for N turns): no surcharge, or 1 money instead?
 
-### Scrapping the rightmost card — DECIDED (want), mechanism *proposal*
+### Taking the rightmost card — DECIDED
 
-Alex wants the stale rightmost cards gone, but by a player's choice with a small payoff, not by a per-turn conveyor.
+**Instead of your Launch this turn, take the rightmost card of either row.** A player without a good rocket still does something useful, and it clears the cards nobody wants.
+- **Market card:** free, to the bottom of your deck like any bought card.
+- **Goal card: OPEN.** What do you get? Options: (a) its reward, straight away (a cancelled contract that pays anyway); (b) you hold it as a private goal only you can complete, at its printed Δv; (c) it's simply discarded, and you get 1 money... except money has no tokens (below), so (c) is out.
 
-*Proposal: **Scrap**, once per turn, free.* Discard the rightmost card of **either** row:
-- **market card → take 1 money** ("surplus sale");
-- **goal card → take 1 science**? Too strong, since science is permanent. *Better:* **goal card → take 1 money** too ("cancelled contract, the agency pays a fee").
+### Money is goal cards, no tokens — DECIDED
 
-One rule for both rows, and it doubles as a trickle of income, so a player with a bad hand can still do something useful. If 1 money a turn is too generous, limit it to "only if you bought nothing this turn".
-
-Other options considered:
-- (b) **Take the rightmost market card for free, to the bottom of your deck.** The consolation *is* the card. Clears stale cards only if somebody wants them for free, which might not happen for really bad ones.
-- (c) **Instead of your end-of-turn draw, take the rightmost market card.** You skip the disaster flip: safety is the consolation. Elegant, but a player could avoid disasters indefinitely by always taking it.
-
-### Money needs tokens — *proposal*
-
-If money is paid by discarding goal cards worth 1–3 bags, paying 2 with a 3-bag card means either losing 1 or making change. And scrapping needs a "1 money" to hand out. *Proposal:* **money-bag tokens.** Money goals pay out tokens; you keep the goal card in your completed pile like any other. VP and science goals stay as cards (science is just counted). Then Budget overrun / Budget Cut take a token.
+Money goals pay **mostly 1 bag, a few 2, rarely 3**, so change is rarely an issue. Pay by discarding money goal cards; overpaying loses the extra. Budget overrun / Budget Cut: discard one money card (your choice which).
 
 ## 7. First card draft — *proposal*, all numbers to playtest
 
@@ -188,7 +178,7 @@ The reward amount = the goal's current `vp` value, so nothing needs re-balancing
 |---|---|
 | FIRST, MOST, RESCUE, ENDURANCE (12) | VP |
 | FLYBY (4) + SCIENCE (4) | science |
-| COMMERCIAL (4) + MILITARY (4) | money (1–2 bags) |
+| COMMERCIAL (4) + MILITARY (4) | money (mostly 1 bag; Maximum Throw, GPS, TV = 2) |
 
 **Flag: money now comes only from the 8 commercial/military contracts, which are marked `filler` ("cut these first").** They're now the economy, so the flag should go, and the deck probably needs more money contracts (more copies of the military throws, which level-1 rockets can reach). Science has the same problem: only 8 cards pay it.
 
