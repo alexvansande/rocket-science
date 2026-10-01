@@ -189,6 +189,19 @@ The reward amount = the goal's current `vp` value, so nothing needs re-balancing
 
 *Proposal, by tech tier:* tier 1 = 1 money; tier 2 = 2 money + 2 science; tier 3 = 3 money + 4 science; tier 4 and paper rockets = 4 money + 6 science. Pad upgrades: Heavy = 3 money + 3 science, Super = 4 + 6.
 
+## In the web prototype (Oct 2026)
+
+`build/table.html` (Blue's seat) now plays these rules: your own deck with draw at end of turn, the 5-step turn order, disasters (all 10) with Backup Systems, crewed/uncrewed slots, buying with money/science and the price gradient, +1 Δv on new contracts, taking the rightmost card instead of launching, permanent goals (VP) face-up and the ×3 transient deck, upgrades on the Space Center (fixes, pads, +1 draw). Data: `data/cards.json` → `disasters`, `actions`, `upgrades`, `starting_deck`, and a `price` on every card.
+
+Placeholders chosen for the prototype (all to playtest, none decided):
+- **Starting deck:** 2× Kerolox Sustainer, 2× Light Solid Booster, Solid Kick Motor, Atmospheric Return, 2× Science Package, Backup Systems, Overtime + the 10 disasters (20 cards).
+- **Prices:** by tech tier as in section 7; actions $1–2; fixes $1; pads Orbital (4 red) $2+⚛1, Heavy $3+⚛3, Super $4+⚛6; Flight Operations Team (+1 draw, 2 copies) $3+⚛2.
+- **Main deck copies:** Backup Systems ×3, Overtime ×2, Extra Shift ×2, other actions ×1. The Crew Capsule card is out of the decks.
+- **Opponent actions** (Paperclip, Espionage, Press Leak, Budget Cut) do nothing yet: no opponents are simulated.
+- **"Completed" mission** = it claimed a goal this turn, or it's back on Earth. A disaster costs only the prizes of the mission it hits.
+- **Goals with no Δv to raise** (orbit, GEO, return trips) get no surcharge.
+- A lost crewed mission costs −2★ only if the crew had boarded.
+
 ## What this changes elsewhere
 
 - `docs/07`: drop Research and the Crew Capsule declaration; 4 slots become 2 crewed + 2 uncrewed; goal rewards and buying.

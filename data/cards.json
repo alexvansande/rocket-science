@@ -86,7 +86,11 @@
       "precursor_tier": 4,
       "tech_label": "K3",
       "flown": true,
-      "real_total_mass_t": 2290
+      "real_total_mass_t": 2290,
+      "price": {
+        "money": 3,
+        "science": 4
+      }
     },
     {
       "name": "HEAVY HYDROLOX CORE",
@@ -151,7 +155,11 @@
       "precursor_tier": 4,
       "tech_label": "H3",
       "flown": true,
-      "real_total_mass_t": 481
+      "real_total_mass_t": 481,
+      "price": {
+        "money": 3,
+        "science": 4
+      }
     },
     {
       "name": "HEAVY HYDROLOX UPPER",
@@ -204,7 +212,11 @@
       "precursor_tier": 3,
       "tech_label": "H2",
       "flown": true,
-      "real_total_mass_t": 119
+      "real_total_mass_t": 119,
+      "price": {
+        "money": 2,
+        "science": 2
+      }
     },
     {
       "name": "HYPERGOLIC TRANSFER STAGE",
@@ -247,7 +259,11 @@
       "precursor_tier": 3,
       "tech_label": "Hp2",
       "flown": true,
-      "real_total_mass_t": 30
+      "real_total_mass_t": 30,
+      "price": {
+        "money": 2,
+        "science": 2
+      }
     },
     {
       "name": "MARS ASCENT VEHICLE",
@@ -269,7 +285,11 @@
       "page": 1,
       "equipment_carry": 4,
       "tech_label": "Hp3",
-      "flown": false
+      "flown": false,
+      "price": {
+        "money": 4,
+        "science": 6
+      }
     },
     {
       "name": "LIGHT DESCENT ENGINE",
@@ -302,7 +322,11 @@
       "page": 1,
       "tech_label": "L1",
       "flown": true,
-      "real_total_mass_t": 10.3
+      "real_total_mass_t": 10.3,
+      "price": {
+        "money": 1,
+        "science": 0
+      }
     },
     {
       "name": "HEAVY SOLID BOOSTER",
@@ -346,7 +370,11 @@
       "precursor_tier": 4,
       "tech_label": "S3",
       "flown": true,
-      "real_total_mass_t": 590
+      "real_total_mass_t": 590,
+      "price": {
+        "money": 3,
+        "science": 4
+      }
     },
     {
       "name": "HYDROLOX DROP TANK",
@@ -418,7 +446,11 @@
       "page": 1,
       "tech_label": "Sh1",
       "flown": true,
-      "real_total_mass_t": 760
+      "real_total_mass_t": 760,
+      "price": {
+        "money": 1,
+        "science": 0
+      }
     },
     {
       "name": "ORBITER",
@@ -455,7 +487,11 @@
       "equipment_carry": 4,
       "tech_label": "Sh1",
       "flown": true,
-      "real_total_mass_t": 110
+      "real_total_mass_t": 110,
+      "price": {
+        "money": 1,
+        "science": 0
+      }
     },
     {
       "name": "SUPER HEAVY",
@@ -511,7 +547,11 @@
       "precursor_tier": 5,
       "tech_label": "M3",
       "flown": true,
-      "real_total_mass_t": 3600
+      "real_total_mass_t": 3600,
+      "price": {
+        "money": 3,
+        "science": 4
+      }
     },
     {
       "name": "STARSHIP",
@@ -572,7 +612,11 @@
       "precursor_tier": 4,
       "tech_label": "M2",
       "flown": true,
-      "real_total_mass_t": 1300
+      "real_total_mass_t": 1300,
+      "price": {
+        "money": 2,
+        "science": 2
+      }
     },
     {
       "name": "KEROLOX BOOSTER",
@@ -633,7 +677,11 @@
       "precursor_tier": 3,
       "tech_label": "K2",
       "flown": true,
-      "real_total_mass_t": 440
+      "real_total_mass_t": 440,
+      "price": {
+        "money": 2,
+        "science": 2
+      }
     },
     {
       "name": "HYDROLOX UPPER",
@@ -680,7 +728,11 @@
       "precursor_tier": 2,
       "tech_label": "H1",
       "flown": true,
-      "real_total_mass_t": 23
+      "real_total_mass_t": 23,
+      "price": {
+        "money": 1,
+        "science": 0
+      }
     },
     {
       "name": "HYPERGOLIC UPPER",
@@ -703,7 +755,11 @@
       "equipment_carry": 2,
       "precursor_tier": 2,
       "tech_label": "Hp1",
-      "flown": true
+      "flown": true,
+      "price": {
+        "money": 1,
+        "science": 0
+      }
     },
     {
       "name": "NUCLEAR ENGINE",
@@ -753,7 +809,11 @@
       "equipment_carry": 4,
       "precursor_tier": 3,
       "tech_label": "N1",
-      "flown": false
+      "flown": false,
+      "price": {
+        "money": 4,
+        "science": 6
+      }
     },
     {
       "name": "ION ENGINE",
@@ -776,7 +836,11 @@
       "equipment_carry": 2,
       "precursor_tier": 3,
       "tech_label": "I1",
-      "flown": true
+      "flown": true,
+      "price": {
+        "money": 1,
+        "science": 0
+      }
     },
     {
       "name": "LIGHT SOLID BOOSTER",
@@ -817,7 +881,11 @@
       "page": 1,
       "precursor_tier": 3,
       "tech_label": "S2",
-      "flown": true
+      "flown": true,
+      "price": {
+        "money": 2,
+        "science": 2
+      }
     },
     {
       "name": "METHALOX BOOSTER",
@@ -866,7 +934,11 @@
       "page": 1,
       "precursor_tier": 3,
       "tech_label": "M1",
-      "flown": true
+      "flown": true,
+      "price": {
+        "money": 1,
+        "science": 0
+      }
     },
     {
       "name": "SOLID KICK MOTOR",
@@ -917,7 +989,11 @@
       "page": 1,
       "precursor_tier": 2,
       "tech_label": "S1",
-      "flown": true
+      "flown": true,
+      "price": {
+        "money": 1,
+        "science": 0
+      }
     },
     {
       "name": "KEROLOX SUSTAINER",
@@ -970,7 +1046,11 @@
       ],
       "tech_label": "K1",
       "flown": true,
-      "real_total_mass_t": 120
+      "real_total_mass_t": 120,
+      "price": {
+        "money": 1,
+        "science": 0
+      }
     },
     {
       "name": "SEA DRAGON",
@@ -1010,7 +1090,11 @@
       "page": 1,
       "precursor_tier": 5,
       "tech_label": "K4",
-      "flown": false
+      "flown": false,
+      "price": {
+        "money": 4,
+        "science": 6
+      }
     },
     {
       "name": "SUPER HYDROLOX UPPER",
@@ -1077,7 +1161,11 @@
       "page": 1,
       "precursor_tier": 5,
       "tech_label": "H4",
-      "flown": false
+      "flown": false,
+      "price": {
+        "money": 4,
+        "science": 6
+      }
     },
     {
       "name": "SUPER HEAVY KEROLOX BOOSTER",
@@ -1124,7 +1212,11 @@
       "page": 1,
       "precursor_tier": 5,
       "tech_label": "K4",
-      "flown": false
+      "flown": false,
+      "price": {
+        "money": 4,
+        "science": 6
+      }
     },
     {
       "name": "KEROLOX UPPER",
@@ -1182,7 +1274,11 @@
       "page": 1,
       "precursor_tier": 3,
       "tech_label": "Ku",
-      "flown": true
+      "flown": true,
+      "price": {
+        "money": 2,
+        "science": 2
+      }
     }
   ],
   "equipment": [
@@ -1191,35 +1287,55 @@
       "desc": "Basic space for 4 people to sit and sleep.",
       "note": "Required for crewed missions",
       "kind": "equipment",
-      "tech_label": "C1"
+      "tech_label": "C1",
+      "price": {
+        "money": 1,
+        "science": 0
+      }
     },
     {
       "name": "ATMOSPHERIC RETURN",
       "desc": "Heat shield + parachute. Enables atmospheric re-entry and soft splashdown. Aerobrake counts as free.",
       "note": "Required for crewed return through atmosphere",
       "kind": "equipment",
-      "tech_label": "Mb3"
+      "tech_label": "Mb3",
+      "price": {
+        "money": 3,
+        "science": 4
+      }
     },
     {
       "name": "LANDING GEAR",
       "desc": "Enables a controlled touchdown on a surface.",
       "note": "Soft landing, any body",
       "kind": "equipment",
-      "tech_label": "Mb2"
+      "tech_label": "Mb2",
+      "price": {
+        "money": 2,
+        "science": 2
+      }
     },
     {
       "name": "LIGHT ASCENT ENGINE",
       "desc": "Tiny hypergolic ascent stage. Provides 2 Dv lifting 1 equipment card (~2.5t). Single use.",
       "note": "LM ascent stage. Surface to lunar orbit.",
       "kind": "equipment",
-      "tech_label": "L2"
+      "tech_label": "L2",
+      "price": {
+        "money": 2,
+        "science": 2
+      }
     },
     {
       "name": "CREW HABITAT",
       "desc": "Amenities to sustain 4 people for long durations. Place in orbit for a space station; add cargo tokens to expand it.",
       "note": "Long-stay crew module \u00b7 station core",
       "kind": "equipment",
-      "tech_label": "C2"
+      "tech_label": "C2",
+      "price": {
+        "money": 2,
+        "science": 2
+      }
     },
     {
       "name": "CONSUMABLES",
@@ -1227,56 +1343,88 @@
       "note": "Crewed missions only. Rotation states: 100% / 75% / 50% / 25%",
       "kind": "equipment",
       "special": "consumables_rotator",
-      "tech_label": "Cn"
+      "tech_label": "Cn",
+      "price": {
+        "money": 2,
+        "science": 2
+      }
     },
     {
       "name": "GREENHOUSE",
       "desc": "Produces 1 consumable per month. Must be deployed on a surface.",
       "note": "Requires power (Solar Array or RTG). Surface only.",
       "kind": "equipment",
-      "tech_label": "C3"
+      "tech_label": "C3",
+      "price": {
+        "money": 3,
+        "science": 4
+      }
     },
     {
       "name": "SCIENCE PACKAGE",
       "desc": "Instruments. Scores science objectives.",
       "note": "Any destination",
       "kind": "equipment",
-      "tech_label": "Sc1"
+      "tech_label": "Sc1",
+      "price": {
+        "money": 1,
+        "science": 0
+      }
     },
     {
       "name": "LARGE ANTENNA",
       "desc": "High-gain communications dish. Required for deep-space science missions to transmit data home.",
       "note": "Enables flyby and probe objectives beyond Earth escape",
       "kind": "equipment",
-      "tech_label": "Sc2"
+      "tech_label": "Sc2",
+      "price": {
+        "money": 2,
+        "science": 2
+      }
     },
     {
       "name": "ROVER",
       "desc": "Surface mobility. Scores exploration objectives.",
       "note": "Surface payload",
       "kind": "equipment",
-      "tech_label": "Mb1"
+      "tech_label": "Mb1",
+      "price": {
+        "money": 1,
+        "science": 0
+      }
     },
     {
       "name": "SAMPLE CONTAINER",
       "desc": "Holds material for a sample-return mission.",
       "note": "Must return to Earth",
       "kind": "equipment",
-      "tech_label": "Sc3"
+      "tech_label": "Sc3",
+      "price": {
+        "money": 3,
+        "science": 4
+      }
     },
     {
       "name": "SOLAR ARRAY",
       "desc": "Power source for ion engines, greenhouses, and ISRU refineries. Loses output past Mars and at lunar poles.",
       "note": "Best for inner-system missions in sunlight",
       "kind": "equipment",
-      "tech_label": "P1"
+      "tech_label": "P1",
+      "price": {
+        "money": 1,
+        "science": 0
+      }
     },
     {
       "name": "RTG",
       "desc": "Radioisotope Thermoelectric Generator. Power source that works anywhere, including deep space and lunar poles.",
       "note": "Compact, decades-long output. Immune to dust storms and night.",
       "kind": "equipment",
-      "tech_label": "P2"
+      "tech_label": "P2",
+      "price": {
+        "money": 2,
+        "science": 2
+      }
     },
     {
       "name": "HYDROLOX REFINERY",
@@ -1284,7 +1432,11 @@
       "note": "Requires power. Lunar option for refueling outbound missions.",
       "kind": "equipment",
       "special": "isru_rotator",
-      "tech_label": "R1"
+      "tech_label": "R1",
+      "price": {
+        "money": 1,
+        "science": 0
+      }
     },
     {
       "name": "METHALOX REFINERY",
@@ -1292,14 +1444,22 @@
       "note": "Requires power. Stable propellant \u2014 no boil-off.",
       "kind": "equipment",
       "special": "isru_rotator",
-      "tech_label": "R2"
+      "tech_label": "R2",
+      "price": {
+        "money": 2,
+        "science": 2
+      }
     },
     {
       "name": "LUNAR MASS DRIVER",
       "desc": "Electromagnetic catapult on an airless surface. Reusable: launches 1 equipment card from the surface to orbit each turn \u2014 no propellant.",
       "note": "Requires power (Solar Array or RTG). Bulky surface installation. Moon / airless worlds.",
       "kind": "equipment",
-      "tech_label": "L3"
+      "tech_label": "L3",
+      "price": {
+        "money": 3,
+        "science": 4
+      }
     }
   ],
   "archived_equipment": [
@@ -1318,47 +1478,364 @@
   "bundles": [
     {
       "mult": 2,
-      "token": "K"
+      "token": "K",
+      "price": {
+        "money": 2,
+        "science": 0
+      }
     },
     {
       "mult": 2,
-      "token": "R"
+      "token": "R",
+      "price": {
+        "money": 2,
+        "science": 0
+      }
     },
     {
       "mult": 4,
-      "token": "R"
+      "token": "R",
+      "price": {
+        "money": 3,
+        "science": 2
+      }
     },
     {
       "mult": 2,
-      "token": "O"
+      "token": "O",
+      "price": {
+        "money": 2,
+        "science": 0
+      }
     },
     {
       "mult": 4,
-      "token": "O"
+      "token": "O",
+      "price": {
+        "money": 3,
+        "science": 2
+      }
     },
     {
       "mult": 2,
-      "token": "Y"
+      "token": "Y",
+      "price": {
+        "money": 2,
+        "science": 0
+      }
     },
     {
       "mult": 3,
-      "token": "Y"
+      "token": "Y",
+      "price": {
+        "money": 3,
+        "science": 2
+      }
     },
     {
       "mult": 4,
-      "token": "Y"
+      "token": "Y",
+      "price": {
+        "money": 3,
+        "science": 2
+      }
     },
     {
       "mult": 2,
-      "token": "E"
+      "token": "E",
+      "price": {
+        "money": 2,
+        "science": 0
+      }
     },
     {
       "mult": 3,
-      "token": "E"
+      "token": "E",
+      "price": {
+        "money": 3,
+        "science": 2
+      }
     },
     {
       "mult": 4,
-      "token": "E"
+      "token": "E",
+      "price": {
+        "money": 3,
+        "science": 2
+      }
     }
+  ],
+  "disasters": [
+    {
+      "id": "kaputnik",
+      "name": "KAPUTNIK",
+      "history": "Vanguard TV-3, 1957",
+      "kind": "one-shot",
+      "effect": "lose_hand",
+      "text": "Lose your hand: shuffle it into your deck."
+    },
+    {
+      "id": "pad_explosion",
+      "name": "PAD EXPLOSION",
+      "history": "Nedelin catastrophe, 1960",
+      "kind": "one-shot",
+      "effect": "pad",
+      "also": "lose_hand",
+      "text": "No Launch on your next turn. Lose your hand."
+    },
+    {
+      "id": "range_safety",
+      "name": "RANGE SAFETY DESTRUCT",
+      "history": "Many early launches",
+      "kind": "one-shot",
+      "effect": "accident",
+      "slot": 3,
+      "text": "Accident: the mission in slot III."
+    },
+    {
+      "id": "metric_mixup",
+      "name": "METRIC MIX-UP",
+      "history": "Mars Climate Orbiter, 1999",
+      "kind": "one-shot",
+      "effect": "farthest_uncrewed",
+      "text": "Accident: your uncrewed mission farthest from Earth."
+    },
+    {
+      "id": "budget_overrun",
+      "name": "BUDGET OVERRUN",
+      "history": "Every program, ever",
+      "kind": "one-shot",
+      "effect": "lose_money",
+      "text": "Lose 1 money card."
+    },
+    {
+      "id": "pogo",
+      "name": "POGO OSCILLATION",
+      "history": "Apollo 6, 1968",
+      "kind": "recurring",
+      "effect": "accident",
+      "slot": 1,
+      "launched": true,
+      "fix": "POGO SUPPRESSOR",
+      "text": "Accident: the mission in slot I, if it launched this turn."
+    },
+    {
+      "id": "combustion",
+      "name": "COMBUSTION INSTABILITY",
+      "history": "F-1 development, 1962",
+      "kind": "recurring",
+      "effect": "pad",
+      "fix": "BAFFLED INJECTOR",
+      "text": "No Launch on your next turn."
+    },
+    {
+      "id": "staging",
+      "name": "STAGING FAILURE",
+      "history": "Many early launches",
+      "kind": "recurring",
+      "effect": "accident",
+      "slot": 4,
+      "launched": true,
+      "fix": "STAGE-SEPARATION TESTING",
+      "text": "Accident: the mission in slot IV, if it launched this turn."
+    },
+    {
+      "id": "guidance",
+      "name": "GUIDANCE FAILURE",
+      "history": "Ariane 5 flight 501, 1996",
+      "kind": "recurring",
+      "effect": "accident",
+      "slot": 3,
+      "launched": true,
+      "fix": "REDUNDANT FLIGHT COMPUTER",
+      "text": "Accident: the mission in slot III, if it launched this turn."
+    },
+    {
+      "id": "cabin_fire",
+      "name": "CABIN FIRE",
+      "history": "Apollo 1, 1967",
+      "kind": "recurring",
+      "effect": "accident",
+      "slot": 2,
+      "fix": "CREW-SAFETY REVIEW",
+      "text": "Accident: the mission in slot II, wherever it is."
+    }
+  ],
+  "actions": [
+    {
+      "name": "BACKUP SYSTEMS",
+      "copies": 3,
+      "effect": "backup",
+      "text": "Play when you draw a disaster: ignore it. The disaster goes to the bottom of your deck.",
+      "price": {
+        "money": 1,
+        "science": 0
+      }
+    },
+    {
+      "name": "OVERTIME",
+      "copies": 2,
+      "effect": "draw2",
+      "text": "Draw 2 cards now.",
+      "price": {
+        "money": 2,
+        "science": 0
+      }
+    },
+    {
+      "name": "EXTRA SHIFT",
+      "copies": 2,
+      "effect": "extra_mc",
+      "text": "One more Mission Control this turn.",
+      "price": {
+        "money": 2,
+        "science": 1
+      }
+    },
+    {
+      "name": "OPERATION PAPERCLIP",
+      "copies": 1,
+      "effect": "opponent",
+      "text": "Take a random card from an opponent's hand. It's yours now.",
+      "price": {
+        "money": 2,
+        "science": 2
+      }
+    },
+    {
+      "name": "ESPIONAGE",
+      "copies": 1,
+      "effect": "opponent",
+      "text": "Look at an opponent's top 3 cards and put them back in any order.",
+      "price": {
+        "money": 1,
+        "science": 1
+      }
+    },
+    {
+      "name": "PRESS LEAK",
+      "copies": 1,
+      "effect": "opponent",
+      "text": "Put an opponent's top card on the bottom of their deck.",
+      "price": {
+        "money": 1,
+        "science": 0
+      }
+    },
+    {
+      "name": "BUDGET CUT",
+      "copies": 1,
+      "effect": "opponent",
+      "text": "An opponent discards 1 money card.",
+      "price": {
+        "money": 2,
+        "science": 0
+      }
+    }
+  ],
+  "upgrades": [
+    {
+      "name": "POGO SUPPRESSOR",
+      "kind": "fix",
+      "fixes": "pogo",
+      "text": "Removes Pogo Oscillation from your deck the next time it's drawn.",
+      "price": {
+        "money": 1,
+        "science": 0
+      }
+    },
+    {
+      "name": "BAFFLED INJECTOR",
+      "kind": "fix",
+      "fixes": "combustion",
+      "text": "Removes Combustion Instability from your deck the next time it's drawn.",
+      "price": {
+        "money": 1,
+        "science": 0
+      }
+    },
+    {
+      "name": "STAGE-SEPARATION TESTING",
+      "kind": "fix",
+      "fixes": "staging",
+      "text": "Removes Staging Failure from your deck the next time it's drawn.",
+      "price": {
+        "money": 1,
+        "science": 0
+      }
+    },
+    {
+      "name": "REDUNDANT FLIGHT COMPUTER",
+      "kind": "fix",
+      "fixes": "guidance",
+      "text": "Removes Guidance Failure from your deck the next time it's drawn.",
+      "price": {
+        "money": 1,
+        "science": 0
+      }
+    },
+    {
+      "name": "CREW-SAFETY REVIEW",
+      "kind": "fix",
+      "fixes": "cabin_fire",
+      "text": "Removes Cabin Fire from your deck the next time it's drawn.",
+      "price": {
+        "money": 1,
+        "science": 0
+      }
+    },
+    {
+      "name": "ORBITAL PAD",
+      "kind": "pad",
+      "tokens": "RRRR",
+      "text": "Launch places 4 red (640t).",
+      "price": {
+        "money": 2,
+        "science": 1
+      }
+    },
+    {
+      "name": "HEAVY PAD",
+      "kind": "pad",
+      "tokens": "KKKK",
+      "text": "Launch places 4 black (2,560t).",
+      "price": {
+        "money": 3,
+        "science": 3
+      }
+    },
+    {
+      "name": "SUPER PAD",
+      "kind": "pad",
+      "tokens": "KKKKKK",
+      "text": "Launch places 6 black (3,840t).",
+      "price": {
+        "money": 4,
+        "science": 6
+      }
+    },
+    {
+      "name": "FLIGHT OPERATIONS TEAM",
+      "kind": "draw",
+      "draw": 1,
+      "copies": 2,
+      "text": "Draw 1 more card at the end of each turn.",
+      "price": {
+        "money": 3,
+        "science": 2
+      }
+    }
+  ],
+  "starting_deck": [
+    "KEROLOX SUSTAINER",
+    "KEROLOX SUSTAINER",
+    "LIGHT SOLID BOOSTER",
+    "LIGHT SOLID BOOSTER",
+    "SOLID KICK MOTOR",
+    "ATMOSPHERIC RETURN",
+    "SCIENCE PACKAGE",
+    "SCIENCE PACKAGE",
+    "BACKUP SYSTEMS",
+    "OVERTIME"
   ]
 }
