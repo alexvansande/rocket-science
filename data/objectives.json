@@ -163,7 +163,8 @@
     "reward": {
       "kind": "science",
       "n": 1
-    }
+    },
+    "era": 2
   },
   {
     "id": "obj11",
@@ -196,7 +197,8 @@
     "reward": {
       "kind": "science",
       "n": 2
-    }
+    },
+    "era": 3
   },
   {
     "id": "obj13",
@@ -215,7 +217,8 @@
     "reward": {
       "kind": "science",
       "n": 2
-    }
+    },
+    "era": 3
   },
   {
     "id": "obj14",
@@ -234,7 +237,8 @@
     "reward": {
       "kind": "science",
       "n": 3
-    }
+    },
+    "era": 4
   },
   {
     "id": "obj15",
@@ -288,7 +292,8 @@
     "reward": {
       "kind": "money",
       "n": 2
-    }
+    },
+    "era": 1
   },
   {
     "id": "fil02",
@@ -310,7 +315,8 @@
     "reward": {
       "kind": "money",
       "n": 3
-    }
+    },
+    "era": 3
   },
   {
     "id": "fil03",
@@ -331,7 +337,8 @@
     "reward": {
       "kind": "money",
       "n": 3
-    }
+    },
+    "era": 2
   },
   {
     "id": "fil04",
@@ -358,7 +365,8 @@
     "reward": {
       "kind": "money",
       "n": 3
-    }
+    },
+    "era": 3
   },
   {
     "id": "fil05",
@@ -375,11 +383,12 @@
       "cargo": 10
     },
     "transient": true,
-    "copies": 3,
+    "copies": 5,
     "reward": {
       "kind": "money",
       "n": 2
-    }
+    },
+    "era": 1
   },
   {
     "id": "fil06",
@@ -400,7 +409,8 @@
     "reward": {
       "kind": "money",
       "n": 2
-    }
+    },
+    "era": 1
   },
   {
     "id": "fil07",
@@ -417,11 +427,12 @@
       "cargo": 10
     },
     "transient": true,
-    "copies": 3,
+    "copies": 4,
     "reward": {
       "kind": "money",
       "n": 3
-    }
+    },
+    "era": 1
   },
   {
     "id": "fil08",
@@ -442,7 +453,8 @@
     "reward": {
       "kind": "money",
       "n": 3
-    }
+    },
+    "era": 1
   },
   {
     "id": "fil09",
@@ -466,7 +478,8 @@
     "reward": {
       "kind": "science",
       "n": 1
-    }
+    },
+    "era": 1
   },
   {
     "id": "fil10",
@@ -487,7 +500,8 @@
     "reward": {
       "kind": "science",
       "n": 2
-    }
+    },
+    "era": 3
   },
   {
     "id": "fil11",
@@ -509,7 +523,8 @@
     "reward": {
       "kind": "science",
       "n": 2
-    }
+    },
+    "era": 4
   },
   {
     "id": "fil12",
@@ -531,7 +546,8 @@
     "reward": {
       "kind": "science",
       "n": 3
-    }
+    },
+    "era": 4
   },
   {
     "id": "inf01",
@@ -559,7 +575,8 @@
         15
       ]
     },
-    "note": "Sets score: the more you own, the more each is worth."
+    "note": "Sets score: the more you own, the more each is worth.",
+    "era": 3
   },
   {
     "id": "inf02",
@@ -587,7 +604,8 @@
         15
       ]
     },
-    "note": "Sets score: the more you own, the more each is worth."
+    "note": "Sets score: the more you own, the more each is worth.",
+    "era": 3
   },
   {
     "id": "inf03",
@@ -615,7 +633,8 @@
         18
       ]
     },
-    "note": "Sets score: the more you own, the more each is worth."
+    "note": "Sets score: the more you own, the more each is worth.",
+    "era": 4
   },
   {
     "id": "inf04",
@@ -644,7 +663,8 @@
         6
       ]
     },
-    "note": "Sets score: the more you own, the more each is worth."
+    "note": "Sets score: the more you own, the more each is worth.",
+    "era": 2
   },
   {
     "id": "inf05",
@@ -672,6 +692,53 @@
         10
       ]
     },
-    "note": "Sets score: the more you own, the more each is worth."
+    "note": "Sets score: the more you own, the more each is worth.",
+    "era": 2
+  },
+  {
+    "id": "fil13",
+    "name": "TEST FLIGHT",
+    "tagline": "V-2 and Redstone test launches, 1940s\u201350s",
+    "desc": "Prove the rocket works: lob a 10t payload to E3.",
+    "requires": "",
+    "type": "MILITARY",
+    "vp": 2,
+    "check": {
+      "at": [
+        "a3"
+      ],
+      "cargo": 10
+    },
+    "transient": true,
+    "copies": 4,
+    "era": 1,
+    "reward": {
+      "kind": "money",
+      "n": 2
+    }
+  },
+  {
+    "id": "fil14",
+    "name": "SOUNDING ROCKET",
+    "tagline": "V-2 and Aerobee science flights, 1946+",
+    "desc": "Carry instruments above the atmosphere and bring back the first data from space.",
+    "requires": "",
+    "type": "SCIENCE",
+    "vp": 1,
+    "check": {
+      "at": [
+        "a5"
+      ],
+      "equip": [
+        "SCIENCE PACKAGE"
+      ]
+    },
+    "transient": true,
+    "copies": 4,
+    "era": 1,
+    "reward": {
+      "kind": "science",
+      "n": 1
+    }
   }
 ]

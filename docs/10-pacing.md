@@ -34,6 +34,15 @@ The game grows more complex as it goes, so rules can arrive with the phases inst
 - Phase 1 could run with very few rules (no disasters at all, or only the teething ones), so the first turns are pure "how does a rocket work".
 - Political events (budget cuts, a program collapse, ride-sharing) live in the phase 3 deck.
 
+## Opening fixes after the first playtest — DECIDED (Alex, Oct 2026)
+
+Playtest: too few rockets, too many disasters, no money without rockets, and missions from every era mixed (a Mars Base on turn 1). Fixes:
+
+- **Era-stacked decks.** Every card and mission has an `era` (1–4 = the phases above) in `data/*.json`. The market deck and the mission deck are each sorted by era, each era shuffled on its own, era 1 on top. Eras are set from history (first flight or design date).
+- **Fewer disasters at the start.** Only the 5 one-shot teething failures start in your deck; the 5 recurring ones join it when **First Orbit** is claimed (the tutorial is over). Infrastructure disasters still join when you build.
+- **More rockets.** Starting deck: 3× Kerolox Sustainer, 3× Light Solid Booster, Solid Kick Motor (the two-stage lesson), Atmospheric Return, 2× Science Package, Backup Systems, Overtime. Starting hand 5.
+- **Easy early money and science.** New era-1 missions: **Test Flight** (10t → E3, 💰2, ×4: any starting rocket can do it) and **Sounding Rocket** (Science Package → E5, ⚛1, ×4: the first science). More Special Delivery (×5) and Intercontinental Express (×4, the K1 + Kick Motor two-stage lesson).
+
 ## How we'll check it
 
 - **Pacing spec → solo bot → tune.** Write the target arc in turns, then a simple solo bot plays the real cards on the real board under the real rules, and we tune science and money until the bot hits the arc and different strategies finish close together. `src/science_ladder.py` is the seed of this.

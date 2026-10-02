@@ -89,6 +89,11 @@ for i, u in enumerate(DATA["improvements"]):   # Space Center improvements: boug
                       "price": u["price"], "copies": u.get("copies", 1),
                       "html": xcard_html("improvement", "SPACE CENTER IMPROVEMENT", u["name"], "stays in front of you", u["text"], price_html(u["price"]))}
 BY_NAME = {c["name"]: cid for cid, c in CARDS.items()}
+_ERA = {c["name"]: c.get("era", 1) for k in ("engines", "equipment", "actions", "improvements") for c in DATA[k]}
+for _cid, _c in CARDS.items():   # era (docs/10 phase) decides where a card sits in the stacked decks
+    _c["era"] = _ERA.get(_c["name"], 2 if _c["kind"] == "bundle" else 1)
+for _i, _b in enumerate(DATA["bundles"]):
+    CARDS[f"b{_i}"]["era"] = _b.get("era", 2)
 
 
 def cid(name):
@@ -108,7 +113,10 @@ HANDS = {k: [CARDS[c]["html"] for c in v] for k, v in HAND_IDS.items()}
 # Your own deck (docs/09): the starting cards + every disaster. Draw from the top, used cards to the bottom.
 # Infrastructure disasters (Station Fire, Orbital Debris, Dust Storm) aren't in it: each joins your deck when you
 # win your first card of that family (owning infrastructure brings its own risks).
-START_DECK = [cid(n) for n in DATA["starting_deck"]] + [c for c in CARDS if CARDS[c]["kind"] == "disaster" and not CARDS[c]["family"]]
+# Phase 1 is a tutorial (docs/10): only the one-shot teething disasters start in your deck; the recurring
+# ones join it when First Orbit is claimed.
+START_DECK = [cid(n) for n in DATA["starting_deck"]] + [c for c in CARDS if CARDS[c]["kind"] == "disaster" and not CARDS[c]["family"] and not CARDS[c]["recurring"]]
+LATE_DISASTERS = [c for c in CARDS if CARDS[c]["kind"] == "disaster" and not CARDS[c]["family"] and CARDS[c]["recurring"]]
 # The shared main deck: every rocket, equipment, bundle, action and Space Center improvement (with copies). The Crew Capsule
 # is retired: a crewed slot's first equipment slot is the crew (docs/09).
 MAIN_DECK = [c for c, v in CARDS.items() if v["kind"] in ("engine", "equipment", "bundle") and v["name"] != "CREW CAPSULE"] \
@@ -124,7 +132,7 @@ LAUNCH_TOKENS = "R"         # the basic pad's lift: 1 red = 160t, single-stage s
 PERMANENT_TYPES = ("FIRST", "MOST", "RESCUE", "ENDURANCE")
 GOALS = {o["id"] + ("" if k == 0 else "bcdefgh"[k - 1]):
          {"name": o["name"], "type": o["type"], "vp": o["vp"], "check": o.get("check"),
-          "reward": o["reward"], "family": o.get("family"), "king": o.get("king"),
+          "reward": o["reward"], "family": o.get("family"), "king": o.get("king"), "era": o.get("era", 1),
           "html": objective_card_html(o), "back": mission_back_html(o)} for o in OBJS for k in range(o.get("copies", 1))}
 GOAL_PERM = [o["id"] for o in OBJS if o["type"] in PERMANENT_TYPES]
 GOAL_DECK = [g for g, v in GOALS.items() if v["type"] not in PERMANENT_TYPES]
@@ -337,7 +345,8 @@ def main():
         parts.append(seat(s_, pname, color, rot, center))
 
     game = {
-        "cards": CARDS, "startDeck": START_DECK, "mainDeck": MAIN_DECK, "launch": LAUNCH_TOKENS,
+        "cards": CARDS, "startDeck": START_DECK, "lateDisasters": LATE_DISASTERS, "startHand": DATA.get("starting_hand", 3),
+        "mainDeck": MAIN_DECK, "launch": LAUNCH_TOKENS,
         "marketN": MARKET_N, "marketSurcharge": MARKET_SURCHARGE, "goalRowN": GOAL_ROW_N, "goalDvSurcharge": GOAL_DV_SURCHARGE,
         "you": PLAYERS[0][2], "tokenColors": TOKEN_COLORS,
         "spaces": {sp["id"]: {"x": round(sp["x"] / 1000 * BOARD_W, 2), "y": round(sp["y"] / 707 * BOARD_H, 2),
@@ -746,21 +755,23 @@ GAME_JS = r'''
   const aadj = {}; for (const [a, b] of G.aero) { (aadj[a] = aadj[a] || []).push(b); (aadj[b] = aadj[b] || []).push(a); }
   const C = id => G.cards[id];
 
+  // Decks are stacked by era (docs/10): each era shuffled on its own, era 1 on top (decks draw from the end).
+  const eraStack = (ids, era) => [4, 3, 2, 1].flatMap(e => shuffle(ids.filter(id => (era(id) || 1) === e)));
   const blank = i => ({ i, crewed: i < 2, active: false, space: null, tokens: [], paid: false, equip: [], cards: [], card: null,
     fired: false, visited: [], crew: false, home: false, launchedTurn: null, arrived: null, done: false });
   const st = {
-    turn: 1, deck: shuffle(G.startDeck.slice()), hand: [], main: shuffle(G.mainDeck.slice()), market: [],
+    turn: 1, deck: shuffle(G.startDeck.slice()), hand: [], main: eraStack(G.mainDeck, id => G.cards[id].era), market: [],
     used: { launch: 0, mc: 0 }, freeMC: 0, extraMC: 0, noLaunch: false, noLaunchNext: false,
     missions: [0, 1, 2, 3].map(blank), upgrades: [], removed: [],
     mode: 'idle', handOpen: false, sel: null, pending: null, firing: null, move: null, load: null,
-    goals: { perm: G.goalPerm.slice(), row: [], deck: shuffle(G.goalDeck.slice()) },
+    goals: { perm: G.goalPerm.slice(), row: [], deck: eraStack(G.goalDeck, g => G.goals[g].era) },
     won: [], spent: new Set(), cash: 0, penalty: 0, firstPlayer: false,
   };
   for (let i = 0; i < G.marketN; i++) st.market.push(st.main.pop() || null);
   for (let i = 0; i < G.goalRowN; i++) st.goals.row.push(st.goals.deck.pop() || null);
   {                                                            // starting hand: 3 cards, disasters drawn now go back
     const aside = [];
-    while (st.hand.length < 3 && st.deck.length) { const id = st.deck.shift(); (C(id).kind === 'disaster' ? aside : st.hand).push(id); }
+    while (st.hand.length < G.startHand && st.deck.length) { const id = st.deck.shift(); (C(id).kind === 'disaster' ? aside : st.hand).push(id); }
     st.deck.push(...aside); shuffle(st.deck);
   }
   const hand = $('hand-you'), toastEl = $('toast'), promptEl = $('prompt'), closeup = $('closeup'), choiceEl = $('choice');
@@ -1295,6 +1306,7 @@ GAME_JS = r'''
         let msg = `Mission ${ROMAN[h.m.i]}: ${g.name}! ` + (g.reward.set ? `Your ${g.family.toLowerCase()} set: ${famCount(g.family)} card${famCount(g.family) > 1 ? 's' : ''}.` : `+${ICON[g.reward.kind]}${g.reward.n}`);
         const risk = g.family && famCount(g.family) === 1 && Object.keys(G.cards).find(k => G.cards[k].family === g.family);
         if (risk && !st.deck.includes(risk) && !st.removed.includes(risk)) { st.deck.push(risk); shuffle(st.deck); msg += ` New risk: ${C(risk).name} joins your deck.`; }
+        if (g.name === 'FIRST ORBIT') { st.deck.push(...G.lateDisasters); shuffle(st.deck); msg += ' The tutorial is over: the recurring disasters join your deck.'; }
         toast(msg); setTimeout(one, 900); });
     };
     one();

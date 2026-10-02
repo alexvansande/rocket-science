@@ -90,7 +90,8 @@
       "price": {
         "money": 3,
         "science": 4
-      }
+      },
+      "era": 2
     },
     {
       "name": "HEAVY HYDROLOX CORE",
@@ -159,7 +160,8 @@
       "price": {
         "money": 3,
         "science": 4
-      }
+      },
+      "era": 3
     },
     {
       "name": "HEAVY HYDROLOX UPPER",
@@ -216,7 +218,8 @@
       "price": {
         "money": 2,
         "science": 2
-      }
+      },
+      "era": 2
     },
     {
       "name": "HYPERGOLIC TRANSFER STAGE",
@@ -263,7 +266,8 @@
       "price": {
         "money": 2,
         "science": 2
-      }
+      },
+      "era": 2
     },
     {
       "name": "MARS ASCENT VEHICLE",
@@ -289,7 +293,8 @@
       "price": {
         "money": 4,
         "science": 6
-      }
+      },
+      "era": 4
     },
     {
       "name": "LIGHT DESCENT ENGINE",
@@ -326,7 +331,8 @@
       "price": {
         "money": 1,
         "science": 0
-      }
+      },
+      "era": 2
     },
     {
       "name": "HEAVY SOLID BOOSTER",
@@ -374,7 +380,8 @@
       "price": {
         "money": 3,
         "science": 4
-      }
+      },
+      "era": 3
     },
     {
       "name": "HYDROLOX DROP TANK",
@@ -450,7 +457,8 @@
       "price": {
         "money": 1,
         "science": 0
-      }
+      },
+      "era": 3
     },
     {
       "name": "ORBITER",
@@ -491,7 +499,8 @@
       "price": {
         "money": 1,
         "science": 0
-      }
+      },
+      "era": 3
     },
     {
       "name": "SUPER HEAVY",
@@ -551,7 +560,8 @@
       "price": {
         "money": 3,
         "science": 4
-      }
+      },
+      "era": 4
     },
     {
       "name": "STARSHIP",
@@ -616,7 +626,8 @@
       "price": {
         "money": 2,
         "science": 2
-      }
+      },
+      "era": 4
     },
     {
       "name": "KEROLOX BOOSTER",
@@ -681,7 +692,8 @@
       "price": {
         "money": 2,
         "science": 2
-      }
+      },
+      "era": 1
     },
     {
       "name": "HYDROLOX UPPER",
@@ -732,7 +744,8 @@
       "price": {
         "money": 2,
         "science": 2
-      }
+      },
+      "era": 2
     },
     {
       "name": "HYPERGOLIC UPPER",
@@ -759,7 +772,8 @@
       "price": {
         "money": 1,
         "science": 0
-      }
+      },
+      "era": 1
     },
     {
       "name": "NUCLEAR ENGINE",
@@ -813,7 +827,8 @@
       "price": {
         "money": 4,
         "science": 6
-      }
+      },
+      "era": 2
     },
     {
       "name": "ION ENGINE",
@@ -840,7 +855,8 @@
       "price": {
         "money": 1,
         "science": 0
-      }
+      },
+      "era": 3
     },
     {
       "name": "LIGHT SOLID BOOSTER",
@@ -885,7 +901,8 @@
       "price": {
         "money": 2,
         "science": 2
-      }
+      },
+      "era": 1
     },
     {
       "name": "METHALOX BOOSTER",
@@ -938,7 +955,8 @@
       "price": {
         "money": 1,
         "science": 0
-      }
+      },
+      "era": 4
     },
     {
       "name": "SOLID KICK MOTOR",
@@ -993,7 +1011,8 @@
       "price": {
         "money": 1,
         "science": 0
-      }
+      },
+      "era": 1
     },
     {
       "name": "KEROLOX SUSTAINER",
@@ -1050,7 +1069,8 @@
       "price": {
         "money": 1,
         "science": 0
-      }
+      },
+      "era": 1
     },
     {
       "name": "SEA DRAGON",
@@ -1094,7 +1114,8 @@
       "price": {
         "money": 4,
         "science": 6
-      }
+      },
+      "era": 2
     },
     {
       "name": "SUPER HYDROLOX UPPER",
@@ -1165,7 +1186,8 @@
       "price": {
         "money": 4,
         "science": 6
-      }
+      },
+      "era": 2
     },
     {
       "name": "SUPER HEAVY KEROLOX BOOSTER",
@@ -1216,7 +1238,8 @@
       "price": {
         "money": 4,
         "science": 6
-      }
+      },
+      "era": 2
     },
     {
       "name": "KEROLOX UPPER",
@@ -1278,7 +1301,8 @@
       "price": {
         "money": 2,
         "science": 2
-      }
+      },
+      "era": 1
     }
   ],
   "equipment": [
@@ -1291,7 +1315,8 @@
       "price": {
         "money": 1,
         "science": 0
-      }
+      },
+      "era": 1
     },
     {
       "name": "ATMOSPHERIC RETURN",
@@ -1302,7 +1327,8 @@
       "price": {
         "money": 3,
         "science": 4
-      }
+      },
+      "era": 1
     },
     {
       "name": "LANDING GEAR",
@@ -1313,7 +1339,8 @@
       "price": {
         "money": 2,
         "science": 2
-      }
+      },
+      "era": 2
     },
     {
       "name": "LIGHT ASCENT ENGINE",
@@ -1324,7 +1351,8 @@
       "price": {
         "money": 2,
         "science": 2
-      }
+      },
+      "era": 2
     },
     {
       "name": "CREW HABITAT",
@@ -1335,7 +1363,8 @@
       "price": {
         "money": 2,
         "science": 2
-      }
+      },
+      "era": 3
     },
     {
       "name": "CONSUMABLES",
@@ -1347,7 +1376,8 @@
       "price": {
         "money": 2,
         "science": 2
-      }
+      },
+      "era": 2
     },
     {
       "name": "GREENHOUSE",
@@ -1358,7 +1388,8 @@
       "price": {
         "money": 3,
         "science": 4
-      }
+      },
+      "era": 3
     },
     {
       "name": "SCIENCE PACKAGE",
@@ -1369,7 +1400,8 @@
       "price": {
         "money": 1,
         "science": 0
-      }
+      },
+      "era": 1
     },
     {
       "name": "LARGE ANTENNA",
@@ -1380,7 +1412,8 @@
       "price": {
         "money": 2,
         "science": 2
-      }
+      },
+      "era": 2
     },
     {
       "name": "ROVER",
@@ -1391,7 +1424,8 @@
       "price": {
         "money": 1,
         "science": 0
-      }
+      },
+      "era": 2
     },
     {
       "name": "SAMPLE CONTAINER",
@@ -1402,7 +1436,8 @@
       "price": {
         "money": 3,
         "science": 4
-      }
+      },
+      "era": 2
     },
     {
       "name": "SOLAR ARRAY",
@@ -1413,7 +1448,8 @@
       "price": {
         "money": 1,
         "science": 0
-      }
+      },
+      "era": 1
     },
     {
       "name": "RTG",
@@ -1424,7 +1460,8 @@
       "price": {
         "money": 2,
         "science": 2
-      }
+      },
+      "era": 2
     },
     {
       "name": "HYDROLOX REFINERY",
@@ -1436,7 +1473,8 @@
       "price": {
         "money": 1,
         "science": 0
-      }
+      },
+      "era": 4
     },
     {
       "name": "METHALOX REFINERY",
@@ -1448,7 +1486,8 @@
       "price": {
         "money": 2,
         "science": 2
-      }
+      },
+      "era": 4
     },
     {
       "name": "LUNAR MASS DRIVER",
@@ -1459,7 +1498,8 @@
       "price": {
         "money": 3,
         "science": 4
-      }
+      },
+      "era": 4
     }
   ],
   "archived_equipment": [
@@ -1482,7 +1522,8 @@
       "price": {
         "money": 2,
         "science": 0
-      }
+      },
+      "era": 2
     },
     {
       "mult": 2,
@@ -1490,7 +1531,8 @@
       "price": {
         "money": 2,
         "science": 0
-      }
+      },
+      "era": 2
     },
     {
       "mult": 4,
@@ -1498,7 +1540,8 @@
       "price": {
         "money": 3,
         "science": 2
-      }
+      },
+      "era": 2
     },
     {
       "mult": 2,
@@ -1506,7 +1549,8 @@
       "price": {
         "money": 2,
         "science": 0
-      }
+      },
+      "era": 2
     },
     {
       "mult": 4,
@@ -1514,7 +1558,8 @@
       "price": {
         "money": 3,
         "science": 2
-      }
+      },
+      "era": 2
     },
     {
       "mult": 2,
@@ -1522,7 +1567,8 @@
       "price": {
         "money": 2,
         "science": 0
-      }
+      },
+      "era": 2
     },
     {
       "mult": 3,
@@ -1530,7 +1576,8 @@
       "price": {
         "money": 3,
         "science": 2
-      }
+      },
+      "era": 2
     },
     {
       "mult": 4,
@@ -1538,7 +1585,8 @@
       "price": {
         "money": 3,
         "science": 2
-      }
+      },
+      "era": 2
     },
     {
       "mult": 2,
@@ -1546,7 +1594,8 @@
       "price": {
         "money": 2,
         "science": 0
-      }
+      },
+      "era": 3
     },
     {
       "mult": 3,
@@ -1554,7 +1603,8 @@
       "price": {
         "money": 3,
         "science": 2
-      }
+      },
+      "era": 3
     },
     {
       "mult": 4,
@@ -1562,7 +1612,8 @@
       "price": {
         "money": 3,
         "science": 2
-      }
+      },
+      "era": 3
     }
   ],
   "disasters": [
@@ -1700,7 +1751,8 @@
       "price": {
         "money": 1,
         "science": 0
-      }
+      },
+      "era": 1
     },
     {
       "name": "OVERTIME",
@@ -1710,7 +1762,8 @@
       "price": {
         "money": 2,
         "science": 0
-      }
+      },
+      "era": 1
     },
     {
       "name": "SELF AUDIT",
@@ -1720,7 +1773,8 @@
       "price": {
         "money": 1,
         "science": 0
-      }
+      },
+      "era": 1
     },
     {
       "name": "EXTRA SHIFT",
@@ -1730,7 +1784,8 @@
       "price": {
         "money": 2,
         "science": 1
-      }
+      },
+      "era": 1
     },
     {
       "name": "OPERATION PAPERCLIP",
@@ -1740,7 +1795,8 @@
       "price": {
         "money": 2,
         "science": 2
-      }
+      },
+      "era": 1
     },
     {
       "name": "ESPIONAGE",
@@ -1750,7 +1806,8 @@
       "price": {
         "money": 1,
         "science": 1
-      }
+      },
+      "era": 1
     },
     {
       "name": "PRESS LEAK",
@@ -1760,7 +1817,8 @@
       "price": {
         "money": 1,
         "science": 0
-      }
+      },
+      "era": 1
     },
     {
       "name": "BUDGET CUT",
@@ -1770,7 +1828,8 @@
       "price": {
         "money": 2,
         "science": 0
-      }
+      },
+      "era": 3
     }
   ],
   "improvements": [
@@ -1782,7 +1841,8 @@
       "price": {
         "money": 1,
         "science": 0
-      }
+      },
+      "era": 2
     },
     {
       "name": "BAFFLED INJECTOR",
@@ -1792,7 +1852,8 @@
       "price": {
         "money": 1,
         "science": 0
-      }
+      },
+      "era": 2
     },
     {
       "name": "STAGE-SEPARATION TESTING",
@@ -1802,7 +1863,8 @@
       "price": {
         "money": 1,
         "science": 0
-      }
+      },
+      "era": 2
     },
     {
       "name": "REDUNDANT FLIGHT COMPUTER",
@@ -1812,7 +1874,8 @@
       "price": {
         "money": 1,
         "science": 0
-      }
+      },
+      "era": 2
     },
     {
       "name": "CREW-SAFETY REVIEW",
@@ -1822,7 +1885,8 @@
       "price": {
         "money": 1,
         "science": 0
-      }
+      },
+      "era": 2
     },
     {
       "name": "DEBRIS TRACKING",
@@ -1832,7 +1896,8 @@
       "price": {
         "money": 1,
         "science": 1
-      }
+      },
+      "era": 3
     },
     {
       "name": "FIRE SUPPRESSION",
@@ -1842,7 +1907,8 @@
       "price": {
         "money": 1,
         "science": 1
-      }
+      },
+      "era": 3
     },
     {
       "name": "DUST-PROOF POWER",
@@ -1852,7 +1918,8 @@
       "price": {
         "money": 1,
         "science": 1
-      }
+      },
+      "era": 4
     },
     {
       "name": "ORBITAL PAD",
@@ -1862,7 +1929,8 @@
       "price": {
         "money": 2,
         "science": 1
-      }
+      },
+      "era": 1
     },
     {
       "name": "HEAVY PAD",
@@ -1872,7 +1940,8 @@
       "price": {
         "money": 3,
         "science": 3
-      }
+      },
+      "era": 2
     },
     {
       "name": "SUPER PAD",
@@ -1882,7 +1951,8 @@
       "price": {
         "money": 4,
         "science": 6
-      }
+      },
+      "era": 4
     },
     {
       "name": "FLIGHT OPERATIONS TEAM",
@@ -1893,7 +1963,8 @@
       "price": {
         "money": 3,
         "science": 2
-      }
+      },
+      "era": 2
     },
     {
       "name": "SECOND LAUNCH COMPLEX",
@@ -1903,7 +1974,8 @@
       "price": {
         "money": 3,
         "science": 2
-      }
+      },
+      "era": 2
     },
     {
       "name": "EXPANDED MISSION CONTROL",
@@ -1913,12 +1985,15 @@
       "price": {
         "money": 2,
         "science": 2
-      }
+      },
+      "era": 2
     }
   ],
   "starting_deck": [
     "KEROLOX SUSTAINER",
     "KEROLOX SUSTAINER",
+    "KEROLOX SUSTAINER",
+    "LIGHT SOLID BOOSTER",
     "LIGHT SOLID BOOSTER",
     "LIGHT SOLID BOOSTER",
     "SOLID KICK MOTOR",
@@ -1927,5 +2002,6 @@
     "SCIENCE PACKAGE",
     "BACKUP SYSTEMS",
     "OVERTIME"
-  ]
+  ],
+  "starting_hand": 5
 }
