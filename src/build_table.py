@@ -537,6 +537,7 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #332d29; fon
 .fptoken { border-radius: 50%; background: radial-gradient(circle at 40% 35%, #ffe08a, #d9a441 60%, #a8741f); color: #3a2608;
   font: 800 4.6mm/16mm Helvetica, Arial, sans-serif; text-align: center; box-shadow: 0 1mm 0 #7a5214, 0 2mm 4mm rgba(0,0,0,.5);
   transition: left 1.2s cubic-bezier(.3,.7,.2,1), top 1.2s cubic-bezier(.3,.7,.2,1); }
+.report { text-align: left; margin: 8px 0; padding-left: 18px; } .report li { margin: 3px 0; }
 .peekrow { display: flex; gap: 3mm; justify-content: center; margin-top: 3mm; }
 .peek { width: 28.2mm; height: 39.6mm; position: relative; }
 .peek > .card { position: absolute; left: 0; top: 0; width: 47mm; height: 66mm; transform: scale(.6); transform-origin: 0 0; border-radius: 2mm; }
@@ -580,7 +581,7 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #332d29; fon
 .flytok { position: absolute; width: 11mm; height: 11mm; z-index: 50; pointer-events: none; transform: translateZ(14mm);
   transition: left .9s cubic-bezier(.3,.7,.2,1), top .9s cubic-bezier(.3,.7,.2,1); }
 .flytok .tok { width: 100%; height: 100%; }
-#boardlayer { pointer-events: none; }
+#boardlayer { pointer-events: none; transform: translateZ(0.6mm); }   /* above the board image: same-plane siblings in a preserve-3d context get painted/hit-tested in any order (Safari draws the board on top) */
 .btok { position: absolute; width: 10mm; height: 10.8mm; margin: -5.4mm 0 0 -5mm; pointer-events: none;
   transition: left 1.4s cubic-bezier(.3,.7,.2,1), top 1.4s cubic-bezier(.3,.7,.2,1); }
 .btok .tok { position: static; width: 100%; height: 100%; }
@@ -1209,7 +1210,7 @@ GAME_JS = r'''
     const id = st.deck.shift(); render();
     if (C(id).kind === 'disaster') return disaster(id, () => drawCards(n - 1, done));
     fly(BACK, $('deck-you'), hand, () => { st.hand.push(id); buildHand(); st.handOpen = true; st.sel = st.hand.length - 1; syncHand(); render();
-      toast(`You draw ${C(id).name}.`); setTimeout(() => drawCards(n - 1, done), 700); });
+      toast(`You draw ${C(id).name}.`); log(`🂠 You drew <b>${C(id).name}</b>.`); setTimeout(() => drawCards(n - 1, done), 700); });
   }
   function lose(m, why) {
     const cards = [...m.cards, ...m.equip], toks = m.tokens.slice();
@@ -1248,15 +1249,16 @@ GAME_JS = r'''
         else if (mc) { st.spent.add(mc); out.push(`You lose a $${reward(mc).n} money card.`); } else out.push('You have no money to lose.'); }
       if (d.recurring) { st.deck.push(id); out.push(`It stays in your deck until you buy ${fixFor(d).name}.`); }
       else { st.removed.push(id); out.push('A one-shot: it leaves the game.'); }
-      finish(`<b>${d.name}!</b> ${out.join(' ')}`);
+      log(`⚠️ <b>${d.name}</b>: ${out.join(' ')}`); finish(`<b>${d.name}!</b> ${out.join(' ')}`);
     };
     if (backup >= 0) return choice(d.html, `<b>${d.name}!</b> ${d.text}<br>Play Backup Systems to ignore it?`, [
       { label: 'Play Backup Systems', main: true, fn: () => { const b = st.hand.splice(backup, 1)[0]; st.deck.push(b, id); buildHand(); render();
-        choice(d.html, `Backup Systems! ${d.name} is ignored and goes to the bottom of your deck.`, [{ label: 'OK', main: true, fn: next }]); } },
+        log(`🛡️ Backup Systems stopped <b>${d.name}</b>.`); choice(d.html, `Backup Systems! ${d.name} is ignored and goes to the bottom of your deck.`, [{ label: 'OK', main: true, fn: next }]); } },
       { label: 'Take the hit', fn: apply }]);
     apply();
   }
 
+  const log = m => { (st.report = st.report || []).push(m); };
   // ---- goals ------------------------------------------------------------------
   const deepN = sid => { const r = /^ds(\d+)$/.exec(sid); return r ? +r[1] : 0; };
   function effCheck(gid, rowIdx) {                             // new contracts (first 3 in the row) need +1 Δv: one step farther
@@ -1279,12 +1281,12 @@ GAME_JS = r'''
   // Launched this turn but met no goal: the rightmost mission card is discarded and you take a 💰1 card.
   function consolation(done) {
     const i = rightmost(st.goals.row); cam(G.focusGoals);
-    if (i < 0) { st.cash++; render(); toast('No mission met a goal: take a 💰1 card from the bank.'); return setTimeout(done, 900); }
+    if (i < 0) { st.cash++; render(); log('💰 You launched but met no goal: +💰1 from the bank.'); return setTimeout(done, 300); }
     const gid = st.goals.row[i], from = $('goal-m' + i);
     st.goals.row.splice(i, 1); st.goals.row.unshift(st.goals.deck.pop() || null); from.innerHTML = ''; from.dataset.gid = '';
     fly(G.goals[gid].html, from, $('deck-missions'), () => { render();
       fly(CASH_HTML(1), $('bank'), $('cgoals-you'), () => { st.cash++; render();
-        toast(`You launched but met no goal: ${G.goals[gid].name} (rightmost) is discarded and you take a 💰1 card.`); setTimeout(done, 900); }); });
+        log(`💰 You launched but met no goal: <b>${G.goals[gid].name}</b> (rightmost) is discarded, +💰1 from the bank.`); setTimeout(done, 300); }); });
   }
   function prizes(done) {                                       // step 4: every open goal a surviving mission meets pays out
     const claims = [], used = new Set();
@@ -1307,7 +1309,7 @@ GAME_JS = r'''
         const risk = g.family && famCount(g.family) === 1 && Object.keys(G.cards).find(k => G.cards[k].family === g.family);
         if (risk && !st.deck.includes(risk) && !st.removed.includes(risk)) { st.deck.push(risk); shuffle(st.deck); msg += ` New risk: ${C(risk).name} joins your deck.`; }
         if (g.name === 'FIRST ORBIT') { st.deck.push(...G.lateDisasters); shuffle(st.deck); msg += ' The tutorial is over: the recurring disasters join your deck.'; }
-        toast(msg); setTimeout(one, 900); });
+        toast(msg); log(`🏆 ${msg.replace(g.name, `<b>${g.name}</b>`)}`); setTimeout(one, 900); });
     };
     one();
   }
@@ -1343,7 +1345,7 @@ GAME_JS = r'''
       const m = falling[0]; toast(`Mission ${ROMAN[m.i]} can't stay up there; it falls back under its heat shield.`);
       return setTimeout(() => aerobrake(m, endTurn), 900);
     }
-    st.mode = 'anim'; render(); camYou();
+    st.mode = 'anim'; render(); camYou(); st.report = [];
     prompt(`End of turn ${st.turn}: drawing ${drawSize()} card${drawSize() > 1 ? 's' : ''}…`);
     setTimeout(() => drawCards(drawSize(), () => prizes(() => {
       const msgs = clearMissions().concat(kingOfTheHill());
@@ -1351,7 +1353,11 @@ GAME_JS = r'''
       st.noLaunch = st.noLaunchNext; st.noLaunchNext = false;
       st.missions.forEach(m => { m.claimed = false; });
       st.mode = 'idle'; render(); camYou(); prompt();
-      toast([...msgs, `Turn ${st.turn}.${st.noLaunch ? ' No Launch this turn.' : ''}`].join(' '));
+      msgs.forEach(m => log(m));                                  // the turn's report stays up until you close it
+      if (!st.report.some(r => r.startsWith('🏆'))) log('No goals met this turn.');
+      choice('', `<b>End of turn ${st.turn - 1}</b><ul class="report">${st.report.map(r => `<li>${r}</li>`).join('')}</ul>`
+        + `${st.noLaunch ? '<b>No Launch this turn.</b><br>' : ''}Now: turn ${st.turn} · ★ ${vp()} · $ ${money()} · ⚛ ${science()}`,
+        [{ label: `Start turn ${st.turn}`, main: true }]);
     })), 500);
   }
 
