@@ -4,7 +4,7 @@ This is a board-game design project. The goal is to make rocket engineering acce
 
 ## Read this first
 
-**Before changing anything, read `docs/01-physics-model.md` and `docs/06-status-and-open-threads.md`** (and `docs/07-rules-v0.md` for the turn loop). They contain hard-won decisions that past Claude sessions repeatedly burned hours rediscovering. In particular:
+**Before changing anything, read `docs/01-physics-model.md` and `docs/06-status-and-open-threads.md`** (and `docs/07-rules-v0.md` for the turn loop, `docs/10-pacing.md` for what the game's phases and resources are for). They contain hard-won decisions that past Claude sessions repeatedly burned hours rediscovering. In particular:
 
 1. **The rocket equation is the displacement model**: `dv = ve × ln(total / (dry + cargo))`. NOT the additive model. If you find yourself thinking "but shouldn't we add cargo to the launch mass?" — refer back to `docs/01-physics-model.md`. The answer is documented.
 

@@ -1,5 +1,7 @@
 # 09 — Personal decks, failures and the economy (v1 draft)
 
+> **Read `docs/10-pacing.md` first (Oct 2026).** It sets what resources are *for* (the four phases). The prices and thresholds in this doc are placeholders to be re-judged against it.
+
 Status: **draft, Oct 2026**, from Alex's playtest notes. **DECIDED** = Alex's call. *Proposal* = Claude's suggestion awaiting a yes/no. **OPEN** = needs a call before it's built. Card physics (docs/01) is unchanged. This revises Research, Launch's Crew Capsule rule, the mission areas and the goal rewards in `docs/07`, and answers docs/06's "Economy: money in or out?" (in) and the event/failure deck item.
 
 ## 1. Your own deck — DECIDED
